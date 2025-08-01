@@ -24,9 +24,9 @@
 // ------------------------------------------------------------------------------------------------
 class SearcDataIterator
 {
-  friend class TSearchData;
+  friend class SearchData;
 protected:
-  TSearchData *pContainer;
+  SearchData *pContainer;
   TreeNode *pObject;
 
 public:

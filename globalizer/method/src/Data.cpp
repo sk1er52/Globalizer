@@ -28,12 +28,12 @@
 //}
 
   /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
-std::vector<TSearchData*> TSearchData::pRecalcDatas;
+std::vector<SearchData*> SearchData::pRecalcDatas;
 
 // ------------------------------------------------------------------------------------------------
-// TSearchData Methods
+// SearchData Methods
 // ------------------------------------------------------------------------------------------------
-TSearchData::TSearchData(int _NumOfFuncs, int _MaxSize)
+SearchData::SearchData(int _NumOfFuncs, int _MaxSize)
 {
   if (_MaxSize <= 0)
   {
@@ -63,7 +63,7 @@ TSearchData::TSearchData(int _NumOfFuncs, int _MaxSize)
   pRecalcDatas.clear();
 }
 
-TSearchData::TSearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
+SearchData::SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
 {
   if (_MaxSize <= 0)
   {
@@ -94,7 +94,7 @@ TSearchData::TSearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
 }
 
 // ------------------------------------------------------------------------------------------------
-TSearchData::~TSearchData()
+SearchData::~SearchData()
 {
   DeleteTree(pRoot);
   delete pQueue;
@@ -106,7 +106,7 @@ TSearchData::~TSearchData()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::Clear()
+void SearchData::Clear()
 {
   DeleteTree(pRoot);
   Count = 0;
@@ -128,7 +128,7 @@ void TSearchData::Clear()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::GetBestIntervals(SearchInterval** intervals, int count)
+void SearchData::GetBestIntervals(SearchInterval** intervals, int count)
 {
   //Текущая длина очереди характеристик должна быть больше, чем число интервалов, которые из нее надо извлечь
   //Иначе очередь надо перезаполнить
@@ -141,7 +141,7 @@ void TSearchData::GetBestIntervals(SearchInterval** intervals, int count)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::GetBestLocalIntervals(SearchInterval** intervals, int count)
+void SearchData::GetBestLocalIntervals(SearchInterval** intervals, int count)
 {
   //Вариант решения проблемы - текущая длина очереди характеристик должна быть больше, чем число интервалов, которые из нее надо извлечь!
   if (pQueue->GetSize() <= count)
@@ -153,7 +153,7 @@ void TSearchData::GetBestLocalIntervals(SearchInterval** intervals, int count)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::DeleteTree(TreeNode *pNode)
+void SearchData::DeleteTree(TreeNode *pNode)
 {
   if (pNode != NULL)
   {
@@ -164,26 +164,26 @@ void TSearchData::DeleteTree(TreeNode *pNode)
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned char TSearchData::GetHeight(TreeNode *p)
+unsigned char SearchData::GetHeight(TreeNode *p)
 {
   return p ? p->Height : 0;
 }
 
 // ------------------------------------------------------------------------------------------------
-int TSearchData::GetBalance(TreeNode *p)
+int SearchData::GetBalance(TreeNode *p)
 {
   return GetHeight(p->pRight) - GetHeight(p->pLeft);
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::FixHeight(TreeNode *p)
+void SearchData::FixHeight(TreeNode *p)
 {
   unsigned char hl = GetHeight(p->pLeft);
   unsigned char hr = GetHeight(p->pRight);
   p->Height = (hl > hr ? hl : hr) + 1;
 }
 
-void TSearchData::SetBestTrial(Trial* trial)
+void SearchData::SetBestTrial(Trial* trial)
 {
   BestTrial = trial;
 
@@ -205,7 +205,7 @@ void TSearchData::SetBestTrial(Trial* trial)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::RotateRight(TreeNode *p)
+TreeNode* SearchData::RotateRight(TreeNode *p)
 {
   TreeNode *pTmp = p->pLeft;
   p->pLeft = pTmp->pRight;
@@ -222,7 +222,7 @@ TreeNode* TSearchData::RotateRight(TreeNode *p)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::RotateLeft(TreeNode *p)
+TreeNode* SearchData::RotateLeft(TreeNode *p)
 {
   TreeNode *pTmp = p->pRight;
   p->pRight = pTmp->pLeft;
@@ -240,7 +240,7 @@ TreeNode* TSearchData::RotateLeft(TreeNode *p)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Maximum(TreeNode *p) const
+TreeNode* SearchData::Maximum(TreeNode *p) const
 {
   while (p->pRight != NULL)
     p = p->pRight;
@@ -248,7 +248,7 @@ TreeNode* TSearchData::Maximum(TreeNode *p) const
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Minimum(TreeNode *p) const
+TreeNode* SearchData::Minimum(TreeNode *p) const
 {
   while (p->pLeft != NULL)
     p = p->pLeft;
@@ -256,7 +256,7 @@ TreeNode* TSearchData::Minimum(TreeNode *p) const
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Balance(TreeNode *p)
+TreeNode* SearchData::Balance(TreeNode *p)
 {
   FixHeight(p);
   if (GetBalance(p) == 2)
@@ -281,7 +281,7 @@ TreeNode* TSearchData::Balance(TreeNode *p)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Insert(TreeNode *p, SearchInterval &pInterval)
+TreeNode* SearchData::Insert(TreeNode *p, SearchInterval &pInterval)
 {
   if (!p)
   {
@@ -307,7 +307,7 @@ TreeNode* TSearchData::Insert(TreeNode *p, SearchInterval &pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Find(TreeNode *p, Trial* x) const
+TreeNode* SearchData::Find(TreeNode *p, Trial* x) const
 {
   TreeNode *res;
   if (!p)
@@ -323,7 +323,7 @@ TreeNode* TSearchData::Find(TreeNode *p, Trial* x) const
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::FindR(TreeNode *p, Trial* x) const
+TreeNode* SearchData::FindR(TreeNode *p, Trial* x) const
 {
   TreeNode *res;
   if (!p)
@@ -339,7 +339,7 @@ TreeNode* TSearchData::FindR(TreeNode *p, Trial* x) const
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode * TSearchData::FindIn(TreeNode * p, Trial* x) const
+TreeNode * SearchData::FindIn(TreeNode * p, Trial* x) const
 {
   TreeNode *res;
   if (!p)
@@ -355,7 +355,7 @@ TreeNode * TSearchData::FindIn(TreeNode * p, Trial* x) const
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval* TSearchData::InsertInterval(SearchInterval &pInterval)
+SearchInterval* SearchData::InsertInterval(SearchInterval &pInterval)
 {
   if (pInterval.xl() >= pInterval.xr())
   {
@@ -367,7 +367,7 @@ SearchInterval* TSearchData::InsertInterval(SearchInterval &pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::UpdateInterval(SearchInterval &pInterval)
+void SearchData::UpdateInterval(SearchInterval &pInterval)
 {
   pCur = Find(pRoot, pInterval.LeftPoint);
   if (pCur)
@@ -377,7 +377,7 @@ void TSearchData::UpdateInterval(SearchInterval &pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval* TSearchData::GetIntervalByX(Trial* x)
+SearchInterval* SearchData::GetIntervalByX(Trial* x)
 {
   pCur = Find(pRoot, x);
   if (pCur)
@@ -387,7 +387,7 @@ SearchInterval* TSearchData::GetIntervalByX(Trial* x)
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval * TSearchData::FindCoveringInterval(Trial* x)
+SearchInterval * SearchData::FindCoveringInterval(Trial* x)
 {
   pCur = FindIn(pRoot, x);
   if (pCur)
@@ -397,7 +397,7 @@ SearchInterval * TSearchData::FindCoveringInterval(Trial* x)
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Previous(TreeNode *p) const
+TreeNode* SearchData::Previous(TreeNode *p) const
 {
   if (p == NULL)
     return NULL;
@@ -417,7 +417,7 @@ TreeNode* TSearchData::Previous(TreeNode *p) const
 }
 
 // ------------------------------------------------------------------------------------------------
-TreeNode* TSearchData::Next(TreeNode *p) const
+TreeNode* SearchData::Next(TreeNode *p) const
 {
   if (p == NULL)
     return NULL;
@@ -437,7 +437,7 @@ TreeNode* TSearchData::Next(TreeNode *p) const
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval* TSearchData::InsertPoint(SearchInterval* coveringInterval,
+SearchInterval* SearchData::InsertPoint(SearchInterval* coveringInterval,
   Trial& newPoint, int iteration, int methodDimension)
 {
   // Если точка уже есть в базе, то ничего не делаем
@@ -474,7 +474,7 @@ SearchInterval* TSearchData::InsertPoint(SearchInterval* coveringInterval,
 }
 
 // ------------------------------------------------------------------------------------------------
-SearcDataIterator TSearchData::GetIterator(SearchInterval* p)
+SearcDataIterator SearchData::GetIterator(SearchInterval* p)
 {
   SearcDataIterator iter;
   iter.pContainer = this;
@@ -483,7 +483,7 @@ SearcDataIterator TSearchData::GetIterator(SearchInterval* p)
 }
 
 // ------------------------------------------------------------------------------------------------
-SearcDataIterator TSearchData::GetBeginIterator()
+SearcDataIterator SearchData::GetBeginIterator()
 {
   SearcDataIterator iter;
   iter.pContainer = this;
@@ -492,7 +492,7 @@ SearcDataIterator TSearchData::GetBeginIterator()
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval* TSearchData::GetIntervalWithMaxR()
+SearchInterval* SearchData::GetIntervalWithMaxR()
 {
   SearchInterval *pRes = NULL;
   //Если нужно вынуть два элемента, и текущий размер очереди - 2, то первый поток вынет максимальный элемент,
@@ -506,7 +506,7 @@ SearchInterval* TSearchData::GetIntervalWithMaxR()
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval* TSearchData::GetIntervalWithMaxLocalR()
+SearchInterval* SearchData::GetIntervalWithMaxLocalR()
 {
   SearchInterval *pRes = NULL;
   if (((PriorityDualQueue*)pQueue)->IsLocalEmpty()
@@ -518,7 +518,7 @@ SearchInterval* TSearchData::GetIntervalWithMaxLocalR()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::RefillQueue()
+void SearchData::RefillQueue()
 {
   pQueue->Clear(); // Если очередь уже была пуста, то вызов лишний, но он из одного действия, так
                    //   что ставить проверку нет смысла
@@ -538,7 +538,7 @@ void TSearchData::RefillQueue()
 
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::DeleteIntervalFromQueue(SearchInterval * i)
+void SearchData::DeleteIntervalFromQueue(SearchInterval * i)
 {
   if (i->GetQueueElementa() == 0)
   {
@@ -553,7 +553,7 @@ void TSearchData::DeleteIntervalFromQueue(SearchInterval * i)
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval& TSearchData::FindMax()
+SearchInterval& SearchData::FindMax()
 {
   if (pQueue->IsEmpty())
   {
@@ -564,7 +564,7 @@ SearchInterval& TSearchData::FindMax()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::TrickleUp(SearchInterval * intervals)
+void SearchData::TrickleUp(SearchInterval * intervals)
 {
   if (intervals->GetQueueElementa() != 0)
   {
@@ -580,13 +580,13 @@ void TSearchData::TrickleUp(SearchInterval * intervals)
   }
 }
 
-int TSearchData::GetQueueSize()
+int SearchData::GetQueueSize()
 {
   return pQueue->GetMaxSize();
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::PushToQueue(SearchInterval *pInterval)
+void SearchData::PushToQueue(SearchInterval *pInterval)
 {
   if (pInterval == 0)
   {
@@ -606,7 +606,7 @@ void TSearchData::PushToQueue(SearchInterval *pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::PopFromGlobalQueue(SearchInterval **pInterval)
+void SearchData::PopFromGlobalQueue(SearchInterval **pInterval)
 {
   void *p;
   double R;
@@ -616,7 +616,7 @@ void TSearchData::PopFromGlobalQueue(SearchInterval **pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::PopFromLocalQueue(SearchInterval **pInterval)
+void SearchData::PopFromLocalQueue(SearchInterval **pInterval)
 {
   void *p;
   double R;
@@ -626,17 +626,17 @@ void TSearchData::PopFromLocalQueue(SearchInterval **pInterval)
 }
 
 // ------------------------------------------------------------------------------------------------
-void TSearchData::ClearQueue()
+void SearchData::ClearQueue()
 {
   pQueue->Clear();
 }
 // ------------------------------------------------------------------------------------------------
-void TSearchData::ResizeQueue(int size)
+void SearchData::ResizeQueue(int size)
 {
   pQueue->Resize(size);
 }
 // ------------------------------------------------------------------------------------------------
-int TSearchData::GetCount()
+int SearchData::GetCount()
 {
   return Count;
 }
@@ -753,7 +753,7 @@ SearchInterval::SearchInterval(const SearchInterval &p)
 SearchInterval::~SearchInterval()
 {
   //Конфликт с функцией RenewSearchData
-  //Решение 1 - статический массив z() в TSearchInterval
+  //Решение 1 - статический массив z() в SearchInterval
   //Решение 2 - выделять память перед записью в массив
 
 }

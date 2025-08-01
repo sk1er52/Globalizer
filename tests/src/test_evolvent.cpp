@@ -1,11 +1,11 @@
-#include "evolvent.h"
-#include "extended.h"
+#include "Evolvent.h"
+#include "Extended.h"
 #include "test_config.h"
 
 #include <gtest/gtest.h>
 #include <cmath>
 
-class TEvolventTest : public ::testing::Test
+class EvolventTest : public ::testing::Test
 {
 protected:
   static const int numOfPoint = 5;
@@ -52,7 +52,7 @@ protected:
     {
       for (int j = 0; j < numOfm; j++)
       {
-        TEvolvent evolvent(N[i], m[j]);
+        Evolvent evolvent(N[i], m[j]);
         evolvent.SetBounds(A, B);
 
         /// Записываем numOfPoint случайных точек
@@ -115,7 +115,7 @@ protected:
     {
       for (int j = 0; j < numOfm; j++)
       {
-        TEvolvent evolvent(N[i], m[j]);
+        Evolvent evolvent(N[i], m[j]);
         evolvent.SetBounds(A, B);
 
         /// Записываем numOfPoint случайных точек
@@ -163,14 +163,14 @@ protected:
  * Проверка параметра размерности N
  * 1<= N <= MaxDim
  */
-TEST_F(TEvolventTest, throws_when_create_with_negative_N)
+TEST_F(EvolventTest, throws_when_create_with_negative_N)
 {
-  ASSERT_ANY_THROW(TEvolvent ev(-1, 10));
+  ASSERT_ANY_THROW(Evolvent ev(-1, 10));
 }
 
-TEST_F(TEvolventTest, throws_when_create_with_too_large_N)
+TEST_F(EvolventTest, throws_when_create_with_too_large_N)
 {
-  ASSERT_ANY_THROW(TEvolvent ev(MaxDim + 1, 10));
+  ASSERT_ANY_THROW(Evolvent ev(MaxDim + 1, 10));
 }
 
 /**
@@ -178,28 +178,28 @@ TEST_F(TEvolventTest, throws_when_create_with_too_large_N)
  * точность разложения гиперкуба
  * 2 <= m <= MaxM
  */
-TEST_F(TEvolventTest, throws_when_create_with_too_low_m)
+TEST_F(EvolventTest, throws_when_create_with_too_low_m)
 {
-  ASSERT_ANY_THROW(TEvolvent ev(2, 1));
+  ASSERT_ANY_THROW(Evolvent ev(2, 1));
 }
 
-TEST_F(TEvolventTest, throws_when_create_with_too_large_m)
+TEST_F(EvolventTest, throws_when_create_with_too_large_m)
 {
-  ASSERT_ANY_THROW(TEvolvent ev(2, MaxM + 1));
+  ASSERT_ANY_THROW(Evolvent ev(2, MaxM + 1));
 }
 
 /**
  * Создание задачи с корректными входными параметрами
  */
-TEST_F(TEvolventTest, can_create_with_correct_values)
+TEST_F(EvolventTest, can_create_with_correct_values)
 {
-  ASSERT_NO_THROW(TEvolvent ev(MaxDim - 1, MaxM - 1));
+  ASSERT_NO_THROW(Evolvent ev(MaxDim - 1, MaxM - 1));
 }
 
 /**
  * Проверка корректности работы метода #GetInverseImage (y-->x)
  */
-TEST_F(TEvolventTest, can_get_inverse_image)
+TEST_F(EvolventTest, can_get_inverse_image)
 {
   //CreateCheckEvolventFile_GetImage();
   FILE* pf;
@@ -222,7 +222,7 @@ TEST_F(TEvolventTest, can_get_inverse_image)
   while (!feof(pf))
   {
     ReadFromFile(pf, N, m, y, x_actual);
-    TEvolvent evolvent(N, m);
+    Evolvent evolvent(N, m);
     evolvent.SetBounds(A, B);
     evolvent.GetInverseImage(y, x_expected);
     double eps = 1.0 / (pow(2.0, m * N));
@@ -234,7 +234,7 @@ TEST_F(TEvolventTest, can_get_inverse_image)
 /**
  * Проверка корректности работы метода #GetImage (x-->y)
  */
-TEST_F(TEvolventTest, can_get_image)
+TEST_F(EvolventTest, can_get_image)
 {
   //CreateCheckEvolventFile_GetInverseImage();
   FILE* pf;
@@ -259,7 +259,7 @@ TEST_F(TEvolventTest, can_get_image)
   {
     ReadFromFile(pf, N, m, y, x);
 
-    TEvolvent evolvent(N, m);
+    Evolvent evolvent(N, m);
     evolvent.SetBounds(A, B);
     evolvent.GetImage(Extended(x), y_expected);
     eps = 1.0 / (pow(2.0, m));
@@ -275,18 +275,18 @@ TEST_F(TEvolventTest, can_get_image)
  * Проверка входного параметра x функции #GetImage
  * 0 <= x <= 1
  */
-TEST_F(TEvolventTest, throws_when_get_image_with_negative_x)
+TEST_F(EvolventTest, throws_when_get_image_with_negative_x)
 {
   const int N = 2, m = 2;
   double _y[N];
-  TEvolvent evolvent(N, m);
+  Evolvent evolvent(N, m);
   ASSERT_ANY_THROW(evolvent.GetImage(Extended(-1), _y));
 }
 
-TEST_F(TEvolventTest, throws_when_get_image_with_too_large_x)
+TEST_F(EvolventTest, throws_when_get_image_with_too_large_x)
 {
   const int N = 2, m = 2;
   double _y[N];
-  TEvolvent evolvent(N, m);
+  Evolvent evolvent(N, m);
   ASSERT_ANY_THROW(evolvent.GetImage(Extended(2), _y));
 }

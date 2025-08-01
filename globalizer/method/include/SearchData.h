@@ -34,7 +34,7 @@ class SearchInterval;
 class SearcDataIterator;
 class Trial;
 // ------------------------------------------------------------------------------------------------
-class TSearchData
+class SearchData
 {
   friend class SearcDataIterator;
 protected:
@@ -88,11 +88,11 @@ protected:
   TreeNode* FindIn(TreeNode *p, Trial* x) const;
 public:
   /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
-  static std::vector<TSearchData*> pRecalcDatas;
+  static std::vector<SearchData*> pRecalcDatas;
 
-  TSearchData(int _NumOfFuncs, int _MaxSize = DefaultSearchDataSize);
-  TSearchData(int _NumOfFuncs, int _MaxSize, int _queueSize);
-  ~TSearchData();
+  SearchData(int _NumOfFuncs, int _MaxSize = DefaultSearchDataSize);
+  SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize);
+  ~SearchData();
 
   /// Очищает и дерево и очередь интервалов
   void Clear();

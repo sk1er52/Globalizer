@@ -1,9 +1,9 @@
-﻿#include "dual_queue.h"
+﻿#include "DualQueue.h"
 #include "gtest/gtest.h"
 
 /**
   Вспомогательный класс, помогающий задать начальную конфигурацию объекта
-  класса #TPriorityQueue, которая будет использоваться в тестах
+  класса #PriorityQueue, которая будет использоваться в тестах
  */
 
 char elemValues [7]= {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
@@ -12,12 +12,12 @@ class TDualQueueTest : public ::testing::Test
 {
 protected:
   /// Указатель на очередь
-  TPriorityDualQueue* queue;
+  PriorityDualQueue* queue;
   static const int MaxDualQueueSize = 33554431;
   static const int maxSize = 3;
   void SetUp()
   {
-    queue = new TPriorityDualQueue(maxSize);
+    queue = new PriorityDualQueue(maxSize);
   }
   void TearDown()
   {
@@ -36,22 +36,22 @@ protected:
  */
 TEST_F(TDualQueueTest, throws_when_create_queue_with_size_not_divisible_by_power_of_two)
 {
-  ASSERT_ANY_THROW(TPriorityDualQueue q(10));
+  ASSERT_ANY_THROW(PriorityDualQueue q(10));
 }
 
 TEST_F(TDualQueueTest, can_create_queue_with_DefaultQueueSize)
 {
-  ASSERT_NO_THROW(TPriorityDualQueue q(DefaultQueueSize));
+  ASSERT_NO_THROW(PriorityDualQueue q(DefaultQueueSize));
 }
 
 TEST_F(TDualQueueTest, can_create_queue_with_correct_size)
 {
-  ASSERT_NO_THROW(TPriorityDualQueue q(1023));
+  ASSERT_NO_THROW(PriorityDualQueue q(1023));
 }
 
 TEST_F(TDualQueueTest, throws_when_memory_for_queue_not_allocated)
 {
-  ASSERT_ANY_THROW(TPriorityDualQueue q((MaxDualQueueSize + 1) * 2 - 1));
+  ASSERT_ANY_THROW(PriorityDualQueue q((MaxDualQueueSize + 1) * 2 - 1));
 }
 /**
  * Проверка корректности работы метода #GetMaxSize

@@ -140,7 +140,7 @@
 /// Добавляет префикс IS_ к имени
 #define IsChange(name) IS_##name
 
-/// Инициализирует параметр из класса TParameters
+/// Инициализирует параметр из класса Parameters
 #define InitParameter(type, name, defVal, com, help, sizeVal)                            \
 IsChange(name) = false;                                                                  \
 Inc(ParType(name), ParType(type), LinkParameter(name), com,                              \
@@ -202,7 +202,7 @@ val - значение по умолчанию
 return name;\
 }\
 
-/// Объявляет переменные для создания параметра класса TParameters
+/// Объявляет переменные для создания параметра класса Parameters
 #define CreateParameter(type, name)       \
 public: type name;                        \
 public: FLAG IsChange(name);              \

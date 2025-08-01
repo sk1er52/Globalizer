@@ -5,15 +5,15 @@
 
 /**
   Вспомогательный класс, помогающий задать начальную конфигурацию объекта
-  класса #TSearchData, которая будет использоваться в тестах
+  класса #SearchData, которая будет использоваться в тестах
  */
 class TSearchDataTest : public ::testing::Test
 {
 protected:
-  TSearchData* data;
-  TSearchInterval interval1;
-  TSearchInterval interval2;
-  TSearchInterval interval3;
+  SearchData* data;
+  SearchInterval interval1;
+  SearchInterval interval2;
+  SearchInterval interval3;
   void SetUp()
   {
     Extended::SetTypeID(etDouble);
@@ -23,7 +23,7 @@ protected:
     argv[0] = new char(8);
     parameters.Init(argc, argv);
     parameters.Dimension = n;
-    data = new TSearchData(MaxNumOfFunc, DefaultSearchDataSize);
+    data = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
     interval1 = SetUpInterval(1.0, 2.0);
     interval2 = SetUpInterval(3.0, 4.0);
     interval3 = SetUpInterval(5.0, 6.0);
@@ -35,9 +35,9 @@ protected:
   /**
   * Create interval with length = 1
   */
-  TSearchInterval SetUpInterval(double xl, double R)
+  SearchInterval SetUpInterval(double xl, double R)
   {
-    TSearchInterval interval;
+    SearchInterval interval;
     interval.CreatePoint();
     interval.LeftPoint->SetX(Extended(xl));
     interval.RightPoint->SetX(Extended(xl + 1));
@@ -52,12 +52,12 @@ protected:
  */
 TEST_F(TSearchDataTest, throws_when_create_with_null_MaxSize_of_searchData)
 {
-  ASSERT_ANY_THROW(TSearchData searchData(MaxNumOfFunc, 0));
+  ASSERT_ANY_THROW(SearchData searchData(MaxNumOfFunc, 0));
 }
 
 TEST_F(TSearchDataTest, throws_when_create_with_negative_MaxSize_of_searchData)
 {
-  ASSERT_ANY_THROW(TSearchData searchData(MaxNumOfFunc, -1));
+  ASSERT_ANY_THROW(SearchData searchData(MaxNumOfFunc, -1));
 }
 
 /**
@@ -66,17 +66,17 @@ TEST_F(TSearchDataTest, throws_when_create_with_negative_MaxSize_of_searchData)
  */
 TEST_F(TSearchDataTest, throws_when_create_with_null_NumOfFunc)
 {
-  ASSERT_ANY_THROW(TSearchData searchData(0, DefaultSearchDataSize));
+  ASSERT_ANY_THROW(SearchData searchData(0, DefaultSearchDataSize));
 }
 
 TEST_F(TSearchDataTest, throws_when_create_with_negative_NumOfFunc)
 {
-  ASSERT_ANY_THROW(TSearchData searchData(-1, DefaultSearchDataSize));
+  ASSERT_ANY_THROW(SearchData searchData(-1, DefaultSearchDataSize));
 }
 
 TEST_F(TSearchDataTest, throws_when_create_with_too_large_NumOfFunc)
 {
-  ASSERT_ANY_THROW(TSearchData searchData(MaxNumOfFunc + 1, DefaultSearchDataSize));
+  ASSERT_ANY_THROW(SearchData searchData(MaxNumOfFunc + 1, DefaultSearchDataSize));
 }
 
 /**
@@ -84,7 +84,7 @@ TEST_F(TSearchDataTest, throws_when_create_with_too_large_NumOfFunc)
  */
 TEST_F(TSearchDataTest, can_create_searchData_with_correct_values)
 {
-  ASSERT_NO_THROW(TSearchData searchData(MaxNumOfFunc, DefaultSearchDataSize));
+  ASSERT_NO_THROW(SearchData searchData(MaxNumOfFunc, DefaultSearchDataSize));
 }
 
 /**
@@ -92,7 +92,7 @@ TEST_F(TSearchDataTest, can_create_searchData_with_correct_values)
  */
 TEST_F(TSearchDataTest, can_insert_interval)
 {
-  TSearchInterval* pInterval = data->InsertInterval(interval1);
+  SearchInterval* pInterval = data->InsertInterval(interval1);
 
   ASSERT_EQ(interval1.xl(), pInterval->xl());
 }
@@ -106,20 +106,20 @@ TEST_F(TSearchDataTest, throws_when_insert_interval_which_already_exist)
 
 TEST_F(TSearchDataTest, throws_when_insert_interval_with_null_length)
 {
-  TSearchInterval interval;
-  interval.LeftPoint = new TTrial();
+  SearchInterval interval;
+  interval.LeftPoint = new Trial();
   interval.LeftPoint->SetX(Extended(1.0));
-  interval.RightPoint = new TTrial();
+  interval.RightPoint = new Trial();
   interval.RightPoint->SetX(Extended(1.0));
   ASSERT_ANY_THROW(data->InsertInterval(interval));
 }
 
 TEST_F(TSearchDataTest, throws_when_insert_interval_with_negative_length)
 {
-  TSearchInterval interval;
-  interval.LeftPoint = new TTrial();
+  SearchInterval interval;
+  interval.LeftPoint = new Trial();
   interval.LeftPoint->SetX(Extended(2.0));
-  interval.RightPoint = new TTrial();
+  interval.RightPoint = new Trial();
   interval.RightPoint->SetX(Extended(1.0));
   ASSERT_ANY_THROW(data->InsertInterval(interval));
 }
@@ -130,9 +130,9 @@ TEST_F(TSearchDataTest, do_nothing_when_update_interval_which_is_not)
 {
   double xl = 2.0;
   double R = 2.0;
-  TSearchInterval insertInterval = SetUpInterval(xl, R);
-  TSearchInterval updateInterval = SetUpInterval(xl + 1, R + 1);
-  TSearchInterval* pInterval = data->InsertInterval(insertInterval);
+  SearchInterval insertInterval = SetUpInterval(xl, R);
+  SearchInterval updateInterval = SetUpInterval(xl + 1, R + 1);
+  SearchInterval* pInterval = data->InsertInterval(insertInterval);
 
   data->UpdateInterval(updateInterval);
 
@@ -144,9 +144,9 @@ TEST_F(TSearchDataTest, can_update_interval)
   double xl = 2.0;
   double R = 2.0;
   double newR = 5.0;
-  TSearchInterval insertInterval = SetUpInterval(xl, R);
-  TSearchInterval updateInterval = SetUpInterval(xl, newR);
-  TSearchInterval* pInterval = data->InsertInterval(insertInterval);
+  SearchInterval insertInterval = SetUpInterval(xl, R);
+  SearchInterval updateInterval = SetUpInterval(xl, newR);
+  SearchInterval* pInterval = data->InsertInterval(insertInterval);
 
   data->UpdateInterval(updateInterval);
 
@@ -158,25 +158,25 @@ TEST_F(TSearchDataTest, can_update_interval)
  */
 TEST_F(TSearchDataTest, get_NULL_by_illegal_X)
 {
-  TSearchInterval insertInterval = SetUpInterval(1.0, 2.0);
+  SearchInterval insertInterval = SetUpInterval(1.0, 2.0);
   (void *) data->InsertInterval(insertInterval);
-  TTrial* x = new TTrial();
+  Trial* x = new Trial();
   x->SetX(3.0);
 
-  TSearchInterval* pIntervalExpected = data->GetIntervalByX(x);
+  SearchInterval* pIntervalExpected = data->GetIntervalByX(x);
 
   ASSERT_EQ(NULL, pIntervalExpected);
 }
 
 TEST_F(TSearchDataTest, can_get_interval_by_X)
 {
-  TSearchInterval* pInterval = data->InsertInterval(interval1);
+  SearchInterval* pInterval = data->InsertInterval(interval1);
   pInterval = data->InsertInterval(interval2);
   pInterval = data->InsertInterval(interval3);
 
-  TTrial* x = new TTrial();
+  Trial* x = new Trial();
   x->SetX(interval2.xl());
-  TSearchInterval* pIntervalExpected = data->GetIntervalByX(x);
+  SearchInterval* pIntervalExpected = data->GetIntervalByX(x);
 
   ASSERT_DOUBLE_EQ(interval2.R, pIntervalExpected->R);
 }
@@ -186,26 +186,26 @@ TEST_F(TSearchDataTest, can_get_interval_by_X)
 // */
 TEST_F(TSearchDataTest, return_NULL_instead_covering_interval_by_illegal_X)
 {
-  TSearchInterval insertInterval = SetUpInterval(1.0, 2.0);
-  TSearchInterval* pInterval = data->InsertInterval(insertInterval);
+  SearchInterval insertInterval = SetUpInterval(1.0, 2.0);
+  SearchInterval* pInterval = data->InsertInterval(insertInterval);
   insertInterval = SetUpInterval(4.0, 5.0);
   pInterval = data->InsertInterval(insertInterval);
-  TTrial* x = new TTrial();
+  Trial* x = new Trial();
   x->SetX(Extended(3.0));
-  TSearchInterval* pIntervalExpected = data->FindCoveringInterval(x);
+  SearchInterval* pIntervalExpected = data->FindCoveringInterval(x);
 
   ASSERT_EQ(NULL, pIntervalExpected);
 }
 
 TEST_F(TSearchDataTest, can_find_covering_interval_by_X)
 {
-  TSearchInterval* pInterval = data->InsertInterval(interval1);
+  SearchInterval* pInterval = data->InsertInterval(interval1);
   pInterval = data->InsertInterval(interval2);
   pInterval = data->InsertInterval(interval3);
 
-  TTrial* x = new TTrial();
+  Trial* x = new Trial();
   x->SetX(interval2.xl() + 0.5);
-  TSearchInterval* pIntervalExpected = data->FindCoveringInterval(x);
+  SearchInterval* pIntervalExpected = data->FindCoveringInterval(x);
 
   ASSERT_DOUBLE_EQ(interval2.R, pIntervalExpected->R);
 }
@@ -217,14 +217,14 @@ TEST_F(TSearchDataTest, can_return_interval_with_max_R)
 {
   double actualXl = 2.0;
   double actualR = 5.0;
-  TSearchInterval i1 = SetUpInterval(3.0, 2.0);
+  SearchInterval i1 = SetUpInterval(3.0, 2.0);
   data->PushToQueue(&i1);
-  TSearchInterval i2 = SetUpInterval(2.0, 5.0);
+  SearchInterval i2 = SetUpInterval(2.0, 5.0);
   data->PushToQueue(&i2);
-  TSearchInterval i3 = SetUpInterval(1.0, 3.0);
+  SearchInterval i3 = SetUpInterval(1.0, 3.0);
   data->PushToQueue(&i3);
 
-  TSearchInterval* pIntervalWithMaxR = data->GetIntervalWithMaxR();
+  SearchInterval* pIntervalWithMaxR = data->GetIntervalWithMaxR();
 
   ASSERT_DOUBLE_EQ(actualR, pIntervalWithMaxR->R);
   ASSERT_DOUBLE_EQ(actualXl, pIntervalWithMaxR->xl().toDouble());
@@ -232,11 +232,11 @@ TEST_F(TSearchDataTest, can_return_interval_with_max_R)
 
 TEST_F(TSearchDataTest, can_return_interval_with_max_R_when_queue_empty)
 {
-  TSearchInterval* pInterval = data->InsertInterval(interval1);
+  SearchInterval* pInterval = data->InsertInterval(interval1);
   pInterval = data->InsertInterval(interval3);
   pInterval = data->InsertInterval(interval2);
 
-  TSearchInterval* pIntervalWithMaxR = data->GetIntervalWithMaxR();
+  SearchInterval* pIntervalWithMaxR = data->GetIntervalWithMaxR();
 
   ASSERT_DOUBLE_EQ(interval3.R, pIntervalWithMaxR->R);
 }
@@ -248,23 +248,23 @@ TEST_F(TSearchDataTest, can_return_interval_with_max_R_when_queue_empty)
 TEST_F(TSearchDataTest, can_return_interval_with_max_local_R)
 {
   parameters.localMix = 1;
-  TSearchData *pData = new TSearchData(MaxNumOfFunc, DefaultSearchDataSize);
+  SearchData *pData = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
 
   double actualXl = 2.0;
   double actualLocalR = 6.0;
-  TSearchInterval interval = SetUpInterval(3.0, 5.0);
+  SearchInterval interval = SetUpInterval(3.0, 5.0);
   interval.locR = 1.0;
   pData->PushToQueue(&interval);
 
-  TSearchInterval interval2_ = SetUpInterval(actualXl, 2.0);
+  SearchInterval interval2_ = SetUpInterval(actualXl, 2.0);
   interval2_.locR = actualLocalR;
   pData->PushToQueue(&interval2_);
 
-  TSearchInterval interval3_ = SetUpInterval(1.0, 3.0);
+  SearchInterval interval3_ = SetUpInterval(1.0, 3.0);
   interval3_.locR = 4.0;
   pData->PushToQueue(&interval3_);
 
-  TSearchInterval* pIntervalWithMaxLocalR = pData->GetIntervalWithMaxLocalR();
+  SearchInterval* pIntervalWithMaxLocalR = pData->GetIntervalWithMaxLocalR();
 
   ASSERT_DOUBLE_EQ(actualLocalR, pIntervalWithMaxLocalR->locR);
 }
@@ -279,7 +279,7 @@ TEST_F(TSearchDataTest, throw_when_push_to_queue_null_pointer)
 
 TEST_F(TSearchDataTest, can_push_interval_to_queue)
 {
-  ASSERT_NO_THROW(data->PushToQueue(new TSearchInterval()));
+  ASSERT_NO_THROW(data->PushToQueue(new SearchInterval()));
 }
 
 /**
@@ -287,7 +287,7 @@ TEST_F(TSearchDataTest, can_push_interval_to_queue)
  */
 TEST_F(TSearchDataTest, can_refill_queue)
 {
-  TSearchInterval* pInterval = data->InsertInterval(interval1);
+  SearchInterval* pInterval = data->InsertInterval(interval1);
   pInterval = data->InsertInterval(interval3);
   pInterval = data->InsertInterval(interval2);
 
@@ -303,16 +303,16 @@ TEST_F(TSearchDataTest, can_refill_queue)
 TEST_F(TSearchDataTest, can_insert_new_point)
 {
   Extended newXl = Extended(5.7);
-  TSearchInterval* pInterval;
-  TSearchInterval* pCoveringInterval;
-  TTrial point;
+  SearchInterval* pInterval;
+  SearchInterval* pCoveringInterval;
+  Trial point;
   point = Extended(newXl);
   point.index = 0;
   pInterval = data->InsertInterval(interval1);
   pCoveringInterval = data->InsertInterval(interval3);
   pInterval = data->InsertInterval(interval2);
 
-  TSearchInterval* pNewInterval = data->InsertPoint(pCoveringInterval, point, 1, 1);
+  SearchInterval* pNewInterval = data->InsertPoint(pCoveringInterval, point, 1, 1);
 
   ASSERT_EQ(newXl, pNewInterval->xl());
 }

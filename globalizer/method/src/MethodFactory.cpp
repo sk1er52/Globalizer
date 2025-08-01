@@ -18,7 +18,7 @@
 
 
 // ------------------------------------------------------------------------------------------------
-IMethod* MethodFactory::CreateMethod(Task& _pTask, TSearchData& _pData,
+IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
   Calculation& _Calculation, Evolvent& _Evolvent)
 {
   IMethod* pMethod = 0;

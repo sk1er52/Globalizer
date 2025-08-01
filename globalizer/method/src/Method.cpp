@@ -64,8 +64,8 @@ int Method::printCount = 0;
 
 // ------------------------------------------------------------------------------------------------
 //Method::Method(int _MaxNumOfTrials, double _Eps, double _r, int _m, int _L, EMapType _MapType,
-//    Task *_pTask, TSearchData *_pData, TOptimEstimation *_pEstimation)
-Method::Method(Task& _pTask, TSearchData& _pData,
+//    Task *_pTask, SearchData *_pData, TOptimEstimation *_pEstimation)
+Method::Method(Task& _pTask, SearchData& _pData,
   Calculation& _Calculation, Evolvent& _Evolvent) :
   pTask(_pTask), pData(&_pData),
   calculation(_Calculation), evolvent(_Evolvent)
@@ -203,7 +203,7 @@ void Method::SetDiscreteValue(int u, std::vector< std::vector<double> > dvs)
   }
 }
 
-TSearchData* Method::GetSearchData(Trial* trial)
+SearchData* Method::GetSearchData(Trial* trial)
 {
   return pData;
 }
@@ -1493,7 +1493,7 @@ void Method::PlotDecisionTrees()
     double arg[2];
     std::vector <double> xArray(n), xArray2(n), yArray(n), yArray2(n);
 
-    TSearchData* data = pData;
+    SearchData* data = pData;
     bool isStartLocalMethod = true;
 
     int N = data->GetCount() - 1;
@@ -3108,7 +3108,7 @@ void Method::Plot3DDecisionTrees()
   //if (parameters.IsPlot)
   {
 
-    TSearchData* data = pData;
+    SearchData* data = pData;
 
     int N = data->GetCount() - 1;
 

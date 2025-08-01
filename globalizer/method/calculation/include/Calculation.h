@@ -35,7 +35,7 @@ protected:
   Task* pTask;
 
   /// Данные по решению
-  TSearchData* pData;
+  SearchData* pData;
 
 
   /// Количество вычислений за итерацию
@@ -70,7 +70,7 @@ public:
   /// Задасть используемую задачу
   void SetTask(Task* _pTask);
 
-  void SetSearchData(TSearchData* _pData);
+  void SetSearchData(SearchData* _pData);
 
   //Сброс данных
   virtual void Reset();

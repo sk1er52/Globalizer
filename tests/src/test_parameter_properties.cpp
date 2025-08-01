@@ -1,7 +1,7 @@
 //#include "types.h"
 //#include "CombinableBaseParameters.h"
 
-#include "parameters.h"
+#include "Parameters.h"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -11,7 +11,7 @@ using namespace std;
 
 int PropertiesIndex = 11;
 
-class TPropertiesTest : public ::testing::Test
+class PropertiesTest : public ::testing::Test
 {
 
 public:
@@ -37,7 +37,7 @@ public:
   virtual void TestBody()
   {  }
 
-  TPropertiesTest()
+  PropertiesTest()
   {
     boolVal = true;
   }
@@ -49,26 +49,26 @@ public:
 
 TEST(Properties_TBool, can_create_default_Bool)
 {
-  ASSERT_NO_THROW(TBool<TPropertiesTest> a);
+  ASSERT_NO_THROW(TBool<PropertiesTest> a);
 }
 
 TEST(Properties_TBool, can_create_Bool)
 {
   bool val = true;
-  ASSERT_NO_THROW(TBool<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TBool<PropertiesTest> a(val));
 }
 
 TEST(Properties_TBool, is_init_Bool_value)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
   ASSERT_EQ(val, (bool)b);
 }
 
 TEST(Properties_TBool, is_getter_and_setter_working_Bool)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(!val);
+  TBool<PropertiesTest> b(!val);
 
   b = val;
 
@@ -78,7 +78,7 @@ TEST(Properties_TBool, is_getter_and_setter_working_Bool)
 TEST(Properties_TBool, is_SetIndex_and_GetIndex_working_Bool)
 {
   int val = PropertiesIndex++;
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   b.SetIndex(val);
 
@@ -88,24 +88,24 @@ TEST(Properties_TBool, is_SetIndex_and_GetIndex_working_Bool)
 TEST(Properties_TBool, is_Bool_GetData_working)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
   ASSERT_EQ(val, b.GetData());
 }
 
 TEST(Properties_TBool, is_Bool_GetValue_working)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
   ASSERT_EQ(val, *((bool*) b.GetValue()));
 }
 
 TEST(Properties_TBool, is_Bool_Clone_working)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(val);
-  TBool<TPropertiesTest>* c;
+  TBool<PropertiesTest> b(val);
+  TBool<PropertiesTest>* c;
 
-  b.Clone((TBaseProperty<TPropertiesTest>**)&c);
+  b.Clone((BaseProperty<PropertiesTest>**)&c);
 
   ASSERT_EQ(val, c->GetData());
 }
@@ -113,7 +113,7 @@ TEST(Properties_TBool, is_Bool_Clone_working)
 TEST(Properties_TBool, is_Bool_GetIsChange_working)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(!val);
+  TBool<PropertiesTest> b(!val);
 
   ASSERT_EQ(false, b.GetIsChange());
 
@@ -125,8 +125,8 @@ TEST(Properties_TBool, is_Bool_GetIsChange_working)
 TEST(Properties_TBool, is_Bool_Copy_working)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(!val);
-  TBool<TPropertiesTest> c(val);
+  TBool<PropertiesTest> b(!val);
+  TBool<PropertiesTest> c(val);
 
   b.Copy((void*)&c);
 
@@ -138,7 +138,7 @@ TEST(Properties_TBool, is_Bool_GetCurrentStringValue_working)
   bool val = true;
   string name = "n";
   string result = "n = true";
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
 
   b.SetName(name);
 
@@ -148,7 +148,7 @@ TEST(Properties_TBool, is_Bool_GetCurrentStringValue_working)
 TEST(Properties_TBool, is_Bool_SetName_and_GetName_working)
 {
   string name = "n";
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetName(name));
 
@@ -158,7 +158,7 @@ TEST(Properties_TBool, is_Bool_SetName_and_GetName_working)
 TEST(Properties_TBool, is_Bool_IsNameEqual_working)
 {
   string name = "n";
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetName(name));
 
@@ -167,14 +167,14 @@ TEST(Properties_TBool, is_Bool_IsNameEqual_working)
 
 TEST(Properties_TBool, is_Bool_IsFlag_working)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_EQ(false, b.IsFlag());
 }
 
 TEST(Properties_TBool, is_Bool_SetIsReadValue_and_GetIsReadValue_working)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetIsReadValue(true));
 
@@ -183,7 +183,7 @@ TEST(Properties_TBool, is_Bool_SetIsReadValue_and_GetIsReadValue_working)
 
 TEST(Properties_TBool, is_Bool_SetIsPreChange_and_IsPreChange_working)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetIsPreChange(true));
 
@@ -193,7 +193,7 @@ TEST(Properties_TBool, is_Bool_SetIsPreChange_and_IsPreChange_working)
 TEST(Properties_TBool, is_Bool_SetHelp_and_GetHelp_working)
 {
   string help = "n";
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetHelp(help));
 
@@ -203,7 +203,7 @@ TEST(Properties_TBool, is_Bool_SetHelp_and_GetHelp_working)
 TEST(Properties_TBool, is_Bool_SetLink_and_GetLink_working)
 {
   string link = "n";
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
   ASSERT_NO_THROW(b.SetLink(link));
 
@@ -217,7 +217,7 @@ TEST(Properties_TBool, is_Bool_GetHelpString_working)
   string help = "This is B";
   string name = "b";
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
 
   b.SetLink(link);
   b.SetHelp(help);
@@ -228,11 +228,11 @@ TEST(Properties_TBool, is_Bool_GetHelpString_working)
 
 TEST(Properties_TBool, is_init_function_Bool)
 {
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b;
+  PropertiesTest a;
+  TBool<PropertiesTest> b;
 
-  ASSERT_NO_THROW(b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool,
-    &TPropertiesTest::CheckValue));
+  ASSERT_NO_THROW(b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool,
+    &PropertiesTest::CheckValue));
 }
 
 
@@ -247,10 +247,10 @@ TEST(Properties_TBool, is_InitializationParameterProperty_function_Bool)
   string defVal = "true";
   bool val = true;
 
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b;
+  PropertiesTest a;
+  TBool<PropertiesTest> b;
 
-  ASSERT_NO_THROW(b.InitializationParameterProperty(&a, &TPropertiesTest::CheckValue, index,
+  ASSERT_NO_THROW(b.InitializationParameterProperty(&a, &PropertiesTest::CheckValue, index,
     sep, 1, name, help, link, defVal));
 
   ASSERT_EQ(val, b);
@@ -263,10 +263,10 @@ TEST(Properties_TBool, is_InitializationParameterProperty_function_Bool)
 TEST(Properties_TBool, is_owner_getter_working_Bool)
 {
   bool val = true;
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b(!val);
+  PropertiesTest a;
+  TBool<PropertiesTest> b(!val);
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool, 0);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool, 0);
   a.boolVal = val;
 
   ASSERT_EQ(val, (bool)b);
@@ -275,10 +275,10 @@ TEST(Properties_TBool, is_owner_getter_working_Bool)
 TEST(Properties_TBool, is_owner_setter_working_Bool)
 {
   bool val = true;
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b(!val);
+  PropertiesTest a;
+  TBool<PropertiesTest> b(!val);
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool, 0);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool, 0);
 
   a.boolVal = !val;
 
@@ -290,11 +290,11 @@ TEST(Properties_TBool, is_owner_setter_working_Bool)
 TEST(Properties_TBool, is_CheckValue_working_Bool)
 {
   bool val = true;
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b;
+  PropertiesTest a;
+  TBool<PropertiesTest> b;
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool,
-    &TPropertiesTest::CheckValue);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool,
+    &PropertiesTest::CheckValue);
 
   b = !val;
 
@@ -304,10 +304,10 @@ TEST(Properties_TBool, is_CheckValue_working_Bool)
 TEST(Properties_TBool, is_GetAvailableData_working_Bool)
 {
   bool val = true;
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b(val);
+  PropertiesTest a;
+  TBool<PropertiesTest> b(val);
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool, 0);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool, 0);
 
   b = !val;
 
@@ -316,21 +316,21 @@ TEST(Properties_TBool, is_GetAvailableData_working_Bool)
 
 TEST(Properties_TBool, is_GetGetter_and_SetGetter_working_Bool)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
-  ASSERT_NO_THROW(b.SetGetter(&TPropertiesTest::GetBool));
+  ASSERT_NO_THROW(b.SetGetter(&PropertiesTest::GetBool));
 
-  ASSERT_EQ(&TPropertiesTest::GetBool, b.GetGetter());
+  ASSERT_EQ(&PropertiesTest::GetBool, b.GetGetter());
 }
 
 TEST(Properties_TBool, is_GetIsHaveValue_working_Bool)
 {
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
 
   ASSERT_EQ(true, b.GetIsHaveValue());
 
-  ASSERT_NO_THROW(b.SetGetter(&TPropertiesTest::GetBool));
+  ASSERT_NO_THROW(b.SetGetter(&PropertiesTest::GetBool));
 
   ASSERT_EQ(false, b.GetIsHaveValue());
 
@@ -338,7 +338,7 @@ TEST(Properties_TBool, is_GetIsHaveValue_working_Bool)
 
   ASSERT_EQ(true, b.GetIsHaveValue());
 
-  ASSERT_NO_THROW(b.SetSetter(&TPropertiesTest::SetBool));
+  ASSERT_NO_THROW(b.SetSetter(&PropertiesTest::SetBool));
 
   ASSERT_EQ(false, b.GetIsHaveValue());
 }
@@ -346,11 +346,11 @@ TEST(Properties_TBool, is_GetIsHaveValue_working_Bool)
 TEST(Properties_TBool, is_SetIsHaveValue_working_Bool)
 {
   bool val = true;
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b(val);
+  PropertiesTest a;
+  TBool<PropertiesTest> b(val);
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool,
-    &TPropertiesTest::CheckValue);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool,
+    &PropertiesTest::CheckValue);
 
   a.boolVal = !val;
 
@@ -367,29 +367,29 @@ TEST(Properties_TBool, is_SetIsHaveValue_working_Bool)
 
 TEST(Properties_TBool, is_GetSetter_and_SetSetter_working_Bool)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
-  ASSERT_NO_THROW(b.SetSetter(&TPropertiesTest::SetBool));
+  ASSERT_NO_THROW(b.SetSetter(&PropertiesTest::SetBool));
 
-  ASSERT_EQ(&TPropertiesTest::SetBool, b.GetSetter());
+  ASSERT_EQ(&PropertiesTest::SetBool, b.GetSetter());
 }
 
 TEST(Properties_TBool, is_SetCheckValue_and_GetCheckValue_working_Bool)
 {
-  TBool<TPropertiesTest> b;
+  TBool<PropertiesTest> b;
 
-  ASSERT_NO_THROW(b.SetCheckValue(&TPropertiesTest::CheckValue));
+  ASSERT_NO_THROW(b.SetCheckValue(&PropertiesTest::CheckValue));
 
-  ASSERT_EQ(&TPropertiesTest::CheckValue, b.GetCheckValue());
+  ASSERT_EQ(&PropertiesTest::CheckValue, b.GetCheckValue());
 }
 
 TEST(Properties_TBool, is_CheckValue__working_Bool)
 {
-  TPropertiesTest a;
-  TBool<TPropertiesTest> b;
+  PropertiesTest a;
+  TBool<PropertiesTest> b;
   a.boolVal = false;
 
-  b.Init(&a, &TPropertiesTest::GetBool, &TPropertiesTest::SetBool, &TPropertiesTest::CheckValue);
+  b.Init(&a, &PropertiesTest::GetBool, &PropertiesTest::SetBool, &PropertiesTest::CheckValue);
 
   ASSERT_NO_THROW(b.CheckValue());
 
@@ -401,7 +401,7 @@ TEST(Properties_TBool, is_Bool_ToString_working)
 {
   string result = "true";
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
 
   ASSERT_EQ(result, b.ToString());
 }
@@ -410,7 +410,7 @@ TEST(Properties_TBool, is_Bool_FromString_working)
 {
   bool val = true;
   string sVal = "true";
-  TBool<TPropertiesTest> b(!val);
+  TBool<PropertiesTest> b(!val);
 
   ASSERT_NO_THROW(b.FromString(sVal));
 
@@ -421,7 +421,7 @@ TEST(Properties_TBool, is_Bool_operator_FromString_working)
 {
   bool val = true;
   string sVal = "true";
-  TBool<TPropertiesTest> b(!val);
+  TBool<PropertiesTest> b(!val);
 
   b = sVal;
 
@@ -432,7 +432,7 @@ TEST(Properties_TBool, is_Bool_operator_ToString_working)
 {
   string result = "true";
   bool val = true;
-  TBool<TPropertiesTest> b(val);
+  TBool<PropertiesTest> b(val);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -443,25 +443,25 @@ TEST(Properties_TBool, is_Bool_operator_ToString_working)
 
 TEST(Properties_TFlag, can_create_default_Flag)
 {
-  ASSERT_NO_THROW(TFlag<TPropertiesTest> a);
+  ASSERT_NO_THROW(TFlag<PropertiesTest> a);
 }
 
 TEST(Properties_TFlag, can_create_Flag)
 {
   bool val = true;
-  ASSERT_NO_THROW(TFlag<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TFlag<PropertiesTest> a(val));
 }
 
 TEST(Properties_TFlag, is_init_Flag_value)
 {
   bool val = true;
-  TFlag<TPropertiesTest> b(val);
+  TFlag<PropertiesTest> b(val);
   ASSERT_EQ(val, (bool)b);
 }
 
 TEST(Properties_TFlag, is_Flag_IsFlag_working)
 {
-  TFlag<TPropertiesTest> b;
+  TFlag<PropertiesTest> b;
 
   ASSERT_EQ(true, b.IsFlag());
 }
@@ -470,7 +470,7 @@ TEST(Properties_TFlag, is_Flag_operator_FromString_working)
 {
   bool val = true;
   string sVal = "true";
-  TFlag<TPropertiesTest> b(!val);
+  TFlag<PropertiesTest> b(!val);
 
   b = sVal;
 
@@ -481,7 +481,7 @@ TEST(Properties_TFlag, is_Flag_operator_ToString_working)
 {
   string result = "true";
   bool val = true;
-  TFlag<TPropertiesTest> b(val);
+  TFlag<PropertiesTest> b(val);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -492,19 +492,19 @@ TEST(Properties_TFlag, is_Flag_operator_ToString_working)
 
 TEST(Properties_TInt, can_create_default_Int)
 {
-  ASSERT_NO_THROW(TInt<TPropertiesTest> a);
+  ASSERT_NO_THROW(TInt<PropertiesTest> a);
 }
 
 TEST(Properties_TInt, can_create_Int)
 {
   int val = 42;
-  ASSERT_NO_THROW(TInt<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TInt<PropertiesTest> a(val));
 }
 
 TEST(Properties_TInt, is_init_Int_value)
 {
   int val = 42;
-  TInt<TPropertiesTest> b(val);
+  TInt<PropertiesTest> b(val);
   ASSERT_EQ(val, (int)b);
 }
 
@@ -512,7 +512,7 @@ TEST(Properties_TInt, is_Int_operator_FromString_working)
 {
   int val = 17;
   string sVal = "17";
-  TInt<TPropertiesTest> b(val + 1);
+  TInt<PropertiesTest> b(val + 1);
 
   b = sVal;
 
@@ -523,7 +523,7 @@ TEST(Properties_TInt, is_Int_operator_ToString_working)
 {
   int val = 17;
   string result = "17";
-  TInt<TPropertiesTest> b(val);
+  TInt<PropertiesTest> b(val);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -534,19 +534,19 @@ TEST(Properties_TInt, is_Int_operator_ToString_working)
 
 TEST(Properties_TDouble, can_create_default_Double)
 {
-  ASSERT_NO_THROW(TDouble<TPropertiesTest> a);
+  ASSERT_NO_THROW(TDouble<PropertiesTest> a);
 }
 
 TEST(Properties_TDouble, can_create_Double)
 {
   double val = 17.3;
-  ASSERT_NO_THROW(TDouble<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TDouble<PropertiesTest> a(val));
 }
 
 TEST(Properties_TDouble, is_init_Double_value)
 {
   double val = 17.3;
-  TDouble<TPropertiesTest> b(val);
+  TDouble<PropertiesTest> b(val);
   ASSERT_EQ(val, (double)b);
 }
 
@@ -554,7 +554,7 @@ TEST(Properties_TDouble, is_Double_operator_FromString_working)
 {
   double val = 17.3;
   string sVal = "17.3";
-  TDouble<TPropertiesTest> b(val + 1);
+  TDouble<PropertiesTest> b(val + 1);
 
   b = sVal;
 
@@ -565,7 +565,7 @@ TEST(Properties_TDouble, is_Double_operator_ToString_working)
 {
   double val = 17.987654;
   string result = "17.987654";
-  TDouble<TPropertiesTest> b(val);
+  TDouble<PropertiesTest> b(val);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -576,19 +576,19 @@ TEST(Properties_TDouble, is_Double_operator_ToString_working)
 
 TEST(Properties_TString, can_create_default_String)
 {
-  ASSERT_NO_THROW(TString<TPropertiesTest> a);
+  ASSERT_NO_THROW(TString<PropertiesTest> a);
 }
 
 TEST(Properties_TString, can_create_String)
 {
   string val = "abc";
-  ASSERT_NO_THROW(TString<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TString<PropertiesTest> a(val));
 }
 
 TEST(Properties_TString, is_init_String_value)
 {
   string val = "abc";
-  TString<TPropertiesTest> b(val);
+  TString<PropertiesTest> b(val);
   ASSERT_EQ(val, b.GetData());
 }
 
@@ -598,13 +598,13 @@ TEST(Properties_TString, is_init_String_value)
 
 TEST(Properties_TStrings, can_create_default_Strings)
 {
-  ASSERT_NO_THROW(TStrings<TPropertiesTest> a);
+  ASSERT_NO_THROW(TStrings<PropertiesTest> a);
 }
 
 TEST(Properties_TStrings, is_init_Strings_value)
 {
   string val[3] = { "abc", "def", "gih" };
-  TStrings<TPropertiesTest> b;
+  TStrings<PropertiesTest> b;
   b.SetSize(3);
   b = val;
   for (int i = 0; i < 3; i++)
@@ -616,7 +616,7 @@ TEST(Properties_TStrings, is_Strings_operator_FromString_working)
 {
   string val = "a_b_c";
   string result[] = {"a", "b", "c"};
-  TStrings<TPropertiesTest> b;
+  TStrings<PropertiesTest> b;
 
   b = val;
   for (int i = 0; i < 3; i++)
@@ -628,7 +628,7 @@ TEST(Properties_TStrings, is_Strings_operator_ToString_working)
 {
   string sVal[] = { "a", "b", "c" };
   string result = "a_b_c";
-  TStrings<TPropertiesTest> b(sVal, 3);
+  TStrings<PropertiesTest> b(sVal, 3);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -639,13 +639,13 @@ TEST(Properties_TStrings, is_Strings_operator_ToString_working)
 
 TEST(Properties_TInts, can_create_Ints)
 {
-  ASSERT_NO_THROW(TInts<TPropertiesTest> a);
+  ASSERT_NO_THROW(TInts<PropertiesTest> a);
 }
 
 TEST(Properties_TInts, is_init_Ints_value)
 {
   int val[3] = { 1, 2, 3 };
-  TInts<TPropertiesTest> b;
+  TInts<PropertiesTest> b;
   b.SetSize(3);
   b = val;
   for (int i = 0; i < 3; i++)
@@ -656,7 +656,7 @@ TEST(Properties_TInts, is_Ints_operator_FromString_working)
 {
   string val = "1_2_3";
   int result[] = { 1, 2, 3 };
-  TInts<TPropertiesTest> b;
+  TInts<PropertiesTest> b;
 
   b = val;
   for (int i = 0; i < 3; i++)
@@ -667,7 +667,7 @@ TEST(Properties_TInts, is_Ints_operator_ToString_working)
 {
   int sVal[] = { 1, 2, 3 };
   string result = "1_2_3";
-  TInts<TPropertiesTest> b(sVal, 3);
+  TInts<PropertiesTest> b(sVal, 3);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -678,14 +678,14 @@ TEST(Properties_TInts, is_Ints_operator_ToString_working)
 
 TEST(Properties_TDoubles, can_create_Doubles)
 {
-  ASSERT_NO_THROW(TDoubles<TPropertiesTest> a);
+  ASSERT_NO_THROW(TDoubles<PropertiesTest> a);
 }
 
 TEST(Properties_TDoubles, is_init_Doubles_value)
 {
   double val[3] = { 1.1, 2.30, 3.54 };
-  ASSERT_NO_THROW(TDoubles<TPropertiesTest> a);
-  TDoubles<TPropertiesTest> b;
+  ASSERT_NO_THROW(TDoubles<PropertiesTest> a);
+  TDoubles<PropertiesTest> b;
   b.SetSize(3);
   b = val;
   for (int i = 0; i < 3; i++)
@@ -697,7 +697,7 @@ TEST(Properties_TDoubles, is_TDoubles_operator_FromString_working)
 {
   string val = "1.1_2.2_3.3";
   double result[] = { 1.1, 2.2, 3.3 };
-  TDoubles<TPropertiesTest> b;
+  TDoubles<PropertiesTest> b;
 
   b = val;
   for (int i = 0; i < 3; i++)
@@ -708,7 +708,7 @@ TEST(Properties_TDoubles, is_TDoubles_operator_ToString_working)
 {
   double sVal[] = { 1.1, 2.2, 3.3 };
   string result = "1.100000_2.200000_3.300000";
-  TDoubles<TPropertiesTest> b(sVal, 3);
+  TDoubles<PropertiesTest> b(sVal, 3);
 
   ASSERT_EQ(result, (string)b);
 }
@@ -719,19 +719,19 @@ TEST(Properties_TDoubles, is_TDoubles_operator_ToString_working)
 
 TEST(Properties_TETypeMethod, can_create_default_ETypeMethod)
 {
-  ASSERT_NO_THROW(TETypeMethod<TPropertiesTest> a);
+  ASSERT_NO_THROW(TETypeMethod<PropertiesTest> a);
 }
 
 TEST(Properties_TETypeMethod, can_create_ETypeMethod)
 {
   ETypeMethod val = ManyNumPointMethod;
-  ASSERT_NO_THROW(TETypeMethod<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TETypeMethod<PropertiesTest> a(val));
 }
 
 TEST(Properties_TETypeMethod, is_init_ETypeMethod_value)
 {
   ETypeMethod val = ManyNumPointMethod;
-  TETypeMethod<TPropertiesTest> b(val);
+  TETypeMethod<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }
 
@@ -741,19 +741,19 @@ TEST(Properties_TETypeMethod, is_init_ETypeMethod_value)
 
 TEST(Properties_TESeparableMethodType, can_create_default_ESeparableMethodType)
 {
-  ASSERT_NO_THROW(TESeparableMethodType<TPropertiesTest> a);
+  ASSERT_NO_THROW(TESeparableMethodType<PropertiesTest> a);
 }
 
 TEST(Properties_TESeparableMethodType, can_create_ESeparableMethodType)
 {
   ESeparableMethodType val = GridSearch;
-  ASSERT_NO_THROW(TESeparableMethodType<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TESeparableMethodType<PropertiesTest> a(val));
 }
 
 TEST(Properties_TESeparableMethodType, is_init_ESeparableMethodType_value)
 {
   ESeparableMethodType val = GridSearch;
-  TESeparableMethodType<TPropertiesTest> b(val);
+  TESeparableMethodType<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }
 
@@ -763,7 +763,7 @@ TEST(Properties_TESeparableMethodType, is_init_ESeparableMethodType_value)
 
 TEST(Properties_TELocalMethodScheme, can_create_default_ELocalMethodScheme)
 {
-  ASSERT_NO_THROW(TELocalMethodScheme<TPropertiesTest> a);
+  ASSERT_NO_THROW(TELocalMethodScheme<PropertiesTest> a);
 }
 
 
@@ -773,19 +773,19 @@ TEST(Properties_TELocalMethodScheme, can_create_default_ELocalMethodScheme)
 
 TEST(Properties_TEStopCondition, can_create_default_EStopCondition)
 {
-  ASSERT_NO_THROW(TEStopCondition<TPropertiesTest> a);
+  ASSERT_NO_THROW(TEStopCondition<PropertiesTest> a);
 }
 
 TEST(Properties_TEStopCondition, can_create_EStopCondition)
 {
   EStopCondition val = OptimumVicinity2;
-  ASSERT_NO_THROW(TEStopCondition<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TEStopCondition<PropertiesTest> a(val));
 }
 
 TEST(Properties_TEStopCondition, is_init_EStopCondition_value)
 {
   EStopCondition val = OptimumVicinity2;
-  TEStopCondition<TPropertiesTest> b(val);
+  TEStopCondition<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }
 
@@ -795,19 +795,19 @@ TEST(Properties_TEStopCondition, is_init_EStopCondition_value)
 
 TEST(Properties_TETypeCalculation, can_create_default_ETypeCalculation)
 {
-  ASSERT_NO_THROW(TETypeCalculation<TPropertiesTest> a);
+  ASSERT_NO_THROW(TETypeCalculation<PropertiesTest> a);
 }
 
 TEST(Properties_TETypeCalculation, can_create_ETypeCalculation)
 {
   ETypeCalculation val = CUDA;
-  ASSERT_NO_THROW(TETypeCalculation<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TETypeCalculation<PropertiesTest> a(val));
 }
 
 TEST(Properties_TETypeCalculation, is_init_ETypeCalculation_value)
 {
   ETypeCalculation val = CUDA;
-  TETypeCalculation<TPropertiesTest> b(val);
+  TETypeCalculation<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }
 
@@ -817,19 +817,19 @@ TEST(Properties_TETypeCalculation, is_init_ETypeCalculation_value)
 
 TEST(Properties_TETypeProcess, can_create_default_ETypeProcess)
 {
-  ASSERT_NO_THROW(TETypeProcess<TPropertiesTest> a);
+  ASSERT_NO_THROW(TETypeProcess<PropertiesTest> a);
 }
 
 TEST(Properties_TETypeProcess, can_create_ETypeProcess)
 {
   ETypeProcess val = SynchronousProcessNew;
-  ASSERT_NO_THROW(TETypeProcess<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TETypeProcess<PropertiesTest> a(val));
 }
 
 TEST(Properties_TETypeProcess, is_init_ETypeProcess_value)
 {
   ETypeProcess val = SynchronousProcessNew;
-  TETypeProcess<TPropertiesTest> b(val);
+  TETypeProcess<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }
 
@@ -839,18 +839,18 @@ TEST(Properties_TETypeProcess, is_init_ETypeProcess_value)
 
 TEST(Properties_TEMapType, can_create_default_EMapType)
 {
-  ASSERT_NO_THROW(TEMapType<TPropertiesTest> a);
+  ASSERT_NO_THROW(TEMapType<PropertiesTest> a);
 }
 
 TEST(Properties_TEMapType, can_create_EMapType)
 {
   EMapType val = mpRotated;
-  ASSERT_NO_THROW(TEMapType<TPropertiesTest> a(val));
+  ASSERT_NO_THROW(TEMapType<PropertiesTest> a(val));
 }
 
 TEST(Properties_TEMapType, is_init_EMapType_value)
 {
   EMapType val = mpRotated;
-  TEMapType<TPropertiesTest> b(val);
+  TEMapType<PropertiesTest> b(val);
   ASSERT_EQ(val, b);
 }

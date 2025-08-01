@@ -39,7 +39,7 @@ void ShowIterResults(Process *pProcess)
 }
 
 // ------------------------------------------------------------------------------------------------
-Process::Process(TSearchData& data, Task& task) :
+Process::Process(SearchData& data, Task& task) :
 pData(&data), pTask(&task)
 {
   isFirstRun = true;
@@ -193,7 +193,7 @@ void Process::Solve()
 
 }
 
-void Process::Reset(TSearchData* data, Task* task)
+void Process::Reset(SearchData* data, Task* task)
 {
   isFirstRun = true;
   pData = data;

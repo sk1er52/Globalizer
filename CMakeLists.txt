@@ -1,5 +1,5 @@
 set(GLOBALIZER_PROJECT_NAME Globalizer)
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.31)
 
 cmake_policy(SET CMP0057 NEW)#adds support for the new IN_LIST operator
 
@@ -265,7 +265,7 @@ endif()
 #add tests
 if(${GLOBALIZER_BUILD_TESTS})
   enable_testing()
-  add_subdirectory(${PROJECT_SOURCE_DIR}/lib/gtest)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/gtest)
   add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 endif()
 
@@ -281,9 +281,9 @@ endif()
 if (IS_MICROSOFT_COMPILER)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   #set_property(TARGET pugixml PROPERTY FOLDER "3rd-party")
-  #if(${GLOBALIZER_BUILD_TESTS})
-  #  set_property(TARGET gtests PROPERTY FOLDER "3rd-party")
-  #endif()
+  if(${GLOBALIZER_BUILD_TESTS})
+    set_property(TARGET gtest gmock gmock_main gtest_main mpi_stub PROPERTY FOLDER "3rd-party")
+  endif()
 
 
   source_group("Header Files" FILES ${ROOT_HEADERS})

@@ -38,7 +38,7 @@ protected:
   /// Общее описание задачи
   Task* pTask;
   /// База данных(поисковая информация)
-  TSearchData* pData;
+  SearchData* pData;
 
   /// Дерева распараллеливания
   //TParallelTree* parTree;

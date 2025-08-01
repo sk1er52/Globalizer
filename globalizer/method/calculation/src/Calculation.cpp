@@ -25,7 +25,7 @@ void Calculation::SetTask(Task* _pTask)
   pTask = _pTask;
 }
 
-void Calculation::SetSearchData(TSearchData* _pData)
+void Calculation::SetSearchData(SearchData* _pData)
 {
   pData = _pData;
 }

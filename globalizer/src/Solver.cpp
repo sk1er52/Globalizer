@@ -358,14 +358,14 @@ int Solver::CreateProcess()
 
   {
     //delete pData;
-    //pData = new TSearchData(_problem->GetNumberOfFunctions());
+    //pData = new SearchData(_problem->GetNumberOfFunctions());
     //int qSize = max((int)pow(2.0, (int)(log((double)parameters.MaxNumOfPoints[pTask->GetProcLevel()])
     //  / log(2.0) - 2)) - 1, 1023);
     //pData->ResizeQueue(qSize);
 
     if (pData == 0)
     {
-      pData = new TSearchData(_problem->GetNumberOfFunctions());
+      pData = new SearchData(_problem->GetNumberOfFunctions());
       int qSize = GLOBALIZER_MAX((int)pow(2.0, (int)(log((double)parameters.MaxNumOfPoints[pTask->GetProcLevel()])
         / log(2.0) - 2)) - 1, 1023);
       pData->ResizeQueue(qSize);

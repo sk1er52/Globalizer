@@ -1,18 +1,18 @@
 #ifdef WIN32 //these tests assume windows enviroment only
-#include "parameters.h"
+#include "Parameters.h"
 
 #include <gtest/gtest.h>
 #include <string>
 #include <cstdlib>
 
-#include "problem_manager.h"
+#include "ProblemManager.h"
 #include "test_config.h"
-#include "init_problem.h"
+#include "InitProblem.h"
 
 using namespace std;
 
 // ------------------------------------------------------------------------------------------------
-void SetProblem(string libName, string confName, char* dim, TParameters& parameters, TProblemManager& manager, IProblem*& problem)
+void SetProblem(string libName, string confName, char* dim, Parameters& parameters, ProblemManager& manager, IProblem*& problem)
 {
   string lib = (string(TESTDATA_BIN_PATH) + "/" + libName + ".dll").c_str();
   int argc = 5;
@@ -72,8 +72,8 @@ TEST(Problem_gkls, test_gkls)
     upper[i] = 0;
   }
 
-  TProblemManager manager;
-  TParameters parameters;
+  ProblemManager manager;
+  Parameters parameters;
 
   SetProblem(libName, confName, dim, parameters, manager, problem);
 
@@ -131,8 +131,8 @@ TEST(Problem_rastrigin, test_rastrigin)
     upper[i] = 0;
   }
 
-  TProblemManager manager;
-  TParameters parameters;
+  ProblemManager manager;
+  Parameters parameters;
 
   SetProblem(libName, confName, dim, parameters, manager, problem);
 
@@ -202,8 +202,8 @@ TEST(Problem_gklsC, test_gklsC)
     upper[i] = 0;
   }
 
-  TProblemManager* manager = new TProblemManager();
-  TParameters* parameters = new TParameters();
+  ProblemManager* manager = new ProblemManager();
+  Parameters* parameters = new Parameters();
 
   SetProblem(libName, confName, dim, *parameters, *manager, problem);
 
@@ -274,8 +274,8 @@ TEST(Problem_grishagin, test_grishagin)
     upper[i] = 0;
   }
 
-  TProblemManager manager;
-  TParameters parameters;
+  ProblemManager manager;
+  Parameters parameters;
 
   SetProblem(libName, confName, dim, parameters, manager, problem);
 

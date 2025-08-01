@@ -2,15 +2,15 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "method.h"
-#include "common.h"
+#include "Method.h"
+#include "Common.h"
 #include "test_common.h"
-#include "problem_manager.h"
+#include "ProblemManager.h"
 #include "test_config.h"
-#include "method_factory.h"
+#include "MethodFactory.h"
 using namespace std;
 /**
-  Вспомогательный класс, помогающий задать начальную конфигурацию объекта класса #TMethod,
+  Вспомогательный класс, помогающий задать начальную конфигурацию объекта класса #Method,
   которая будет использоваться в тестах
  */
 struct testParameters
@@ -26,7 +26,7 @@ struct testParameters
     libName(_libName), actualDataFile(_actualDataFile), expectedDataFile(_expectedDataFile), dim(_dim) {}
 };
 
-class TMethodTest : public ::testing::TestWithParam<testParameters>
+class MethodTest : public ::testing::TestWithParam<testParameters>
 {
 protected:
   static const int MaxNumOfTrials = 10000;
@@ -38,10 +38,10 @@ protected:
   double r;
   double reserv;
 
-  TTask* pTask;
-  TSearchData* pData;
-  TParameters* parameters;
-  TProblemManager manager;
+  Task* pTask;
+  SearchData* pData;
+  Parameters* parameters;
+  ProblemManager manager;
 
   void SetUp()
   {
@@ -63,21 +63,21 @@ protected:
 
     IProblem* problem;
     std::string libPath = std::string(TESTDATA_BIN_PATH) + libName;
-    if (TProblemManager::OK_ == manager.LoadProblemLibrary(libPath))
+    if (ProblemManager::OK_ == manager.LoadProblemLibrary(libPath))
     {
       int argc = 1;
       char* argv[1];
       argv[0] = new char(8);
-      parameters = new TParameters();
+      parameters = new Parameters();
       parameters->Init(argc, argv);
       problem = manager.GetProblem();
       problem->SetDimension(n);
       problem->SetConfigPath(parameters->libConfigPath);
       problem->Initialize();
-      pTask = new TTask(n, n, problem, 0);
+      pTask = new Task(n, n, problem, 0);
 
       parameters->Dimension = n;
-      pData = new TSearchData(MaxNumOfFunc, DefaultSearchDataSize);
+      pData = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
     }
     else
     {
@@ -85,7 +85,7 @@ protected:
     }
   }
 
-  bool DoIteration(TMethod* method)
+  bool DoIteration(Method* method)
   {
     bool IsStop;
     method->CalculateIterationPoints();
@@ -103,9 +103,9 @@ protected:
 // * Проверка параметра Максимальное число испытаний #MaxNumOfTrials
 // * MaxNumOfTrials >=1
 // */
-//TEST_F(TMethodTest, throws_when_create_with_not_positive_MaxNumOfTrials)
+//TEST_F(MethodTest, throws_when_create_with_not_positive_MaxNumOfTrials)
 //{
-//  ASSERT_ANY_THROW(TMethod method(0, eps, r, reserv, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(0, eps, r, reserv, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 //
@@ -113,16 +113,16 @@ protected:
 // * Проверка параметра Точность решения задачи #Epsilon
 // * 0 < Epsilon <= 0.01
 // */
-//TEST_F(TMethodTest, throws_when_create_with_not_positive_epsilon)
+//TEST_F(MethodTest, throws_when_create_with_not_positive_epsilon)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, 0, r, reserv, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, 0, r, reserv, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
 //Нужно обсудить верхнюю границу
-//TEST_F(TMethodTest, throws_when_create_with_too_large_epsilon)
+//TEST_F(MethodTest, throws_when_create_with_too_large_epsilon)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, 0.011, r, reserv, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, 0.011, r, reserv, m, L, CurL,
 //                                  mpRotated, *parameters, pTask, pData));
 //}
 
@@ -130,9 +130,9 @@ protected:
 // * Проверка параметра Надежность метода #r
 // * r > 1
 // */
-//TEST_F(TMethodTest, throws_when_create_with_too_low_r)
+//TEST_F(MethodTest, throws_when_create_with_too_low_r)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, 1, reserv, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, 1, reserv, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 //
@@ -140,15 +140,15 @@ protected:
 // * Проверка параметра параметр eps-резервирования #reserv
 // * 0 <= reserv <= 0.5
 // */
-//TEST_F(TMethodTest, throws_when_create_with_negative_reserv)
+//TEST_F(MethodTest, throws_when_create_with_negative_reserv)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, -0.001, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, -0.001, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 //
-//TEST_F(TMethodTest, throws_when_create_with_too_large_reserv)
+//TEST_F(MethodTest, throws_when_create_with_too_large_reserv)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, 0.51, m, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, 0.51, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
@@ -156,15 +156,15 @@ protected:
  * Проверка параметра Плотность построения развертки #m
  * 2 <= m <= MaxM
  */
-//TEST_F(TMethodTest, throws_when_create_with_too_low_m)
+//TEST_F(MethodTest, throws_when_create_with_too_low_m)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, reserv, 1, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, reserv, 1, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
-//TEST_F(TMethodTest, throws_when_create_with_too_large_m)
+//TEST_F(MethodTest, throws_when_create_with_too_large_m)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, reserv, MaxM + 1, L, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, reserv, MaxM + 1, L, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
@@ -172,59 +172,59 @@ protected:
  * Проверка параметра Число используемых разверток #L
  * Для сдвиговой разверки L <= #m, для вращаемой L <= N(N-1)+1
  */
-//TEST_F(TMethodTest, throws_when_create_with_not_positive_L)
+//TEST_F(MethodTest, throws_when_create_with_not_positive_L)
 //{
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, reserv, m, 0, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, reserv, m, 0, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
-//TEST_F(TMethodTest, throws_when_create_with_too_large_L_for_rotatedEvolvent)
+//TEST_F(MethodTest, throws_when_create_with_too_large_L_for_rotatedEvolvent)
 //{
 //  int N = pTask->GetN();
-//  ASSERT_ANY_THROW(TMethod method(MaxNumOfTrials, eps, r, reserv, m, N * (N - 1) + 2, CurL,
+//  ASSERT_ANY_THROW(Method method(MaxNumOfTrials, eps, r, reserv, m, N * (N - 1) + 2, CurL,
 //    mpRotated, *parameters, pTask, pData));
 //}
 
-//TEST_F(TMethodTest, throws_when_create_with_too_large_L_for_ShiftedEvolvent)
+//TEST_F(MethodTest, throws_when_create_with_too_large_L_for_ShiftedEvolvent)
 //{
-//  ASSERT_ANY_THROW(TMethod method(*parameters, *pTask, *pData));
+//  ASSERT_ANY_THROW(Method method(*parameters, *pTask, *pData));
 //}
 
 /**
  * Создание метода с корректными входными параметрами
  */
-//TEST_F(TMethodTest, can_create_with_correct_values)
+//TEST_F(MethodTest, can_create_with_correct_values)
 //{
-//  ASSERT_NO_THROW(TMethod method(*parameters, *pTask, *pData));
+//  ASSERT_NO_THROW(Method method(*parameters, *pTask, *pData));
 //}
 //
 ///**
 // * Проверка метода #FirstIteration
 // */
-//TEST_F(TMethodTest, on_FirstIteration_can_reset_IterationCount)
+//TEST_F(MethodTest, on_FirstIteration_can_reset_IterationCount)
 //{
-//  TMethod* method = new TMethod(*parameters, *pTask, *pData);
+//  Method* method = new Method(*parameters, *pTask, *pData);
 //  method->FirstIteration();
 //  ASSERT_EQ(1, method->GetIterationCount());
 //}
 //
-//TEST_F(TMethodTest, on_FirstIteration_can_reset_BestTrial)
+//TEST_F(MethodTest, on_FirstIteration_can_reset_BesTrial)
 //{
-//  TMethod* pMethod = new TMethod(*parameters, *pTask, *pData);
+//  Method* pMethod = new Method(*parameters, *pTask, *pData);
 //  pMethod->FirstIteration();
 //  ASSERT_EQ(-2, pMethod->GetOptimEstimation()[0].index);
 //}
 //
-//TEST_F(TMethodTest, on_FirstIteration_can_reset_NumberOfTrials)
+//TEST_F(MethodTest, on_FirstIteration_can_reset_NumberOfTrials)
 //{
-//  TMethod* pMethod = new TMethod(*parameters, *pTask, *pData);
+//  Method* pMethod = new Method(*parameters, *pTask, *pData);
 //  pMethod->FirstIteration();
 //  ASSERT_EQ(0, pMethod->GetNumberOfTrials());
 //}
 //
-////TEST_F(TMethodTest, on_FirstIteration_can_generate_new_points)
+////TEST_F(MethodTest, on_FirstIteration_can_generate_new_points)
 ////{
-////  TMethod* pMethod = new TMethod(*parameters, *pTask, *pData);
+////  Method* pMethod = new Method(*parameters, *pTask, *pData);
 ////  pMethod->FirstIteration();
 ////
 ////  int NumPoints = parameters->NumPoints;
@@ -236,9 +236,9 @@ protected:
 ///**
 // * Проверка метода #FinalizeIteration
 // */
-//TEST_F(TMethodTest, FinalizeIteration_can_increase_iterationCount_1)
+//TEST_F(MethodTest, FinalizeIteration_can_increase_iterationCount_1)
 //{
-//  TMethod* pMethod = new TMethod(*parameters, *pTask, *pData);
+//  Method* pMethod = new Method(*parameters, *pTask, *pData);
 //  pMethod->SetBounds();
 //
 //  pMethod->FirstIteration();
@@ -251,10 +251,10 @@ protected:
 ///**
 // * Проверка метода #CheckStopCondition
 // */
-//TEST_F(TMethodTest, CheckStopCondition_can_stop_method_when_too_many_inerations)
+//TEST_F(MethodTest, CheckStopCondition_can_stop_method_when_too_many_inerations)
 //{
 //  int currentMaxNumOfTrials = 2;
-//  TMethod* pMethod = new TMethod(currentMaxNumOfTrials, eps, r, reserv, m, L, CurL,
+//  Method* pMethod = new Method(currentMaxNumOfTrials, eps, r, reserv, m, L, CurL,
 //    mpRotated, *parameters, pTask, pData);
 //  pMethod->SetBounds();
 //  bool IsStop = false;
@@ -271,9 +271,9 @@ protected:
 ///**
 // * Проверка решения задач с различными функциями
 // */
-//TEST_P(TMethodTest, check_states_of_method_iterations)
+//TEST_P(MethodTest, check_states_of_method_iterations)
 //{
-//  testParameters params = GetParam();
+//  tesParameters params = GetParam();
 //  std::string actualDataFile = std::string(TESTDATA_PATH) + std::string(params.actualDataFile);
 //  std::string expectedDataFile = std::string(TESTDATA_PATH) + std::string(params.expectedDataFile);
 //
@@ -281,7 +281,7 @@ protected:
 //  fclose(currentf);
 //
 //  SetUp(std::string(params.libName), params.dim);
-//  TMethod* pMethod = new TMethod(MaxNumOfTrials, eps, r, reserv, m, L, CurL,
+//  Method* pMethod = new Method(MaxNumOfTrials, eps, r, reserv, m, L, CurL,
 //    mpBase, *parameters, pTask, pData);
 //  pMethod->SetBounds();
 //
@@ -299,12 +299,12 @@ protected:
 //}
 
 INSTANTIATE_TEST_CASE_P(CheckMethod,
-  TMethodTest,
+  MethodTest,
   ::testing::Values(
     testParameters(LIB_RASTRIGIN, "/actualRastriginState.dat", "/expectedRastriginState.dat", 4),
     testParameters(LIB_STRONGINC3, "/actualStronginc3State.dat", "/expectedStronginc3State.dat", 2)));
 /*INSTANTIATE_TEST_CASE_P(CheckRastrigin1,
-                        TMethodTest,
+                        MethodTest,
                         ::testing::Values(
                         pair<string, string>("/actualRastriginState2.dat", "/expectedRastriginState.dat"),
                         pair<string, string>("/actualRastriginState3.dat", "/expectedRastriginState.dat")));

@@ -21,7 +21,7 @@
 \date 2016
 \copyright ННГУ им. Н.И. Лобачевского
 
-\brief Объявление класса #TProblemManager
+\brief Объявление класса #ProblemManager
 
 */
 

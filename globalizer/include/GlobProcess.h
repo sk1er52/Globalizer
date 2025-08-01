@@ -47,7 +47,7 @@ protected:
   /// Задача
   Task* pTask;
   /// Поисковая информация
-  TSearchData* pData;
+  SearchData* pData;
 
   /// Методы для одной итерации
   IMethod* pMethod;
@@ -85,7 +85,7 @@ protected:
   ///Проверяет остановились ли соседи
   bool CheckIsStop(bool IsStop);
 public:
-  Process(TSearchData& data, Task& task);
+  Process(SearchData& data, Task& task);
   virtual ~Process();
   /// Время решения
   double GetSolveTime();
@@ -93,7 +93,7 @@ public:
   void Solve();
 
   /// Сброс параметров процесса
-  void Reset(TSearchData* data, Task* task);
+  void Reset(SearchData* data, Task* task);
 
   /** Получить число испытаний
 

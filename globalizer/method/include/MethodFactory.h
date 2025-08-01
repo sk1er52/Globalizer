@@ -21,7 +21,7 @@
 class MethodFactory
 {
 public:
-  static IMethod* CreateMethod(Task& _pTask, TSearchData& _pData,
+  static IMethod* CreateMethod(Task& _pTask, SearchData& _pData,
     Calculation& _Calculation, Evolvent& _Evolvent);
 };
 

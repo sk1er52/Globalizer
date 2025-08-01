@@ -21,7 +21,7 @@
 \date 2015-2016
 \copyright ННГУ им. Н.И. Лобачевского
 
-\brief Объявление класса #TMethod
+\brief Объявление класса #Method
 
 \details Объявление класса #Method и сопутствующих типов данных
 */
@@ -88,7 +88,7 @@ protected:
   /// Указатель на решаемую задачу
   Task&            pTask;
   /// Указатель на матрицу состояния поиска
-  TSearchData*      pData;
+  SearchData*      pData;
 
   /// Вычислитель
   Calculation& calculation;
@@ -278,11 +278,11 @@ protected:
   virtual void SetDiscreteValue(int u, std::vector< std::vector <double> > dvs);
 
   /// Получаем поисковую информацию, важно для адаптивного метода
-  virtual TSearchData* GetSearchData(Trial* trial);
+  virtual SearchData* GetSearchData(Trial* trial);
 
 public:
 
-  Method(Task& _pTask, TSearchData& _pData,
+  Method(Task& _pTask, SearchData& _pData,
     Calculation& _Calculation, Evolvent& _Evolvent);
   virtual ~Method();
 

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include <queue.h>
+#include <Queue.h>
 
 /**
   Вспомогательный класс, помогающий задать начальную конфигурацию объекта
-  класса #TPriorityQueue, которая будет использоваться в тестах
+  класса #PriorityQueue, которая будет использоваться в тестах
  */
 
 char values [6]= {'a', 'b', 'c', 'd', 'e', 'f'};
@@ -13,11 +13,11 @@ class TQueueTest : public ::testing::Test
 protected:
   static const int MaxQueueSize = 67108863;
   /// Указатель на очередь
-  TPriorityQueue* queue;
+  PriorityQueue* queue;
   static const int maxSize = 3;
   void SetUp()
   {
-    queue = new TPriorityQueue(maxSize);
+    queue = new PriorityQueue(maxSize);
   }
   void TearDown()
   {
@@ -36,22 +36,22 @@ protected:
  */
 TEST_F(TQueueTest, throws_when_create_queue_with_size_not_divisible_by_power_of_two)
 {
-  ASSERT_ANY_THROW(TPriorityQueue q(10));
+  ASSERT_ANY_THROW(PriorityQueue q(10));
 }
 
 TEST_F(TQueueTest, can_create_queue_with_DefaultQueueSize)
 {
-  ASSERT_NO_THROW(TPriorityQueue q(DefaultQueueSize));
+  ASSERT_NO_THROW(PriorityQueue q(DefaultQueueSize));
 }
 
 TEST_F(TQueueTest, can_create_queue_with_correct_size)
 {
-  ASSERT_NO_THROW(TPriorityQueue q(1023));
+  ASSERT_NO_THROW(PriorityQueue q(1023));
 }
 
 TEST_F(TQueueTest, throws_when_memory_for_queue_not_allocated)
 {
-  ASSERT_ANY_THROW(TPriorityQueue q((MaxQueueSize + 1) * 2 - 1));
+  ASSERT_ANY_THROW(PriorityQueue q((MaxQueueSize + 1) * 2 - 1));
 }
 
 /**
