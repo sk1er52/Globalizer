@@ -30,41 +30,12 @@
 #include <algorithm>
 
 
-//#define NUM_POINTS_FOR_APPROXIMATION 30
-
-#ifdef USE_PLOTTER
-#include <../lib/dislin/include/discpp.h>
-typedef std::pair<double, double> point2d;
-#endif
-
-#ifdef USE_OpenCV
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/ml/ml.hpp"
-
-//using namespace cv;
-//using namespace ml;
-//
-#endif
-
 #include <string>
 #include <cmath>
 
 
 
-/// Массив для сохранения точек для последующей печати и рисования
-std::vector<Trial*> Method::printPoints;
-/// количество точек вычисленных локальным методом
-int Method::localPointCount = 0;
-/// число запусков локально метода
-int Method::numberLocalMethodtStart;
-/// Количество вызовов рисовалки
-int Method::printCount = 0;
-
-
 // ------------------------------------------------------------------------------------------------
-//Method::Method(int _MaxNumOfTrials, double _Eps, double _r, int _m, int _L, EMapType _MapType,
-//    Task *_pTask, SearchData *_pData, TOptimEstimation *_pEstimation)
 Method::Method(Task& _pTask, SearchData& _pData,
   Calculation& _Calculation, Evolvent& _Evolvent) :
   pTask(_pTask), pData(&_pData),
@@ -77,18 +48,16 @@ Method::Method(Task& _pTask, SearchData& _pData,
   {
     throw EXCEPTION("MaxNumOfTrials is out of range");
   }
-  Epsilon = parameters.Eps[_pTask.GetProcLevel()];
-  if (Epsilon <= 0.0)
+
+  if (parameters.Epsilon <= 0.0)
   {
     throw EXCEPTION("Epsilon is out of range");
   }
-  r = parameters.rs[_pTask.GetProcLevel()];
-  if (r <= 1.0)
+
+  if (parameters.r <= 1.0)
   {
     throw EXCEPTION("r is out of range");
   }
-
-  m = parameters.m;
 
   if ((parameters.rEps < 0.0) || (parameters.rEps > 0.5))
   {
@@ -97,34 +66,19 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
   alfa = parameters.localAlpha; // пока локальная адаптация - фиксированная
 
-  // число порождаемых точек на итерации совпадает с числом потомков в дереве процессов,
-  //  если процесс - не лист
-  if (pTask.GetProcLevel() < parameters.NumOfTaskLevels - 1)
+
+
+  if (parameters.NumPoints <= 0)
   {
-    NumPoints = parameters.ChildInProcLevel[pTask.GetProcLevel()];
-    if (NumPoints <= 0)
-    {
-      throw EXCEPTION("ChildInProcLevel and NumPoints <= 0");
-    }
+    throw EXCEPTION("NumPoints parameter <= 0");
   }
-  else
-  {
-    NumPoints = parameters.NumPoints;
-    if (NumPoints <= 0)
-    {
-      throw EXCEPTION("NumPoints parameter <= 0");
-    }
-  }
+  
 
   iteration.IterationCount = 0;
 
   AchievedAccuracy = MaxDouble;
   // Массив для текущих итераций
-  iteration.pCurTrials.resize(NumPoints);
-  //// Лучшая точка пока не найдена
-  //pData->GetBestTrial()->index = -2;
-  //// МПИ лучшей точки пока не найдена
-  //pData->GetBestTrial()->simVal = NULL;
+  iteration.pCurTrials.resize(parameters.NumPoints);
 
   //===========================================================================================================================================
   mu = new double [pTask.GetNumOfFunc()];
@@ -135,24 +89,11 @@ Method::Method(Task& _pTask, SearchData& _pData,
     Xmax[i] = 0;
   //===========================================================================================================================================
 
-  //for (int i = 0; i < parameters.Dimension; i++)
-  //{
-  //  pData->GetBestTrial()->y[i] = pTask.GetA()[i] - 1;
-  //}
 
-  // Выделяем память под массив лучших интервалов
-  //iteration.BestIntervals.resize(NumPoints);
-  //Смешанный алгоритм лучше включаеть при NumOfTrials > N*100
-  //  StartLocalIteration = MaxNumOfTrials / 10;
-
-  rootDim = pTask.GetFreeN();
-  if (pTask.IsLeaf())
-    rootDim = pTask.GetFreeN() - pTask.GetNumberOfDiscreteVariable();
-
-  if (pTask.GetFreeN() == 1)
+  if (parameters.Dimension == 1)
     StartLocalIteration = 5;
   else
-    StartLocalIteration = rootDim * 70 / NumPoints;
+    StartLocalIteration = parameters.Dimension * 70 / parameters.NumPoints;
 
   functionCalculationCount.resize(pTask.GetNumOfFunc());
   for (int i = 0; i < pTask.GetNumOfFunc(); i++)
@@ -160,7 +101,7 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
   isFindInterval = false;
 
-  inputSet.trials.resize(NumPoints);
+  inputSet.trials.resize(parameters.NumPoints);
 
 
   globalM.resize(pTask.GetNumOfFunc());
@@ -183,6 +124,10 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
   isLocalZUpdate = false;
 
+  /// количество точек вычисленных локальным методом
+  localPointCount = 0;
+  /// число запусков локально метода
+  numberLocalMethodtStart = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -221,40 +166,10 @@ bool Method::IsIntervalInSegment(SearchInterval* basicInterval, SearchInterval* 
   return false;
 }
 
-// ------------------------------------------------------------------------------------------------
-void Method::SetNumPoints(int newNP)
-{
-  if (newNP <= 0)
-    newNP = 1;
-  if (NumPoints != newNP)
-  {
-    NumPoints = newNP;
-
-    if (iteration.pCurTrials.size() != NumPoints)
-    {
-      for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
-        iteration.pCurTrials[i] = 0;
-
-      iteration.pCurTrials.resize(NumPoints);
-    }
-
-    //if (iteration.BestIntervals.size() != NumPoints)
-    //  iteration.BestIntervals.resize(NumPoints);
-
-    inputSet.Resize(NumPoints);
-    outputSet.Resize(NumPoints);
-  }
-}
-
 
 double Method::Update_r(int iter, int procLevel)
 {
-  int pl = 0;
-  if (procLevel < 0)
-    pl = pTask.GetProcLevel();
-  else
-    pl = procLevel;
-  double baseR = parameters.rs[pl];
+  double baseR = parameters.r;
   double iterationCount = 0;
   if (iter <= 1)
     iterationCount = (double)(iteration.IterationCount);
@@ -264,7 +179,7 @@ double Method::Update_r(int iter, int procLevel)
   if (iterationCount <= 0)
     iterationCount = 1;
 
-  double p = 1.0 / rootDim;
+  double p = 1.0 / parameters.Dimension;
   double resR = baseR + parameters.rDynamic / pow(iterationCount, p);
 
   return resR;
@@ -292,10 +207,10 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
     pCurTrialsj.SetX(0.5 * (BestIntervalsj->xl() + BestIntervalsj->xr()) -
       (((BestIntervalsj->zr() - BestIntervalsj->zl()) > 0) ? 1 : -1)*
       pow(fabs(BestIntervalsj->zr() - BestIntervalsj->zl()) /
-        pData->M[BestIntervalsj->izl()], rootDim) / 2 / r);
+        pData->M[BestIntervalsj->izl()], parameters.Dimension) / 2 / parameters.r);
     //      pCurTrialsj.x = BestIntervalsj->xl() + (0.5*BestIntervalsj->dx -
     //(((BestIntervalsj->zr() - BestIntervalsj->zl)>0)?1:-1)*pow(fabs(BestIntervalsj->zr() -
-    //BestIntervalsj->zl)/pData->M[BestIntervalsj->izl],pTask.GetFreeN())/(2*r));
+    //BestIntervalsj->zl)/pData->M[BestIntervalsj->izl],parameters.Dimension)/(2*r));
   }
 
   pCurTrialsj.leftInterval = BestIntervalsj;
@@ -312,14 +227,9 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
   // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
   CalculateImage(pCurTrialsj);
 
-  for (int k = pTask.GetFreeN() - 1; k >= 0; k--)
-    pCurTrialsj.y[pTask.GetFixedN() + k] = pCurTrialsj.y[k];
+  for (int k = parameters.Dimension - 1; k >= 0; k--)
+    pCurTrialsj.y[k] = pCurTrialsj.y[k];
 
-  // Записываем фиксированные координаты - они всегда расположены вначае
-  for (int j = 0; j < pTask.GetFixedN(); j++)
-  {
-    pCurTrialsj.y[j] = pTask.GetFixedY()[j];
-  }
 
   // Записываем значение дискретной переменной
   for (int j = 0; j < pTask.GetNumberOfDiscreteVariable(); j++)
@@ -330,11 +240,10 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
 // ------------------------------------------------------------------------------------------------
 void Method::FirstIteration()
 {
-  printCount = 0;
   // Задаем границы интервалов изменения параметров
   // Указатель на границы интервалов в подзадаче - это указатель на исходные границы,
   //   смещенный на число фиксированных размерностей
-  evolvent.SetBounds(pTask.GetA() + pTask.GetFixedN(), pTask.GetB() + pTask.GetFixedN());
+  evolvent.SetBounds(pTask.GetA(), pTask.GetB());
 
   // Это первая итерация, сбрасываем счетчик
   iteration.IterationCount = 1;
@@ -375,7 +284,7 @@ void Method::FirstIteration()
   //}
   //delete[] dvs;
 
-  iteration.pCurTrials.resize(NumPoints * mDiscreteValuesCount);
+  iteration.pCurTrials.resize(parameters.NumPoints * mDiscreteValuesCount);
 
   SearchInterval** NewInterval = new SearchInterval*[mDiscreteValuesCount];
     //SearchIntervalFactory::CreateSearchInterval();
@@ -414,7 +323,7 @@ void Method::FirstIteration()
     //====================================================================
     if ((parameters.isCalculationInBorderPoint == true) || (parameters.LocalTuningType != 0))
     {
-      //if (pTask.GetFreeN() == 1)
+      //if (parameters.Dimension == 1)
       {
         // Эта функция вызывается только в листе дерева - поэтому вычисляем функционалы здесь
         for (int j = 0; j < pTask.GetNumOfFunc(); j++)
@@ -464,17 +373,17 @@ void Method::FirstIteration()
   // Точки первой итерации выбираются по особому правилу
   // Равномерно ставим NumPoints точек c шагом h
   // А надо бы случайно...
-  double h = 1.0 / (NumPoints + 1);
+  double h = 1.0 / (parameters.NumPoints + 1);
   if (!parameters.isLoadFirstPointFromFile) // равномерно распределяем начальные точки
   {
     for (int e = 0; e < mDiscreteValuesCount; e++)
     {
-      for (int q = 0; q < NumPoints; q++)
+      for (int q = 0; q < parameters.NumPoints; q++)
       {
 
         if (parameters.TypeDistributionStartingPoints == Evenly)
         {
-          int ind = e * NumPoints + q;
+          int ind = e * parameters.NumPoints + q;
           iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
           iteration.pCurTrials[ind]->discreteValuesIndex = e;
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
@@ -484,14 +393,10 @@ void Method::FirstIteration()
           CalculateImage(*iteration.pCurTrials[ind]);
           // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
           // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = pTask.GetFreeN() - 1; j >= 0; j--)
+          for (int j = parameters.Dimension - 1; j >= 0; j--)
           {
-            iteration.pCurTrials[ind]->y[pTask.GetFixedN() + j] = iteration.pCurTrials[ind]->y[j];
+            iteration.pCurTrials[ind]->y[0 + j] = iteration.pCurTrials[ind]->y[j];
           }
-
-          // Записываем фиксированные координаты - они всегда расположены вначае
-          for (int j = 0; j < pTask.GetFixedN(); j++)
-            iteration.pCurTrials[ind]->y[j] = pTask.GetFixedY()[j];
 
           for (int j = 0; j < numberOfDiscreteVariable; j++)
             iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
@@ -502,7 +407,7 @@ void Method::FirstIteration()
         }
         else
         {
-          int ind = e * NumPoints + q;
+          int ind = e * parameters.NumPoints + q;
           iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
           iteration.pCurTrials[ind]->discreteValuesIndex = e;
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
@@ -510,7 +415,7 @@ void Method::FirstIteration()
           //iteration.pCurTrials[ind]->SetX((q + 1)* h);
           //CalculateImage(*iteration.pCurTrials[ind]);
 
-          for (size_t iCNP = 0; iCNP < pTask.GetFreeN(); iCNP++)
+          for (size_t iCNP = 0; iCNP < parameters.Dimension; iCNP++)
           {
             iteration.pCurTrials[ind]->y[iCNP] = pTask.GetA()[iCNP] + ((double(q) + 1.0) * h) * (pTask.GetB()[iCNP] - pTask.GetA()[iCNP]);
           }
@@ -521,14 +426,11 @@ void Method::FirstIteration()
 
           // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
           // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = pTask.GetFreeN() - 1; j >= 0; j--)
+          for (int j = parameters.Dimension - 1; j >= 0; j--)
           {
-            iteration.pCurTrials[ind]->y[pTask.GetFixedN() + j] = iteration.pCurTrials[ind]->y[j];
+            iteration.pCurTrials[ind]->y[j] = iteration.pCurTrials[ind]->y[j];
           }
 
-          // Записываем фиксированные координаты - они всегда расположены вначае
-          for (int j = 0; j < pTask.GetFixedN(); j++)
-            iteration.pCurTrials[ind]->y[j] = pTask.GetFixedY()[j];
 
           for (int j = 0; j < numberOfDiscreteVariable; j++)
             iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
@@ -540,9 +442,6 @@ void Method::FirstIteration()
       }
     }
 
-    //pData->SetBestTrial(iteration.pCurTrials[0]);
-    //NumPoints = NumPoints * mDiscreteValuesCount;
-    SetNumPoints(NumPoints* mDiscreteValuesCount);
   }
   else // читаем из файла FirstPointFilePath
   {
@@ -689,39 +588,11 @@ void Method::Recalc()
 // ------------------------------------------------------------------------------------------------
 void Method::CalculateIterationPoints()
 {
-
-  //r = Update_r(iteration.IterationCount);
-
   if (iteration.IterationCount == 1)
   {
     return;
   }
-  else if (iteration.IterationCount == 2)
-  {
-    // число порождаемых точек на итерации совпадает с числом потомков в дереве процессов,
-//  если процесс - не лист
-    if (pTask.GetProcLevel() < parameters.NumOfTaskLevels - 1)
-    {
-      this->SetNumPoints(parameters.ChildInProcLevel[pTask.GetProcLevel()]);
 
-      if (NumPoints <= 0)
-      {
-        throw EXCEPTION("ChildInProcLevel and NumPoints <= 0");
-      }
-    }
-    else
-    {
-      this->SetNumPoints(parameters.NumPoints);
-      if (NumPoints <= 0)
-      {
-        throw EXCEPTION("NumPoints parameter <= 0");
-      }
-    }
-    
-    //NumPoints = parameters.NumPoints;
-  }
-
-  //PlotDecisionTrees();
 
   // Если поднят флаг - то пересчитать все характеристики
   Recalc();
@@ -730,97 +601,18 @@ void Method::CalculateIterationPoints()
   // Очередь пока одна - очередь глобальных характеристик
   // В ней должно быть нужное количество интервалов, т.к. на первом шаге проводится NumPoints
   // испытаний
-  std::vector<SearchInterval*> BestIntervals(NumPoints);
+  std::vector<SearchInterval*> BestIntervals(parameters.NumPoints);
 
   int localMix = parameters.localMix;
-  //if (pTask.IsLeaf())
-  //  localMix = 0;
 
   if (GetIterationType(iteration.IterationCount, localMix) == Global)
   {
 
-    bool f = parameters.PointTakingType;
-    if (f == 0)
-      pData->GetBestIntervals(BestIntervals.data(), NumPoints);
-    else
-    {
-#ifdef USE_OpenCV
-      int numberOfRepetitionsInIteration = 0;
-      int count = pData->GetCount();
-      int countMinInterval = 0;
-      for (int i = 0; i < NumPoints; i++)
-      {
-        int j = 0;
-        SearchInterval* interval = 0;
-        while (j < (count + 1))
-        {
-          interval = pData->GetIntervalWithMaxR();
-
-          if (interval->delta <= parameters.Epsilon)
-            countMinInterval++;
-
-          bool fl = true;
-
-          // Проверяем границы интервала, не попали ли они в окрестность (0.1) точек из массива (массив с локальными минимумами)
-          for (int s = 0; s < localMins.size(); s++) {
-            int localAreaCounter = 0;
-            for (int r = 0; r < parameters.Dimension; r++) {
-              if (fabs(localMins[s]->y[r] - interval->LeftPoint->y[r]) < 0.1) {
-                localAreaCounter++;
-              }
-            }
-            if (localAreaCounter == parameters.Dimension) {
-              fl = false;
-              break;
-            }
-            localAreaCounter = 0;
-            for (int r = 0; r < parameters.Dimension; r++) {
-              if (fabs(localMins[s]->y[r] - interval->RightPoint->y[r]) < 0.1) {
-                localAreaCounter++;
-              }
-            }
-            if (localAreaCounter == parameters.Dimension) {
-              fl = false;
-              break;
-            }
-          }
-
-          if (interval->status != SearchInterval::local_area) {
-            fl = fl && true;
-          }
-          else {
-            fl = false;
-          }
-
-          if (true == fl)
-            break;
-
-          j++;
-
-          numberOfRepetitions++;
-          numberOfRepetitionsInIteration++;
-        }
-        BestIntervals[i] = interval;
-        if (BestIntervals[i]->status == SearchInterval::educational_local_method)
-        {
-          isSetInLocalMinimumInterval = true;
-        }
-      }
-      if (numberOfRepetitionsInIteration > 0)
-        pData->SetRecalc(true);
-      if (numberOfRepetitionsInIteration >= (count / 2.0))
-        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nprocess 0, iteration %d\tpovt = %d\tcountPoint %d\n",
-          GetIterationCount(), numberOfRepetitionsInIteration, count);
-      if (!(GetIterationCount() % parameters.StepPrintMessages))
-      {
-        printf("process 0, iteration %d\t povt = %d\n", GetIterationCount(), numberOfRepetitions);
-        numberOfRepetitions = 0;
-      }
-#endif
-    }
+    pData->GetBestIntervals(BestIntervals.data(), parameters.NumPoints);
+    
   }
   else
-    pData->GetBestLocalIntervals(BestIntervals.data(), NumPoints);
+    pData->GetBestLocalIntervals(BestIntervals.data(), parameters.NumPoints);
   // Пока заполняем одновременно вектор CurTrials, и вектор интервалов
 
   CalculateCurrentPoints(BestIntervals);
@@ -848,11 +640,11 @@ bool Method::CheckStopCondition()
   if (CurrentAccuracy < AchievedAccuracy)
     AchievedAccuracy = CurrentAccuracy;
 
-  if (pTask.GetFixedN() != 0) //если метод не в корне, то остановка только по точности
+  if (pTask.IsLeaf()) //если метод не в корне, то остановка только по точности
   {
-    //if (AchievedAccuracy < Epsilon)
+    //if (AchievedAccuracy < parameters.Epsilon)
     //  res = true;
-    double fm = Epsilon;
+    double fm = parameters.Epsilon;
     if ((isSetInLocalMinimumInterval == true) || (AchievedAccuracy < fm))
       res = true;
   }
@@ -861,7 +653,7 @@ bool Method::CheckStopCondition()
     switch (parameters.stopCondition)
     {
     case Accuracy:
-      if (AchievedAccuracy < Epsilon)
+      if (AchievedAccuracy < parameters.Epsilon)
         res = true;
       break;
     case OptimumVicinity:
@@ -913,7 +705,7 @@ bool Method::CheckStopCondition()
       res = true;
       for (int i = 0; i < pTask.GetN(); i++)
       {
-        if (fabs(pData->GetBestTrial()->y[i] - pTask.GetOptimumPoint()[i]) > Epsilon)
+        if (fabs(pData->GetBestTrial()->y[i] - pTask.GetOptimumPoint()[i]) > parameters.Epsilon)
         {
           res = false;
           break;
@@ -923,85 +715,13 @@ bool Method::CheckStopCondition()
     break;
     case OptimumValue:
       if (pData->GetBestTrial()->index == pTask.GetNumOfFunc() - 1 &&
-        pData->GetBestTrial()->FuncValues[pData->GetBestTrial()->index] - pTask.GetOptimumValue() < Epsilon)
+        pData->GetBestTrial()->FuncValues[pData->GetBestTrial()->index] - pTask.GetOptimumValue() < parameters.Epsilon)
         res = true;
       break;
-
-    case AccuracyWithCheck:
-      //res = true;
-      //for (int i = 0; i < pTask.GetN(); i++)
-      //{
-      //  if (fabs(pData->GetBestTrial()->y[i] - pTask.GetOptimumPoint()[i]) > Epsilon)
-      //  {
-      //    res = false;
-      //  }
-      //}
-
-      //if((res) && ((int)(parameters.itrEps) == 0))
-      //{
-      //  parameters.itrEps.SetValue(&iteration.IterationCount);
-      //
-      //}
-      res = false;
-      if (AchievedAccuracy < Epsilon)
-      {
-        FILE* pf;
-        if (parameters.GetProcRank() == 0)
-        {
-          pf = fopen("optim_pareto.txt", "a");
-          int found = 0;
-          if (pTask.getProblem()->isOptimal(pData->GetBestTrial()->y, pTask.getMin(), pTask.getMax()))
-          {
-            found = 1;
-          }
-          fprintf(pf, "%d ", found);
-          fprintf(pf, "%d ", (int)(parameters.itrEps));
-
-          fprintf(pf, "%1.4lf ", pData->M[0]);
-
-          //fprintf(pf, "\n");
-          fclose(pf);
-
-          int itr = 0;
-          parameters.itrEps.SetValue(&itr);
-
-          //int cnt_const= pTask>GetNumberOfConstraints();
-          int cnt_const = 5;
-
-          printf("########################## point #########################\n");
-          printf("best alg\n");
-          for (int i = 0; i < pTask.GetN(); i++)
-          {
-            printf("x[%d] = %1.5lf \n", i, pData->GetBestTrial()->y[i]);
-          }
-          for (int i = 0; i < cnt_const; i++)
-          {
-            printf(" %1.5lf \n", pTask.CalculateFuncs(pData->GetBestTrial()->y, i));
-          }
-          printf(" %1.5lf \n", pTask.CalculateFuncs(pData->GetBestTrial()->y, 100));
-          printf("best aprox\n");
-          for (int i = 0; i < pTask.GetN(); i++)
-          {
-            printf("x[%d] = %1.5lf \n", i, pTask.GetOptimumPoint()[i]);
-          }
-
-          const double* point = pTask.GetOptimumPoint();
-          double value = pTask.CalculateFuncs(point, 100);
-          for (int i = 0; i < cnt_const; i++)
-          {
-            printf(" %1.5lf \n", pTask.CalculateFuncs(point, i));
-          }
-          printf(" %1.5lf \n", value);
-          printf("########################## point #########################\n");
-        }
-        res = true;
-      }
-      break;
-
 
     case InLocalArea:
     {
-      double fm = Epsilon; //* (pTask.GetB()[pTask.GetProcLevel()] - pTask.GetA()[pTask.GetProcLevel()]);
+      double fm = parameters.Epsilon; 
       if ((isSetInLocalMinimumInterval == true) || (AchievedAccuracy < fm))
         res = true;
     }
@@ -1116,7 +836,7 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
   {
     Trial* currentPoint = points[j];
 	Extended  x;
-    evolvent.GetInverseImage(&(currentPoint->y[pTask.GetFixedN()]), x);
+    evolvent.GetInverseImage(&(currentPoint->y[0]), x);
 	currentPoint->SetX(x);
     SearchInterval* CoveringInterval = pData->FindCoveringInterval(currentPoint);
 
@@ -1129,7 +849,7 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
       points[j]->K = 1;
 
     SearchInterval* p = pData->InsertPoint(CoveringInterval, *currentPoint,
-      iteration.IterationCount, pTask.GetFreeN());
+      iteration.IterationCount, parameters.Dimension);
 
     UpdateOptimumEstimation(*currentPoint);
 
@@ -1196,7 +916,7 @@ void Method::InsertPoints(const std::vector<Trial*>& points)
       throw EXCEPTION("Wrong covering interval");
 
     SearchInterval* p = pData->InsertPoint(CoveringInterval, *currentPoint,
-      iteration.IterationCount, pTask.GetFreeN());
+      iteration.IterationCount, parameters.Dimension);
 
     UpdateOptimumEstimation(*currentPoint);
 
@@ -1247,674 +967,9 @@ void Method::SavePoints()
       }
     }
   }
-  //if (parameters.IsPlot)
-  //  PlotPoint();
-
 
 }
 
-void Method::PlotPoint()
-{
-#ifdef USE_PLOTTER
-  std::vector<point2d> points;
-  std::vector<int> typeColor;
-
-  //std::ifstream input;
-  std::string currentLine(512, ' ');
-  size_t numberOfPoints = 0;
-
-  //input.open(pointsPath, std::ios_base::in);
-
-  //if (input.is_open())
-  {
-    //input.getline(&currentLine[0], currentLine.size());
-    numberOfPoints = pData->GetCount();
-    points.reserve(numberOfPoints + 2);
-    typeColor.reserve(numberOfPoints + 2);
-
-    for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-    {
-      if (it->LeftPoint->index >= 0)
-      {
-        point2d currentPoint;
-
-        currentPoint.first = it->LeftPoint->y[pTask.GetFixedN()];//std::stod(currentLine, &nextPosition);
-
-        currentPoint.second = it->LeftPoint->FuncValues[it->LeftPoint->index];//std::stod(a);
-        points.push_back(currentPoint);
-        typeColor.push_back(it->LeftPoint->TypeColor);
-      }
-      else
-        numberOfPoints--;
-    }
-
-  }
-
-  size_t totalPoints = numberOfPoints;
-
-  int n = 300, i, j, width = 900, height = 900;
-  double  x_step, y_step, x_left, y_left, x_right, y_right;
-  double arg[2];
-  std::vector <double> xArray(n), yArray(n);
-
-  //double lb[2], ub[2];
-  const double* lb = pTask.GetA();//GetBounds(lb, ub);
-  const double* ub = pTask.GetB();
-  x_left = lb[0];
-  y_left = lb[0];
-  x_right = ub[0];
-  y_right = ub[0];
-
-  x_step = (x_right - x_left) / (n - 1);
-  y_step = (y_right - y_left) / (n - 1);
-
-  for (i = 0; i < n; i++)
-  {
-    xArray[i] = x_left + i * x_step;
-  }
-  
-  printCount++;
-  Dislin g;
-  g.metafl("png");
-  g.winsiz(width, height);
-  g.pagmod("LAND");
-  g.page(2400, 2400);
-  std::string pName = "loc_" + std::to_string(pTask.num) + "_" + std::to_string(this->printCount) + "_" + parameters.GetPlotFileName();
-  g.setfil(pName.c_str());
-  g.sclfac(2.0);
-  g.filmod("VERSION");
-  g.scrmod("revers");
-  g.disini();
-  g.complx();
-  g.name("X-axis", "x");
-  g.name("Values", "y");
-
-  g.labdig(-1, "x");
-  g.ticks(9, "x");
-  g.ticks(10, "y");
-
-  g.axspos(240, 2200);
-  g.axslen(2100, 2100);
-
-  double minx = x_left, miny = 0, maxx = x_right, maxy = 0;
-
-  for (int iz = 0; iz < pTask.GetFixedN(); iz++)
-    arg[iz] = pTask.GetFixedY()[iz];
-
-  for (i = 0; i < n; i++)
-  {
-    arg[pTask.GetFixedN()] = xArray[i]; //arg[1] = yray[j];
-    yArray[i] = pTask.CalculateFuncs(arg, 0);
-
-    if (maxy < yArray[i])
-      maxy = yArray[i];
-    if (miny > yArray[i])
-      miny = yArray[i];
-  }
-
-  if (maxx == minx)
-    maxx += 1;
-  if (maxy == miny)
-    maxy += 1;
-
-  double xstep = (maxx - minx) / 4.0;
-  double ystep = (maxy - miny) / 4.0;
-  g.graf(minx, maxx, minx, xstep,
-    miny - ((maxy - miny) * 0.1), maxy + ((maxy - miny) * 0.1), miny, ystep);
-
-  g.height(30);
-
-  int colors[] = { 150 };
-  g.shdmod("LOWER", "CELL");
-  g.shdmod("UPPER", "COLOR");
-  g.conclr(colors, 1);
-
-  g.color("fore");
-  g.height(50);
-  g.title();
-
-
-  g.setrgb(0.7, 0.7, 0.7);
-  g.grid(1, 1);
-
-  g.color("red");
-
-  int xn = yArray.size();
-  g.curve(xArray.data(), yArray.data(), xn);
-
-  if (points.size())
-  {
-
-    g.hsymbl(15);
-
-    for (size_t k = 0; k < totalPoints; k++)
-    {
-      if (typeColor[k] == 0)
-        g.color("white");
-      else if (typeColor[k] == 1)
-        g.color("green");
-      else if (typeColor[k] == 2)
-        g.color("blue");
-      else
-        g.color("white");
-
-      g.rlsymb(21, points[k].first, points[k].second);
-    }
-
-    //g.color("yellow");
-    //g.hsymbl(25);
-    //g.rlsymb(21, points[totalPoints].first, points[totalPoints].second);
-    //g.hsymbl(20);
-    //if (totalPoints == points.size() - 2)
-    //{
-    //  g.color("red");
-    //  g.rlsymb(21, points[totalPoints + 1].first, points[totalPoints + 1].second);
-    //}
-  }
-
-  g.height(50);
-  g.color("fore");
-  g.title();
-  g.disfin();
-
-  //PrintLevelPoints(pName + "_.txt");
-#endif
-}
-
-
-void Method::PlotDecisionTrees()
-{
-#ifdef USE_PLOTTER
-#ifdef USE_OpenCV
-  if (parameters.IsPlot)
-  {
-    std::vector<point2d> points;
-    std::vector<int> typeColor;
-
-    //std::ifstream input;
-    std::string currentLine(512, ' ');
-    size_t numberOfPoints = 0;
-
-    //input.open(pointsPath, std::ios_base::in);
-
-    //if (input.is_open())
-    {
-      //input.getline(&currentLine[0], currentLine.size());
-      numberOfPoints = pData->GetCount();
-      points.reserve(numberOfPoints + 2);
-      typeColor.reserve(numberOfPoints + 2);
-
-      for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-      {
-        if (it->LeftPoint->index >= 0)
-        {
-          point2d currentPoint;
-
-          currentPoint.first = it->LeftPoint->X().toDouble();//std::stod(currentLine, &nextPosition);
-
-          currentPoint.second = it->LeftPoint->FuncValues[it->LeftPoint->index];//std::stod(a);
-          points.push_back(currentPoint);
-          typeColor.push_back(it->LeftPoint->TypeColor);
-        }
-        else
-          numberOfPoints--;
-      }
-
-    }
-
-    size_t totalPoints = numberOfPoints;
-
-    double heightWidthMult = 2.5;
-    int n = 1500, j;
-    int height = 1500; //Высота от которой считается размер полотна
-    int  width = int(double(height) * heightWidthMult);
-    double  x_step, y_step, x_left, y_left, x_right, y_right;
-    double arg[2];
-    std::vector <double> xArray(n), xArray2(n), yArray(n), yArray2(n);
-
-    SearchData* data = pData;
-    bool isStartLocalMethod = true;
-
-    int N = data->GetCount() - 1;
-
-    if (parameters.isCalculationInBorderPoint == 1)
-      N += 1;
-
-    int flag = 0;
-
-    cv::Mat X(N, 1, CV_32FC1);
-    cv::Mat ff(N, 1, CV_32FC1);
-
-
-    int indexX = -1;
-    std::vector< Trial*> allPoints(N);
-    int i = 0;
-    for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-    {
-
-      if (it->LeftPoint->index >= 0)
-      {
-        X.at<float>(i, 0) = it->LeftPoint->X().toDouble();
-        ff.at<float>(i, 0) = it->LeftPoint->GetValue();
-        allPoints[i] = it->LeftPoint;
-        i++;
-      }
-    }
-
-
-    cv::Ptr< cv::ml::DTrees > Mytree = cv::ml::DTrees::create();
-
-    Mytree->setMinSampleCount(1);
-    Mytree->setCVFolds(1);
-    Mytree->setMaxDepth(parameters.DecisionTreesMaxDepth);
-    Mytree->setRegressionAccuracy(parameters.DecisionTreesRegressionAccuracy);
-
-    Mytree->train(X, cv::ml::ROW_SAMPLE, ff); // тренирует дерево на TrainData
-
-
-      //double lb[2], ub[2];
-    const double* lbN = pTask.GetA();//GetBounds(lb, ub);
-    const double* ubN = pTask.GetB();
-
-    //x_left = lb[0];
-    //y_left = lb[0];
-    //x_right = ub[0];
-    //y_right = ub[0];
-
-    double lb = lbN[0];
-    double ub = ubN[0];
-
-    double luDiff = ub - lb;
-
-    x_left = lb;
-    y_left = lb;
-    x_right = ub;
-    y_right = ub;
-
-    //x_step = (x_right - x_left) / (n - 1);
-    x_step = 1.0 / (n - 1);
-    y_step = (y_right - y_left) / (n - 1);
-
-    for (i = 0; i < n; i++)
-    {
-      xArray[i] = i * x_step;
-    }
-
-    int NN = n;
-    cv::Mat X_preduct(NN, 1, CV_32FC1);
-    cv::Mat results;
-    float hh = 1.0 / NN;
-    for (int i = 0; i < NN; i++)
-    {
-      X_preduct.at<float>(i, 0) = i * hh;
-    }
-
-    Mytree->predict(X_preduct, results);
-
-    cv::Mat results2;
-    Mytree->predict(X, results2);
-    std::vector<double> r2(N);
-    double oldVal = 1000;
-    double err = 0;
-    for (indexX = 0; indexX < results2.rows; indexX++)
-    {
-
-      r2[indexX] = results2.at<float>(indexX, 0);
-
-      if (r2[indexX] != oldVal)
-      {
-        if (err > parameters.DecisionTreesRegressionAccuracy)
-          print << "Iter = " << iteration.IterationCount << "\terr = " << err << "\n";
-        err = 0;
-        oldVal = r2[indexX];
-      }
-
-      err += fabs(allPoints[indexX]->GetValue() - r2[indexX]) * fabs(allPoints[indexX]->GetValue() - r2[indexX]);
-
-    }
-
-    if (err > parameters.DecisionTreesRegressionAccuracy)
-      print << "Iter = " << iteration.IterationCount << "\terr = " << err << "\n";
-
-    for (indexX = 0; indexX < results.rows; indexX++)
-    {
-      yArray2[indexX] = results.at<float>(indexX, 0);
-    }
-
-    //'BLACK', 'RED', 'GREEN', 'BLUE', 'CYAN', 'YELLOW', 'ORANGE', 'MAGENTA', 'WHITE', 'FORE', 'BACK', 'GRAY' and 'HALF'. 
-
-    Dislin g;
-    g.metafl("png");
-    g.winsiz(width, height);
-    g.pagmod("LAND");
-
-    int pageHeight = height * 1.2;
-    int pageWidth = int(double(pageHeight) * heightWidthMult);
-
-    g.page(pageWidth, pageHeight);
-    g.setfil(("loc_" + parameters.GetPlotFileName()).c_str());
-    g.sclfac(2.0);
-    g.filmod("VERSION");
-    g.scrmod("revers");
-    g.disini();
-
-    g.height(70);//Размер шрифта
-    g.helve();
-
-
-    //g.name("X-axis", "x");
-    //g.name("Values", "y");
-
-    //g.labdig(-1, "x");
-    g.ticks(10, "x");
-    g.ticks(10, "y");
-
-    double pageAxHeightWidthMult = 0.875;
-
-    int nxa = int(double(pageWidth) * 0.1);
-    int nya = int(double(pageHeight) * 0.90);
-
-    g.axspos(nxa, nya);
-    //g.axslen(2100, 2100);
-
-    g.axslen(pageWidth * pageAxHeightWidthMult, pageHeight * pageAxHeightWidthMult);
-    
-    double minx = x_left, miny = 0, maxx = x_right, maxy = 0;
-
-    for (int iz = 0; iz < pTask.GetFixedN(); iz++)
-      arg[iz] = pTask.GetFixedY()[iz];
-
-    std::vector <double> xArrayOr(n);
-
-    for (i = 0; i < n; i++)
-    {
-      arg[pTask.GetFixedN()] = xArray[i]; //arg[1] = yray[j];
-      evolvent.GetImage(xArray[i], arg);
-      yArray[i] = pTask.CalculateFuncs(arg, 0);
-
-      xArrayOr[i] = arg[0];
-
-      if (maxy < yArray[i])
-        maxy = yArray[i];
-      if (miny > yArray[i])
-        miny = yArray[i];
-    }
-
-    if (maxx == minx)
-      maxx += 1;
-    if (maxy == miny)
-      maxy += 1;
-
-    double xstep = (maxx - minx) / 4.0;
-    double ystep = (maxy - miny) / 4.0;
-    //g.color("RED");
-    //
-    g.graf(minx, maxx, minx, xstep,
-      miny - ((maxy - miny) * 0.1), maxy + ((maxy - miny) * 0.1), miny, ystep);
-    //g.color("WHITE");
-    g.height(30);
-
-    int colors[] = { 150 };
-    g.shdmod("LOWER", "CELL");
-    g.shdmod("UPPER", "COLOR");
-    g.conclr(colors, 1);
-
-    g.color("fore");
-    g.height(50);
-    g.title();
-
-  
-
-    g.setrgb(0.7, 0.7, 0.7);
-    g.grid(1, 1);
-
-    g.color("red");
-
-    g.thkcrv(21);//толщина линии
-    
-    int xn = yArray.size();
-    g.curve(xArrayOr.data(), yArray.data(), xn);
-
-    g.thkcrv(11);//толщина линии
-    g.color("blue");
-    g.curve(xArrayOr.data(), yArray2.data(), xn);
-
-    if (points.size())
-    {
-      int pointSize = 41;
-      g.hsymbl(pointSize);
-
-      for (size_t k = 0; k < totalPoints; k++)
-      {
-        if (typeColor[k] == 0)
-          g.color("white");
-        else if (typeColor[k] == 1)
-          g.color("green");
-        else if (typeColor[k] == 2)
-          //g.color("blue");
-          g.color("green");
-        else
-          g.color("white");
-
-        arg[pTask.GetFixedN()] = points[k].first; //arg[1] = yray[j];
-        evolvent.GetImage((points[k].first), arg);
-        
-        g.rlsymb(21, arg[0], points[k].second);
-      }
-
-      //g.color("yellow");
-      //g.hsymbl(25);
-      //g.rlsymb(21, points[totalPoints].first, points[totalPoints].second);
-      //g.hsymbl(20);
-      //if (totalPoints == points.size() - 2)
-      //{
-      //  g.color("red");
-      //  g.rlsymb(21, points[totalPoints + 1].first, points[totalPoints + 1].second);
-      //}
-    }
-
-    g.height(50);
-    g.color("fore");
-    g.title();
-    g.disfin();
-  }
-#endif
-#endif
-}
-
-
-
-void Method::PlotPoint2()
-{
-#ifdef USE_PLOTTER
-  parameters.IsPlot = false;
-  std::vector<point2d> points;
-  std::vector<int> typeColor;
-
-  //std::ifstream input;
-  std::string currentLine(512, ' ');
-  size_t numberOfPoints = 0;
-
-  //input.open(pointsPath, std::ios_base::in);
-
-  //if (input.is_open())
-  {
-    //input.getline(&currentLine[0], currentLine.size());
-    numberOfPoints = pData->GetCount();
-    points.reserve(numberOfPoints + 2);
-    typeColor.reserve(numberOfPoints + 2);
-
-    for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-    {
-      if (it->LeftPoint->index >= 0)
-      {
-        point2d currentPoint;
-
-        currentPoint.first = it->LeftPoint->y[0];//std::stod(currentLine, &nextPosition);
-
-        currentPoint.second = it->LeftPoint->FuncValues[it->LeftPoint->index];//std::stod(a);
-        points.push_back(currentPoint);
-        typeColor.push_back(it->LeftPoint->TypeColor);
-      }
-      else
-        numberOfPoints--;
-    }
-
-  }
-
-  size_t totalPoints = numberOfPoints;
-
-  int n = 50, i, j, width = 900, height = 900;
-  double  x_step, y_step, x_left, y_left, x_right, y_right;
-  double arg[2];
-  std::vector <double> xArray(n), yArray(n);
-
-  //double lb[2], ub[2];
-  const double* lb = pTask.GetA();//GetBounds(lb, ub);
-  const double* ub = pTask.GetB();
-  x_left = lb[0];
-  y_left = lb[0];
-  x_right = ub[0];
-  y_right = ub[0];
-
-  x_step = (x_right - x_left) / (n - 1);
-  y_step = (y_right - y_left) / (n - 1);
-
-  for (i = 0; i < n; i++)
-  {
-    xArray[i] = x_left + i * x_step;
-  }
-
-  Dislin g;
-  g.metafl("png");
-  g.winsiz(width, height);
-  g.pagmod("LAND");
-  g.page(2400, 2400);
-  g.setfil(("glob_" + parameters.GetPlotFileName()).c_str());
-  //g.setfil((parameters.GetPlotFileName()).c_str());
-  g.sclfac(2.0);
-  g.filmod("VERSION");
-  g.scrmod("revers");
-  g.disini();
-  g.complx();
-  g.name("X-axis", "x");
-  g.name("Values", "y");
-
-  g.labdig(-1, "x");
-  g.ticks(9, "x");
-  g.ticks(10, "y");
-
-  g.axspos(240, 2200);
-  g.axslen(2100, 2100);
-
-  double minx = x_left, miny = 0, maxx = x_right, maxy = 0;
-
-  InformationForCalculation inputlocal;
-  TResultForCalculation outputlocal;
-  inputlocal.Resize(1);
-  outputlocal.Resize(1);
-
-
-  calculation.Reset();
-
-  parameters.MaxNumOfPoints[pTask.GetProcLevel() + 1] = GLOBALIZER_MAX(parameters.MaxNumOfPoints[pTask.GetProcLevel() + 1], 1000);
-  parameters.Eps[pTask.GetProcLevel() + 1] = GLOBALIZER_MIN(parameters.Eps[pTask.GetProcLevel() + 1], 0.0001);
-  parameters.rs[pTask.GetProcLevel() + 1] = GLOBALIZER_MAX(parameters.rs[pTask.GetProcLevel() + 1], 10);
-
-  Trial* point = TrialFactory::CreateTrial();
-  inputlocal.trials[0] = point;//p->LeftPoint;
-  if (inputlocal.tasks[0] == 0)
-    inputlocal.tasks[0] = TaskFactory::CreateTask();
-
-  for (int iz = 0; iz < pTask.GetN(); iz++)
-    point->y[iz] = (pTask.GetA()[iz] + pTask.GetB()[iz]) / 2.0;
-
-  //calculation.Calculate(inputlocal, outputlocal);
-
-
-
-  for (i = 0; i < n; i++)
-  {
-    //arg[0] = xArray[i]; //arg[1] = yray[j];
-    point->y[0] = xArray[i];
-    inputlocal.tasks[0] = TaskFactory::CreateTask();
-    calculation.Calculate(inputlocal, outputlocal);
-    yArray[i] = point->FuncValues[point->index];
-    //yArray[i] = pTask.CalculateFuncs(arg, 0);
-
-    if (maxy < yArray[i])
-      maxy = yArray[i];
-    if (miny > yArray[i])
-      miny = yArray[i];
-  }
-
-  if (maxx == minx)
-    maxx += 1;
-  if (maxy == miny)
-    maxy += 1;
-
-  double xstep = (maxx - minx) / 4.0;
-  double ystep = (maxy - miny) / 4.0;
-  g.graf(minx, maxx, minx, xstep,
-    miny - ((maxy - miny) * 0.1), maxy + ((maxy - miny) * 0.1), miny, ystep);
-
-  g.height(30);
-
-  int colors[] = { 150 };
-  g.shdmod("LOWER", "CELL");
-  g.shdmod("UPPER", "COLOR");
-  g.conclr(colors, 1);
-
-  g.color("fore");
-  g.height(50);
-  g.title();
-
-
-  g.setrgb(0.7, 0.7, 0.7);
-  g.grid(1, 1);
-
-  g.color("red");
-
-  int xn = yArray.size();
-  g.curve(xArray.data(), yArray.data(), xn);
-
-  if (points.size())
-  {
-
-    g.hsymbl(15);
-
-    for (size_t k = 0; k < totalPoints; k++)
-    {
-      if (typeColor[k] == 0)
-        g.color("white");
-      else if (typeColor[k] == 1)
-        g.color("green");
-      else if (typeColor[k] == 2)
-        g.color("blue");
-      else
-        g.color("white");
-
-      g.rlsymb(21, points[k].first, points[k].second);
-    }
-
-    //g.color("yellow");
-    //g.hsymbl(25);
-    //g.rlsymb(21, points[totalPoints].first, points[totalPoints].second);
-    //g.hsymbl(20);
-    //if (totalPoints == points.size() - 2)
-    //{
-    //  g.color("red");
-    //  g.rlsymb(21, points[totalPoints + 1].first, points[totalPoints + 1].second);
-    //}
-  }
-
-  g.height(50);
-  g.color("fore");
-  g.title();
-  g.disfin();
-  parameters.IsPlot = true;
-#endif
-}
 
 // ------------------------------------------------------------------------------------------------
 double Method::CalculateGlobalR(SearchInterval* p)
@@ -1936,9 +991,6 @@ double Method::CalculateGlobalR(SearchInterval* p)
       printf("Z[%d] = %lf M = %lf alfa = %lf\n", v, pData->Z[v], pData->Z[v], alfa);
       printf("val = %lf\n", value);
 
-      //PrintCurPoint();
-
-      //PrintInfo();
     }
   }
   else if ((p->izl() == -3) || (p->izr() == -3))
@@ -1949,18 +1001,18 @@ double Method::CalculateGlobalR(SearchInterval* p)
   {
     v = p->izl();
     value =
-      deltax + (p->zr() - p->zl()) * (p->zr() - p->zl()) / (deltax * pData->M[v] * pData->M[v] * r * r) -
-      2 * (p->zr() + p->zl() - 2 * pData->Z[v]) / (r * pData->M[v]);
+      deltax + (p->zr() - p->zl()) * (p->zr() - p->zl()) / (deltax * pData->M[v] * pData->M[v] * parameters.r * parameters.r) -
+      2 * (p->zr() + p->zl() - 2 * pData->Z[v]) / (parameters.r * pData->M[v]);
   }
   else if (p->izr() > p->izl())
   {
     v = p->izr();
-    value = 2 * deltax - 4 * (p->zr() - pData->Z[v]) / (r * pData->M[v]);
+    value = 2 * deltax - 4 * (p->zr() - pData->Z[v]) / (parameters.r * pData->M[v]);
   }
   else //if (p->izr() < p->izl)
   {
     v = p->izl();
-    value = 2 * deltax - 4 * (p->zl() - pData->Z[v]) / (r * pData->M[v]);
+    value = 2 * deltax - 4 * (p->zl() - pData->Z[v]) / (parameters.r * pData->M[v]);
   }
 
   //Характеристика интервала должна быть конечной, иначе - ошибка
@@ -2061,8 +1113,8 @@ void Method::CalculateM(SearchInterval* p)
         ++i;
       //Если обнаружили точку с большим или равным индексом, то вычисляем оценку константы
       if (i != NULL && p->izl() <= i->izl() && IsIntervalInSegment(p, (*i)))
-        UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), rootDim), p->izl(), boundaryStatus, p);
-      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), pTask.GetFreeN()), p->izl(), boundaryStatus, p);
+        UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
+      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
     // Просмотр влево до обнаружения точки с большим или равным индексом,
     // или до левой границы интервала поиска
       i = pData->GetIterator(p);
@@ -2071,8 +1123,8 @@ void Method::CalculateM(SearchInterval* p)
         --i;
       //Если обнаружили точку с большим или равным индексом, то вычисляем оценку константы
       if (i != NULL && p->izl() <= i->izl() && IsIntervalInSegment(p, (*i)))
-        UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), rootDim), p->izl(), boundaryStatus, p);
-      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), pTask.GetFreeN()), p->izl(), boundaryStatus, p);
+        UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
+      //UpdateM(fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), parameters.Dimension), p->izl(), boundaryStatus, p);
     }
     else
     {
@@ -2128,20 +1180,9 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   NewInterval->LeftPoint = &pCurTrialsj;
 
 
-  //Внимание! Конфликт с деструктором класса SearchInterval!!
-
-  //for (int i = 0; i < pCurTrialsj.index + 1; i++)
-  //{
-  //  NewInterval->z[i] = pCurTrialsj.FuncValues[i];
-  //}
 
   // Правая точка интервала - это правая точка интервала, в котором проведено испытание
   NewInterval->RightPoint = BestIntervalsj->RightPoint;
-
-  //=================================================================================================
-  if (parameters.StatusIntervalChangeType == 1)
-    NewInterval->status = (BestIntervalsj)->status;
-  //=================================================================================================
 
   //Правая точка должна быть больше левой, если - меньше, ошибка!!!
   if (NewInterval->xr() <= NewInterval->xl())
@@ -2150,14 +1191,11 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   }
 
   // Гельдеровская длина интервала
-  NewInterval->delta = root(NewInterval->xr() - NewInterval->xl(), rootDim);
-  //NewInterval->delta = root(NewInterval->xr() - NewInterval->xl(), pTask.GetFreeN());
-  //    NewInterval->delta = pow(NewInterval->dx,1.0/pTask.GetFreeN());
-
+  NewInterval->delta = root(NewInterval->xr() - NewInterval->xl(), parameters.Dimension);
+ 
   // Корректируем существующий интервал
   (BestIntervalsj)->RightPoint = NewInterval->LeftPoint;
 
-  //    (*BestIntervalsj)->dx -= NewInterval->dx;
 
   // Обновляем достигнутую точность - по старой гельдеровской длине лучшего интервала
   if ((BestIntervalsj)->delta < AchievedAccuracy)
@@ -2165,9 +1203,9 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
     AchievedAccuracy = (BestIntervalsj)->delta;
   }
   // После чего вычисляем новую гельдеровскую длину лучшего интервала
-  (BestIntervalsj)->delta = root((BestIntervalsj)->xr() - (BestIntervalsj)->xl(), rootDim);
-  //(BestIntervalsj)->delta = root((BestIntervalsj)->xr() - (BestIntervalsj)->xl(), pTask.GetFreeN());
-  //    (*BestIntervalsj)->delta = pow((*BestIntervalsj)->dx,1.0/pTask.GetFreeN());
+  (BestIntervalsj)->delta = root((BestIntervalsj)->xr() - (BestIntervalsj)->xl(), parameters.Dimension);
+  //(BestIntervalsj)->delta = root((BestIntervalsj)->xr() - (BestIntervalsj)->xl(), parameters.Dimension);
+  //    (*BestIntervalsj)->delta = pow((*BestIntervalsj)->dx,1.0/parameters.Dimension);
 
   int j = BestIntervalsj->izr();
   if (BestIntervalsj->izl() > j)
@@ -2227,7 +1265,7 @@ void Method::RenewSearchData()
     //Обработка началной итерации
     if (iteration.IterationCount == 1)
     {
-      //bool f = j < NumPoints - 1;
+      //bool f = j < parameters.NumPoints - 1;
       //// Добавить следующий интервал для обработки
       //if (f && (interval != 0))
       //{
@@ -2283,34 +1321,12 @@ void Method::FinalizeIteration()
   for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
     iteration.pCurTrials[i] = 0;
 
-  if (parameters.TypeCalculation == 8) {
-    SetNumPoints(1);
-    parameters.NumPoints = 1;
-  }
-  //if (pTask.GetProcLevel() == 0)
-  //  printf("%d\t;\t%lf\t;\t%lf\n",iteration.IterationCount, pData->M[0], globalM[0]);
-
-  if (isStop)
-  {
-    if (parameters.IsPlot)
-    {
-      //PlotPoint2();
-      //PlotDecisionTrees();
-      ///Plot3DDecisionTrees();
-    }
-
-    //Plot3DDecisionTrees();
-  }
 
   if (isLocalZUpdate)//Если нужен пересчет - обновился минимум
   {
     LocalSearch();
   }
   isLocalZUpdate = false;
-
-  //if (parameters.IsPlot)
-    //if (iteration.IterationCount % 10 == 0)
-      //PlotPoint();
 }
 
 
@@ -2454,7 +1470,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         ++i;
       if (i != NULL && p->izl() == i->izl() && IsIntervalInSegment(p, (*i)) && p->izl() == j)
       {
-        temp = fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), rootDim);
+        temp = fabs(i->z()[p->izl()] - p->zl()) / root(i->xl() - p->xl(), parameters.Dimension);
         if (temp > mu[j])
           mu[j] = temp;
       }
@@ -2465,7 +1481,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         --i;
       if (i != NULL && p->izl() == i->izl() && IsIntervalInSegment(p, (*i)) && p->izl() == j)
       {
-        temp = fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), rootDim);
+        temp = fabs(i->z()[p->izl()] - p->zl()) / root(p->xl() - i->xl(), parameters.Dimension);
         if (temp > mu[j])
           mu[j] = temp;
       }
@@ -2571,7 +1587,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (newValue > mu[0]) {
       mu[0] = newValue;
     }
-    Xm = p->delta;//pow(p->delta, pTask.GetFreeN());
+    Xm = p->delta;//pow(p->delta, parameters.Dimension);
 
     if (isSearchXMax)
     {
@@ -2595,7 +1611,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         intervalXMax = p;
       }
     }
-    gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / pTask.GetFreeN());
+    gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
     //gamma = mu;
 
     //Запоминаем конечное мю
@@ -2611,7 +1627,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       }
     }
 
-    temp = (lambda / r) + (((r - 1) * gamma) / r);
+    temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
     //temp = mu;
 
     if (temp > pData->M[index])
@@ -2688,7 +1704,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (newValue > mu[0]) {
       mu[0] = newValue;
     }
-    Xm = p->delta;//pow(p->delta, pTask.GetFreeN());
+    Xm = p->delta;//pow(p->delta, parameters.Dimension);
 
     if (isSearchXMax)
     {
@@ -2712,7 +1728,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         intervalXMax = p;
       }
     }
-    gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / rootDim);
+    gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
 
     //Запоминаем конечное мю
     if (parameters.ltXi > pData->M[index] || pData->M[index] == 1.0 && newValue > _M_ZERO_LEVEL) {
@@ -2726,7 +1742,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       }
     }
 
-    temp = (lambda / r) + (((r - 1) * gamma) / r);
+    temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
 
     if (temp > pData->M[index]) {
       pData->M[index] = temp;
@@ -2740,7 +1756,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     }
 
     //H = fabs(p->zr() - p->zl()) / (p->xr() - p->xl());
-    H = newValue / pow(p->delta, rootDim - 1);
+    H = newValue / pow(p->delta, parameters.Dimension - 1);
 
     if (H > pData->M[index]) {
       pData->M[index] = H;
@@ -2765,21 +1781,10 @@ Trial* Method::GetOptimEstimation()
 // ------------------------------------------------------------------------------------------------
 int Method::GetNumberOfTrials()
 {
-  // Если задача последнего уровня, т.е. сумма размерностей равна общей размерности
-  if (pTask.GetN() == pTask.GetFixedN() + pTask.GetFreeN())
-  {
-    // Число итераций равно числу интервалов в таблице - 1
-    return pData->GetCount() - 1;
-  }
-  // Если задача верхнего уровня - надо просуммировать все данные из интервалов
-  int NumberOfTrials = 0;
 
-  for (SearcDataIterator it = pData->GetBeginIterator(); it; ++it)
-  {
-    NumberOfTrials += it->K;
-  }
-
-  return NumberOfTrials;
+  // Число итераций равно числу интервалов в таблице - 1
+  return pData->GetCount() - 1;
+  
 }
 
 void Method::PrintSection()
@@ -2931,9 +1936,9 @@ void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
 
 
   double initialStep = 0;
-  for (int i = pTask.GetFixedN(); i < pTask.GetN(); i++)
+  for (int i = 0; i < pTask.GetN(); i++)
     initialStep += pTask.GetB()[i] - pTask.GetA()[i];
-  initialStep /= rootDim;
+  initialStep /= parameters.Dimension;
   // начальный шаг равен среднему размеру стороны гиперкуба, умноженному на коэффициент
   localMethod->SetEps(parameters.localVerificationEpsilon);
   localMethod->SetInitialStep(0.07 * initialStep);
@@ -3020,21 +2025,19 @@ void Method::LocalSearch()
     }
 
     double initialStep = 0;
-    for (int i = pTask.GetFixedN(); i < pTask.GetN(); i++)
+    for (int i = 0; i < pTask.GetN(); i++)
       initialStep += pTask.GetB()[i] - pTask.GetA()[i];
-    initialStep /= rootDim;
+    initialStep /= parameters.Dimension;
     // начальный шаг равен среднему размеру стороны гиперкуба, умноженному на коэффициент
     localMethod->SetEps(parameters.localVerificationEpsilon);
-    //localMethod.SetEps(parameters.Epsilon / 100.0);
-    localMethod->SetInitialStep(0.07 * initialStep);// parameters.Epsilon * 10
-    //localMethod.SetInitialStep(parameters.Epsilon * 10);// parameters.Epsilon * 10
-    //localMethod.SetMaxTrials(1000);
+
+    localMethod->SetInitialStep(0.07 * initialStep);
+ 
     localMethod->SetMaxTrials(parameters.localVerificationIteration);
     Trial point2 = localMethod->StartOptimization();
     Trial* newpoint = TrialFactory::CreateTrial(&point2);
 
     std::vector<Trial> points = localMethod->GetSearchSequence();
-    //localMethod.GetTrialsCounter
 
     int s = points.size();
     for (int i = 0; i < s; i++)
@@ -3080,160 +2083,6 @@ int Method::GetNumberLocalMethodtStart()
   return numberLocalMethodtStart;
 }
 
-void Method::Plot3DDecisionTrees()
-{
-#ifdef USE_PLOTTER
-  #ifdef USE_OpenCV
-  //if (parameters.IsPlot)
-  {
-
-    SearchData* data = pData;
-
-    int N = data->GetCount() - 1;
-
-    if (parameters.isCalculationInBorderPoint == 1)
-      N += 1;
-
-    pointsForLocalMethod.clear();
-
-
-    PrepareDataForDecisionTree(N, data);
-
-    CreateTree();
-
-    Mytree->train(X, cv::ml::ROW_SAMPLE, ff); // тренирует дерево на TrainData
-
-    // После того, как натренировали дерево на исходных данных
-    // нужно организовать дискретную сетку (отображение наших точек на одномерный массив)
-    // провести предсказание на новом одномерном массиве, найти точку, близкую к нашей пришедшей точке
-    // и проверить ее соседей: находим значение меньшее -> возвращаем фолс; все значения больше -> возвращаем тру;
-    // равное значение -> ее тоже проверяем
-
-    // Равномерное заполнение отрезка (от левой до правой границы)
-    int numPointPerDim = pow(2000, 1.0 / parameters.Dimension);
-
-    FillTheSegment(numPointPerDim);
-
-    // На полученной сетке предсказываем значения функции
-    cv::Mat results;
-    Mytree->predict(uniformPartition, results);
-
-    
-    int sizeGride = pow(numPointPerDim, (int)parameters.Dimension);
-
-    std::vector<std::vector<float>> Y(sizeGride);
-    std::vector<float> Z(sizeGride);
-
-    for (int index = 0; index < sizeGride; index++)
-    {
-      Y[index].resize(parameters.Dimension);
-      for (int i = 0; i < parameters.Dimension; i++)
-      {
-        Y[index][i] = uniformPartition.at<float>(index, i);
-      }
-      Z[index] = results.at<float>(index, 0);
-     }
-
-    std::cout << "Y1 = [";
-    for (int index = 0; index < sizeGride; index++)
-    {
-      std::cout << Y[index][0] << ", ";
-    }
-    std::cout << "]";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "Y2 = [";
-    for (int index = 0; index < sizeGride; index++)
-    {
-      std::cout << Y[index][1] << ", ";
-    }
-    std::cout << "]";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "Z = [";
-    for (int index = 0; index < sizeGride; index++)
-    {
-      std::cout << Z[index] << ", ";
-    }
-    std::cout << "]";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //for (int index = 0; index < sizeGride; index++)
-    //{
-    //  double yy[2] = { Y[index][0], Y[index][1] };
-    //  std::cout << pTask.CalculateFuncs(yy, 0) << ", ";
-    //}
-    //std::cout << std::endl;
-    //std::cout << std::endl;
-  }
-  #endif
-#endif
-}
-
-
-//// ------------------------------------------------------------------------------------------------
-//void Method::SeparableSearch()
-//{
-//  TSeparableMethod SeparableMethod(parameters, pTask);
-//  Trial SepTrial = SeparableMethod.StartOptimization();
-//
-//  UpdateOptimumEstimation(SepTrial);
-//
-//  std::vector<Trial> localPoints = SeparableMethod.GetSearchSequence();
-//  InsertPoints(localPoints);
-//  //После сепарабельного поиска - поднять флаг пересчета
-//  recalc = true;
-//}
-//
-//// ------------------------------------------------------------------------------------------------
-//void Method::RandomSearh()
-//{
-//  int numRandomPoints = 10 * pTask.GetFreeN();
-//  int maxRndLocIters = 1000;
-//  Trial *randomTrials = new Trial[numRandomPoints];
-//
-//  TRandomGenerator generator(777);
-//
-//  double initialStep = 0;// начальный шаг равен среднему размеру стороны гиперкуба,
-//  //  умноженному на коэффициент
-//  for (int i = pTask.GetFixedN(); i < pTask.GetN(); i++)
-//    initialStep += pTask.GetB()[i] - pTask.GetA()[i];
-//  initialStep /= pTask.GetFreeN();
-//  //только для задач без ограничений и для корня дерева процессов
-//  for (int i = 0; i < numRandomPoints; i++)
-//  {
-//    //generate new trial
-//    //copy fixed vars and generate free
-//    for (int j = 0; j < pTask.GetFixedN(); j++)
-//      randomTrials[i].y[j] = pTask.GetFixedY()[j];
-//
-//    generator.GetRandomVector(pTask.GetFreeN(), pTask.GetA() + pTask.GetFixedN(),
-//      pTask.GetB() + pTask.GetFixedN(), randomTrials[i].y + pTask.GetFixedN());
-//
-//    randomTrials[i].index = pTask.GetNumOfFunc() - 1;
-//    randomTrials[i].FuncValues[randomTrials[i].index] = HUGE_VAL;
-//    //start local method from generated points
-//    LocalMethod localMethod(parameters, pTask, randomTrials[i], true);
-//    localMethod.SetEps(0.0001);
-//    localMethod.SetInitialStep(0.1*initialStep);
-//    localMethod.SetMaxTrials(maxRndLocIters);
-//    randomTrials[i] = localMethod.StartOptimization();
-//
-//    UpdateOptimumEstimation(randomTrials[i]);
-//
-//    std::vector<Trial> localPoints = localMethod.GetSearchSequence();
-//    InsertPoints(localPoints);
-//  }
-//  recalc = true;
-//  delete[] randomTrials;
-//}
 
 
 // - end of file ----------------------------------------------------------------------------------

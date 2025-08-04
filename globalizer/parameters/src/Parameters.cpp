@@ -62,8 +62,6 @@ void Parameters::SetDefaultParameters()
   
   InitOption(rDynamic, 0, "-rd", "Additive when dynamics change r, r = r + rDynamic / (Iteration ^ (1 / N))", 1);
   InitOption(rEps, 0.01, "-rE", "eps-reserv", 1);
-  InitOption(rs, 2.3_2.3_2.3_2.3, "-rs", "r by levels", 4);
-  InitOption(Eps, 0.01_0.01_0.01_0.01, "-Eps", "Epsilon", 4);
   InitOption(Comment, 000, "-Comment", "Comment", 1);//ResulLog
   InitOption(ResulLog, 000, "-ResulLog", "ResulLog", 1);
   InitOption(Epsilon, 0.01, "-E", "Epsilon", 1);
@@ -75,14 +73,8 @@ void Parameters::SetDefaultParameters()
   InitOption(TypeDistributionStartingPoints, Evenly, "-tdsp",
     "Type of distribution of starting points ", 1);
 
-  InitOption(NumOfTaskLevels, 1, "-nl", "NumOfTaskLevels", 1); // максимальное число уровней в дереве - 5
-  InitOption(DimInTaskLevel, 0_0_0_0, "-dl", "DimInTaskLevel", 4);
 
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
-  InitOption(FullOrShort, 0, "-fs", "Full calculation in Parallel Block Scheme or just function", 1); // 0 - полное вычисление; 1 - вычисление только значения функции
-  InitOption(ChildInProcLevel, 0_0_0_0, "-cl", "ChildInProcLevel", 4); // последний уровень - листья
-  InitOption(MapInLevel, 1_1_1_1, "-ml", "MapInLevel", 4); // пока по одной развертке на уровень
-  InitOption(MapProcInLevel, 1_1_1_1, "-mpl", "MapProcInLevel", 4); // пока по одной развертке на уровень
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
   InitOption(MaxNumOfPoints, 7000000_2_2_2, "-MaxNP", "MaxNumOfPoints", 4);
@@ -125,37 +117,14 @@ void Parameters::SetDefaultParameters()
   InitOption(isUseGlobalZ, false, "-iugz", "isUseGlobalZ", 1);
   InitOption(isNotUseZ, false, "-inuz", "isNotUseZ", 1);
   
-  InitOption(isUseLocalUpdate, false, "-iulu", "Whether to use the local method when finding the local minimum", 1);
-  InitOption(countPointInLocalMinimum, 5, "-cpilm", "Count Point In Local Minimum", 1); 
-  InitOption(Localr, 16, "-lr", "Local refinement enable parameter (the length of the local subdomain is 1 / Localr of the maximum length)", 1);
 
-  InitOption(TypeStartLocalMethod, EqualNumberOfPoints, "-tlsm", "Type of criterion for starting the local method (0 - found any countPointInLocalMinimum points forming a paraboloid, 1 found countPointInLocalMinimum / 2 points left and right)", 1);
   InitOption(TypeAddLocalPoint, NotTakenIntoAccountInStoppingCriterion, "-talp", "The type of adding local refinement points (0 - as normal points, 1 - local method points are not counted in the precision stopping criterion)", 1);
   InitOption(maxCountLocalPoint, 5, "-mclp", "Maximum number of points set by the local method", 1);
-  InitOption(PointTakingType, 0, "-ptt", "Type of taking points: 0 - take np points at once, 1 - take into account the neighborhood of local minima", 1);
-  InitOption(StatusIntervalChangeType, 0, "-sict", "Interval status change type: 0 - do not change in descendants, 1 - change.", 1);
   InitOption(isCalculationInBorderPoint, false, "-icibp", "Is Calculation Function In Border Point", 1);
   InitOption(LocalTuningType, WithoutLocalTuning, "-ltt", "Type of local tuning: 0 - without it, 1 - LT, 2 - LTA, 3 - LTMA", 1);
   InitOption(ltXi, 1e-6, "-ltXi", "Parameter of local tuning", 1);
-  InitOption(TypeLocalMinIntervale, NPoints, "-tlmi", "Type Local Min Intervale Search", 1); 
-  InitOption(DecisionTreesMaxDepth, 6, "-dtmd", "Decision Trees Max Depth The maximum possible depth of the tree. That is the training algorithms attempts to split a node while its depth is less than maxDepth. The root node has zero depth. The actual depth may be smaller if the other termination criteria are met (see the outline of the training procedure @ref ml_intro_trees here), and/or if the tree is pruned", 1);
-  InitOption(DecisionTreesRegressionAccuracy, 0.01, "-dtra", "Decision Trees Regression Accuracy Termination criteria for regression trees.     If all absolute differences between an estimated value in a node and values of train samples in this node are less than this parameter then the node will not be split further", 1);
   
   
-  InitOption(NumPointsForApproximation, -1, "-npfa", "Num Points For Approximation", 1);
-  
-  //MCO
-  InitOption(Lamda, -1, "-ld", "LamdaValue", 1);
-  InitOption(rLamda, -1, "-rld", "resue Lamda", 1);
-  InitOption(numberOfLamda, 50, "-nld", "number of Lamda", 1);
-  InitOption(isCriteriaScaling, false, "-isCS", "is criteria scaling at convolution", 1);
-  InitOption(itrEps, 0, "-itrEps", "itertion berfor solution", 1);
-  InitOption(MCO_N_Criteria, 0, "-mcoN_crit", "number of criteria at geniral model of MCO problem", 1);
-  InitOption(MCO_N_Constraint, 0, "-mcoN_const", "number of constraint at geniral model of MCO problem", 1);
-  InitOption(MCO_Criteria_perm, 0, "-mcoCr_perm", "Permutation of criteria at geniral model of MCO problem", 1);
-  InitOption(MCO_Constraint_perm, 0, "-mcoCo_perm", "Permutation of criteria at geniral model of MCO problem", 1);
-  InitOption(MCO_q, 0, "-mco_q", "Tolerance vector at geniral model of MCO problem", 1);
-
   InitOption(isLoadFirstPointFromFile, false, "-islfp", "is load first point from file", 1);
   InitOption(FirstPointFilePath, \0, "-fpf", "path from first point file", 1);
 
@@ -194,95 +163,7 @@ int Parameters::CheckValueParameters(int index)
     if (NumPoints <= 0)
       NumPoints = 1;
 
-    if (!Epsilon.GetIsChange() && Eps.GetIsChange())
-      Epsilon = Eps[0];
-    if (Epsilon.GetIsChange() && !Eps.GetIsChange())
-    {
-      Eps.SetSize(NumOfTaskLevels);
-      for (int i = 0; i < NumOfTaskLevels; i++)
-        Eps[i] = Epsilon;
-    }
-
-    if (Eps.GetSize() < NumOfTaskLevels)
-    {
-      if (Eps.GetSize() == 1)
-      {
-        double e = Eps[0];
-        Eps.SetSize(NumOfTaskLevels);
-        for (int i = 0; i < NumOfTaskLevels; i++)
-          Eps[i] = e;
-      }
-      else
-      {
-        int oldSize = Eps.GetSize();
-        Eps.SetSize(NumOfTaskLevels);
-        for (int i = oldSize; i < NumOfTaskLevels; i++)
-          Eps[i] = Epsilon;
-      }
-    }
-
-    if (!DimInTaskLevel.GetIsChange())
-      DimInTaskLevel[0] = Dimension;
-
-    int sumDim = 0;
-    for (int i = 0; i < NumOfTaskLevels; i++)
-      sumDim += DimInTaskLevel[i];
-    if (sumDim != Dimension)
-    {
-      if ((NumOfTaskLevels == 1) && (GetProcNum() == 1))
-      {
-        for (int i = 0; i < DimInTaskLevel.GetSize(); i++)
-        {
-          DimInTaskLevel[i] = 0;
-        }
-        DimInTaskLevel[0] = Dimension;
-      }
-    }
-
-
-    if (!r.GetIsChange() && rs.GetIsChange())
-      r = rs[0];
-    if (r.GetIsChange() && !rs.GetIsChange())
-    {
-      rs.SetSize(NumOfTaskLevels);
-      for (int i = 0; i < NumOfTaskLevels; i++)
-        rs[i] = r;
-    }
-
-    if (rs.GetSize() < NumOfTaskLevels)
-    {
-      if (rs.GetSize() == 1)
-      {
-        double e = rs[0];
-        rs.SetSize(NumOfTaskLevels);
-        for (int i = 0; i < NumOfTaskLevels; i++)
-          rs[i] = e;
-      }
-      else
-      {
-        int oldSize = rs.GetSize();
-        rs.SetSize(NumOfTaskLevels);
-        for (int i = oldSize; i < NumOfTaskLevels; i++)
-          rs[i] = r;
-      }
-    }
-
-    mNeedMPIProcessorCount = MapProcInLevel[0];
-    //int ChildInProcLevel0[] = {2, 3, 0, 0}; // последний уровень - листья
-    //// Общее число процессов = 1 (корень) + 2 (дети корня) + 2 * 3 (внуки корня) + ...
-    int oldSize = MapProcInLevel[0];
-    for (int i = 0; i < NumOfTaskLevels - 1; i++)
-    {
-      mNeedMPIProcessorCount += ChildInProcLevel[i] * MapProcInLevel[i + 1] * oldSize;
-      oldSize = ChildInProcLevel[i] * MapProcInLevel[i + 1] * oldSize;
-    }
-    //if (GetProcRank() == 0)
-      //printf("\nproc = %d\tNeed MPI processes - %d\n",0, mNeedMPIProcessorCount);
-
-    //isCalculationsArray = false;
-    //if (masSize[inccalculationsArray] == mNeedMPIProcessorCount)
-    //  isCalculationsArray = true;
-
+  
     if (calculationsArray.GetSize() < mNeedMPIProcessorCount)
     {
       int tempSize = calculationsArray.GetSize();
@@ -295,24 +176,9 @@ int Parameters::CheckValueParameters(int index)
         calculationsArray[i] = val;
     }
 
-    //дефолтные параметры для многопроцессорного запуска
-    /*if (((!NumOfTaskLevels.GetIsChange() || !DimInTaskLevel.GetIsChange() ||
-      !ChildInProcLevel.GetIsChange()) && (GetProcNum() > 1)) && (MapType != mpRotated))
-    {
-      if (GetProcRank() == 0)
-        printf("\nRequired parameters are not specified!!!\nCalculated parameters: NumOfTaskLevels, DimInTaskLevel, ChildInProcLevel\n");
-      NumOfTaskLevels = 2;
-      DimInTaskLevel.SetSize(NumOfTaskLevels);
-      ChildInProcLevel.SetSize(NumOfTaskLevels - 1);
-
-      DimInTaskLevel[0] = Dimension / 2;
-      DimInTaskLevel[1] = Dimension - DimInTaskLevel[0];
-
-      ChildInProcLevel[0] = GetProcNum() - 1;
-    }*/
 
     // TODO::dmsi Убрать, если асинхронная схема научится работать с пачками точек
-    if (TypeCalculation == 8) {
+    if (TypeCalculation == AsyncMPI) {
       mpiBlockSize = 1;
     }
     //Если запуск на mpi (синхронном или асинхронном), но не блочная схема, то NumPoints может принимать только одно значение
@@ -323,38 +189,7 @@ int Parameters::CheckValueParameters(int index)
       }
     }
 
-    MapCount = new int[NumOfTaskLevels];
-    for (int i = 0; i < NumOfTaskLevels; i++)
-      MapCount[i] = MapInLevel[i] / MapProcInLevel[i];
-
-    if (MaxNumOfPoints.GetSize() < NumOfTaskLevels)
-    {
-      int a = MaxNumOfPoints.GetSize();
-      MaxNumOfPoints.SetSize(NumOfTaskLevels);
-      for (int t = a; t < NumOfTaskLevels; t++)
-      {
-        MaxNumOfPoints[t] = MaxNumOfPoints[0];
-      }
-    }
-
-    //if (DimInTaskLevel.GetSize() < NumOfTaskLevels)
-    //  _ERROR_(ERROR_ARGUMENT_SIZE);
-    //if (ChildInProcLevel.GetSize() < (NumOfTaskLevels - 1))
-    //  _ERROR_(ERROR_ARGUMENT_SIZE);
-    //if (MapInLevel.GetSize() < NumOfTaskLevels)
-    //  _ERROR_(ERROR_ARGUMENT_SIZE);
-    //if (MapProcInLevel.GetSize() < NumOfTaskLevels)
-    //  _ERROR_(ERROR_ARGUMENT_SIZE);
-    //if (MaxNumOfPoints.GetSize() < NumOfTaskLevels)
-    //  _ERROR_(ERROR_ARGUMENT_SIZE);
-
-
-
-    sumDim = 0;
-    for (int i = 0; i < NumOfTaskLevels; i++)
-      sumDim += DimInTaskLevel[i];
-    //if (sumDim != Dimension)
-    //  _ERROR_(ERROR_DIM_IN_TASK_LEVEL);
+   
 
     mIsInit = true;
   }
@@ -497,10 +332,6 @@ Parameters::Parameters(Parameters& _parameters) : BaseParameters<Parameters>::Ba
   }
   mOptionsCount = _parameters.mOptionsCount;
   mIsInit = true;
-
-  MapCount = new int[_parameters.NumOfTaskLevels];
-  for (int i = 0; i < _parameters.NumOfTaskLevels; i++)
-    MapCount[i] = _parameters.MapCount[i];
 
   MyLevel = _parameters.MyLevel;
 

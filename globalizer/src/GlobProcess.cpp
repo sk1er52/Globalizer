@@ -44,12 +44,8 @@ pData(&data), pTask(&task)
 {
   isFirstRun = true;
 
-  int L = parameters.MapInLevel[pTask->GetProcLevel()];
-  int d = pTask->GetFreeN();
-  if (pTask->IsLeaf())
-    d = pTask->GetFreeN() - pTask->GetNumberOfDiscreteVariable();
   if (parameters.MapType == mpBase)
-    evolvent = new Evolvent(d, parameters.m);
+    evolvent = new Evolvent(parameters.Dimension, parameters.m);
   else
     throw EXCEPTION("Unknown type of evolvent");
 
@@ -61,23 +57,10 @@ pData(&data), pTask(&task)
 
   isPrintOptimEstimation = false;
 
-  if ((parameters.MapProcInLevel[pTask->GetProcLevel()] - 1) > 0)
-  {
-    //printf("proc = %d ProcLevel = %d", parameters.GetProcRank(), pTask->GetProcLevel());
-    //printf("proc = %d MapProcInLevel = %d", parameters.GetProcRank(), parameters.MapProcInLevel[pTask->GetProcLevel()]);
+  Neighbours.resize(parameters.GetProcNum() - 1);
+  for (int i = 0; i < parameters.GetProcNum() - 1; i++)
+    Neighbours[i] = i + 1;
 
-    Neighbours.resize(parameters.MapProcInLevel[pTask->GetProcLevel()] - 1);
-
-    int p = 0;
-    for (int k = 0; k < parameters.MapProcInLevel[pTask->GetProcLevel()]; k++)
-    {
-      if (parameters.GetProcRank() == k)
-        continue;
-      Neighbours[p] = k;
-      //printf("proc = %d Neighbours = %d Neighbours.size = %d\n", parameters.GetProcRank(), Neighbours[p], Neighbours.size());
-      p++;
-    }
-  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -97,8 +80,6 @@ double Process::GetSolveTime()
 // ------------------------------------------------------------------------------------------------
 void Process::Solve()
 {
-  ////if (parameters.GetProcRank() == 0) printf("AA0! %d\n", parameters.GetProcRank());
-
   Trial OptimEstimation, NewOptimEstimation;
 
   Timer.Start();
@@ -107,16 +88,12 @@ void Process::Solve()
     BeginIterations();
     isFirstRun = false;
   }
-  OptimEstimation = *(pMethod->GetOptimEstimation());//.FuncValues[pMethod->GetOptimEstimation().index];
-
-  //if (pTask->GetProcLevel() == 0)  printf("CC-3! Proc=%d iter=%d \n", parameters.GetProcRank(), this->pMethod->GetIterationCount());
-  
+  OptimEstimation = *(pMethod->GetOptimEstimation());
+ 
   while (!IsOptimumFound)
   {
-    //if (pTask->GetProcLevel() == 0)  printf("CC-2! Proc=%d iter=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount());
 
-
-    if (pTask->GetProcLevel() == 0)
+    if (!pTask->IsLeaf())
     {
       if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages))
       {
@@ -141,12 +118,8 @@ void Process::Solve()
       }
     }
     pMethod->GetIterationCount();
-    //if (pTask->GetProcLevel() == 0)  printf("CC-1! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsOptimumFound);
 
     DoIteration();
-
-    //if (pTask->GetProcLevel() == 0)  printf("CC23! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsOptimumFound);
-
 
     NewOptimEstimation = *(pMethod->GetOptimEstimation());
     if (NewOptimEstimation.FuncValues[NewOptimEstimation.index] !=
@@ -156,14 +129,6 @@ void Process::Solve()
       duration = Timer.GetTime();
       PrintOptimEstimationToFile(OptimEstimation);
     }
-
-    //if (IsOptimumFound)
-    //  isPrintOptimEstimation = true;
-    //if (pTask->GetProcLevel() == 0)  printf("CC26! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsOptimumFound);
-
-    //IsOptimumFound = CheckIsStop(IsOptimumFound);
-
-    //if (pTask->GetProcLevel() == 0)  printf("CC34! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsOptimumFound);
 
   }
 
@@ -175,18 +140,13 @@ void Process::Solve()
 
   OptimEstimation = *(pMethod->GetOptimEstimation());
 
-  if ((pTask->GetProcLevel() == 0) && isPrintOptimEstimation)
+  if (!pTask->IsLeaf() && isPrintOptimEstimation)
   {
     printf("\n");
     PrintOptimEstimationToFile(OptimEstimation);
     PrintOptimEstimationToConsole(OptimEstimation);
     PrintResultToFile(OptimEstimation);
   }
-  else
-  {
-    //printPoints;
-  }
-
 }
 
 void Process::Reset(SearchData* data, Task* task)
@@ -194,11 +154,10 @@ void Process::Reset(SearchData* data, Task* task)
   isFirstRun = true;
   pData = data;
   pTask = task;
-  int L = parameters.MapInLevel[pTask->GetProcLevel()];
   if (evolvent == 0)
   {
     if (parameters.MapType == mpBase)
-      evolvent = new Evolvent(pTask->GetFreeN() - pTask->GetNumberOfDiscreteVariable(), parameters.m);
+      evolvent = new Evolvent(parameters.Dimension, parameters.m);
     else
       throw EXCEPTION("Unknown type of evolvent");
   }
@@ -221,7 +180,7 @@ void Process::PrintOptimEstimationToFile(Trial OptimEstimation)
   int NumberOfTrials;
   FILE* pf;
 
-  if (parameters.IsPrintFile && pTask->GetProcLevel() == 0)
+  if (parameters.IsPrintFile && !pTask->IsLeaf())
   {
     pf = fopen("optim.dat", "a");
 
@@ -757,10 +716,6 @@ bool Process::CheckIsStop(bool IsStop)
 
   if (pTask->GetProcLevel() == 0)
   {
-    //if (pTask->GetProcLevel() == 0)  printf("CC30! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsStop);
-
-    if ((parameters.MapProcInLevel[pTask->GetProcLevel()] - 1) > 0)
-    {
       for (int k = 0; k < Neighbours.size(); k++)
       {
         MPI_Send(&f, 1, MPI_CHAR, Neighbours[k], TagChildSolved, MPI_COMM_WORLD);
@@ -775,9 +730,8 @@ bool Process::CheckIsStop(bool IsStop)
 
         IsStop = IsStop || f;
       }
-    }
+    
 
-    //if (pTask->GetProcLevel() == 0)  printf("CC33! Proc=%d iter=%d PL=%d IsStop=%d\n", parameters.GetProcRank(), this->pMethod->GetIterationCount(), (parameters.MapProcInLevel[pTask->GetProcLevel()] - 1), IsStop);
   }
 
   return IsStop;

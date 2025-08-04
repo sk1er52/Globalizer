@@ -724,8 +724,6 @@ SearchInterval::SearchInterval()
   delta = 0;
   queueElementa = 0;
   treeNode = 0;
-
-  status = SearchInterval::usual;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -746,7 +744,6 @@ SearchInterval::SearchInterval(const SearchInterval &p)
 
   queueElementa = p.queueElementa;
   treeNode = p.treeNode;
-  status = p.status;
 }
 
 // ------------------------------------------------------------------------------------------------
