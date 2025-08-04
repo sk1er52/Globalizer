@@ -323,24 +323,6 @@ int Parameters::CheckValueParameters(int index)
       }
     }
 
-    if (MapType == mpRotated)
-    {
-      for (int i = 0; i < NumOfTaskLevels; i++)
-      {
-        int L = MapInLevel[i];
-        int PlaneCount = GLOBALIZER_MAX(Dimension * (Dimension - 1) / 2, 1);
-        if ((L < 1) || (L > 2 * PlaneCount + 1))
-        {
-          if (GetProcRank() == 2)
-          {
-            printf("\n\nL=%d\n\n", L);
-            printf("Error MapInLevel count!!!\n max PlaneCount = %d\n", PlaneCount);
-            _ERROR_(ERROR_ARGUMENT_SIZE);
-          }
-        }
-      }
-    }
-
     MapCount = new int[NumOfTaskLevels];
     for (int i = 0; i < NumOfTaskLevels; i++)
       MapCount[i] = MapInLevel[i] / MapProcInLevel[i];

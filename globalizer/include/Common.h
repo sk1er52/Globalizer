@@ -91,15 +91,7 @@ enum EParameterType
 enum ETypeMethod
 {
   StandartMethod,
-  HybridMethod,
-  ManyNumPointMethod,
-  UniformSearchMethod,
-  GlobalSearchMethod,
-  MCO_Method,
-  MultievolventsMethod,
-  ParallelMultievolventsMethod,
-  IntegerMethod,
-  AdaptivMethod
+  IntegerMethod
 };
 
 enum ESeparableMethodType
@@ -135,22 +127,10 @@ enum ETypeCalculation
   OMP,
   /// Параллельный АГП - CUDA вычислитель
   CUDA,
-  /// Параллельный АГП - вычисления на Intel XeonPHI
-  PHI,
-  /// Последовательная многошаговая схема
-  BlockScheme,
-  /// Адаптивная схема, ТОЛЬКО ПРИ ETypeMethod = AdaptivMethod
-  Adaptiv,
-  /// Множественные развертки
-  Multievolvents,
-  /// Параллельная блочная многошаговая схема, MPI для нижнего уровня
-  ParallelBlockScheme,
   /// Параллельный АГП - MPI Вычислитель
   MPI_calc,
   /// Параллельный АГП - MPI Вычислитель, ассинхронный
   AsyncMPI,
-  /// Схема с использованием Аппроксимации
-  ApproximationScheme,
   /// MPI Вычислитель - Intel oneAPI вычислитель
   OneApi
 };
@@ -158,11 +138,7 @@ enum ETypeCalculation
 enum ETypeProcess
 {
   /// Обычный процесс
-  SynchronousProcess,
-  /// Не поддерживается
-  SynchronousProcessNew,
-  /// Не поддерживается
-  AsynchronousProcess
+  SynchronousProcess
 };
 
 /// <summary>
@@ -172,21 +148,13 @@ enum ETypeSolver
 {
   /// Класический АГП
   SingleSearch,
-  /// Последовательный спуск (не поддерживается в этой версии)
-  SequentialSearch,
   /// Сепарабельная оптимизация (не поддерживается в этой версии)
-  SeparableSearch,
-  /// Автоматическое разделение переменных и запуск блочной многошаговой схемы
-  SeparationVariables
+  SeparableSearch
 };
 
 ///Тип развертки
 enum EMapType
 {
-  ///Вращаемая развертка
-  mpRotated,
-  ///Сдвиговая развертка
-  mpShifted,
   ///Базовый, одиночный вариант
   mpBase
 };
@@ -195,9 +163,7 @@ enum EMapType
 enum ETypeDistributionStartingPoints
 {
   /// Равномерно
-  Evenly,
-  /// Адаптивно
-  Adaptively
+  Evenly
 };
 
 enum ETypeLocalMethod
@@ -206,12 +172,8 @@ enum ETypeLocalMethod
   HookeJeeves,
   /// Метод наименьших квадратов
   LeastSquareMethod,
-  //Метод BFGS с ограниченным использованием памяти в многомерном кубе
-  L_BFGS_B,
   /// Параллельный Метод Хука — Дживса
-  ParallelHookeJeeves,
-  //Параллельный L-BFGS-B
-  Parallel_L_BFGS_B
+  ParallelHookeJeeves
 };
 
 enum ETypeStartLocalMethod

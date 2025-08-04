@@ -1092,27 +1092,6 @@ void Method::CalculateFunctionals()
   {
     if (outputSet.trials[i] == 0)
       iteration.pCurTrials[i] = 0;
-    else if (parameters.TypeCalculation == 8)
-    {
-      iteration.pCurTrials[i] = outputSet.trials[i];
-    }
-
-    if (parameters.TypeCalculation == ApproximationScheme)
-    {
-      std::cout << "OutputSet.trials[i] = " << outputSet.trials[i] << std::endl;
-      if ((outputSet.trials.size() < i) && (outputSet.trials[i] != 0))
-      {
-        if (outputSet.trials[i]->isNeedRecalculateCoordinates)
-        {
-          Extended genX(0.0);
-          evolvent.GetInverseImage(outputSet.trials[i]->y, genX);
-          outputSet.trials[i]->SetX(genX);
-
-          pData->PushToQueue(intervalArr[i]);
-        }
-      }
-      std::cout << "My message 1" << std::endl;
-    }
   }
 
   for (int j = 0; j < pTask.GetNumOfFunc(); j++)

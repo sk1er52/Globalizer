@@ -722,18 +722,6 @@ TEST(Properties_TETypeMethod, can_create_default_ETypeMethod)
   ASSERT_NO_THROW(TETypeMethod<PropertiesTest> a);
 }
 
-TEST(Properties_TETypeMethod, can_create_ETypeMethod)
-{
-  ETypeMethod val = ManyNumPointMethod;
-  ASSERT_NO_THROW(TETypeMethod<PropertiesTest> a(val));
-}
-
-TEST(Properties_TETypeMethod, is_init_ETypeMethod_value)
-{
-  ETypeMethod val = ManyNumPointMethod;
-  TETypeMethod<PropertiesTest> b(val);
-  ASSERT_EQ(val, b);
-}
 
 /**
 Проверка класса TESeparableMethodType
@@ -820,18 +808,6 @@ TEST(Properties_TETypeProcess, can_create_default_ETypeProcess)
   ASSERT_NO_THROW(TETypeProcess<PropertiesTest> a);
 }
 
-TEST(Properties_TETypeProcess, can_create_ETypeProcess)
-{
-  ETypeProcess val = SynchronousProcessNew;
-  ASSERT_NO_THROW(TETypeProcess<PropertiesTest> a(val));
-}
-
-TEST(Properties_TETypeProcess, is_init_ETypeProcess_value)
-{
-  ETypeProcess val = SynchronousProcessNew;
-  TETypeProcess<PropertiesTest> b(val);
-  ASSERT_EQ(val, b);
-}
 
 /**
 Проверка класса TEMapType
@@ -840,17 +816,4 @@ TEST(Properties_TETypeProcess, is_init_ETypeProcess_value)
 TEST(Properties_TEMapType, can_create_default_EMapType)
 {
   ASSERT_NO_THROW(TEMapType<PropertiesTest> a);
-}
-
-TEST(Properties_TEMapType, can_create_EMapType)
-{
-  EMapType val = mpRotated;
-  ASSERT_NO_THROW(TEMapType<PropertiesTest> a(val));
-}
-
-TEST(Properties_TEMapType, is_init_EMapType_value)
-{
-  EMapType val = mpRotated;
-  TEMapType<PropertiesTest> b(val);
-  ASSERT_EQ(val, b);
 }

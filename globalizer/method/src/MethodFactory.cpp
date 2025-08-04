@@ -22,9 +22,7 @@ IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
   Calculation& _Calculation, Evolvent& _Evolvent)
 {
   IMethod* pMethod = 0;
-  if ((parameters.TypeMethod == StandartMethod) ||
-    (parameters.TypeMethod == HybridMethod) ||
-    (parameters.TypeMethod == ManyNumPointMethod))
+  if (parameters.TypeMethod == StandartMethod)
     pMethod = new Method(_pTask, _pData, _Calculation, _Evolvent);
 
   return pMethod;

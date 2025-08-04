@@ -50,10 +50,6 @@ pData(&data), pTask(&task)
     d = pTask->GetFreeN() - pTask->GetNumberOfDiscreteVariable();
   if (parameters.MapType == mpBase)
     evolvent = new Evolvent(d, parameters.m);
-  else if (parameters.MapType == mpRotated)
-    evolvent = new TRotatedEvolvent(d, parameters.m, L);
-  else if (parameters.MapType == mpShifted)
-    evolvent = new TShiftedEvolvent(d, parameters.m, L);
   else
     throw EXCEPTION("Unknown type of evolvent");
 
@@ -203,10 +199,6 @@ void Process::Reset(SearchData* data, Task* task)
   {
     if (parameters.MapType == mpBase)
       evolvent = new Evolvent(pTask->GetFreeN() - pTask->GetNumberOfDiscreteVariable(), parameters.m);
-    else if (parameters.MapType == mpRotated)
-      evolvent = new TRotatedEvolvent(pTask->GetFreeN(), parameters.m, L);
-    else if (parameters.MapType == mpShifted)
-      evolvent = new TShiftedEvolvent(pTask->GetFreeN(), parameters.m, L);
     else
       throw EXCEPTION("Unknown type of evolvent");
   }
