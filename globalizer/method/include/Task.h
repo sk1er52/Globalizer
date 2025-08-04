@@ -26,8 +26,6 @@
 class Task: public QueueBaseData
 {
 protected:
-  /// полная размерность задачи
-  int        N;
   /// левая граница области поиска
   double     A[MaxDim];
   /// правая граница области поиска
@@ -36,18 +34,7 @@ protected:
   int        NumOfFunc;
   /// указатель на саму задачу оптимизации
   IProblem*  pProblem;
-  /// размерность подзадачи
-  int        FreeN;
-  /**
-  число фиксированных размерностей
-  чем "ниже" уровень задача в дереве задач, тем больше FixedN
-  */
-  int        FixedN;
-  /**
-  значения фиксированных переменных
-  включая значения переменных, зафиксированных на уровнях выше
-  */
-  double     FixedY[MaxDim];
+
   /// оптимальное значение целевой функции (определено, если известно из задачи)
   double     OptimumValue;
   /// координаты глобального минимума целевой функции (определено, если известно)
@@ -64,7 +51,7 @@ protected:
 
 public:
   int num;
-  Task(int _N, int _FreeN, IProblem* _problem, int _ProcLevel);
+  Task(IProblem* _problem, int _ProcLevel);
   Task();
   virtual ~Task();
   virtual Task* Clone();
@@ -72,17 +59,11 @@ public:
   {
     return Clone();
   }
-  virtual void Init(int _N, int _FreeN, IProblem* _problem, int _ProcLevel);
-  /// Задает фиксированные переменные
-  virtual void SetFixed(int _FixedN, double *_FixedY);
+  virtual void Init(IProblem* _problem, int _ProcLevel);
+
   /// Возвращает общую рамерность задачи
-  virtual int GetN() const { return N; }
-  /// Возвращает уровень процесса в дереве процессов
-  virtual int GetProcLevel() { return ProcLevel; }
-  /// Возвращает число свободных переменных
-  virtual int GetFreeN() const { return FreeN; }
-  /// Возвращает число фиксированных переменных
-  virtual int GetFixedN() const { return FixedN; }
+  virtual int GetN() const { return parameters.Dimension; }
+
 
   /// Возвращает левую границу области поиска
   virtual const double* GetA() const { return A; }
@@ -108,8 +89,6 @@ public:
   /// Возвращает текущую задачу
   virtual IProblem* getProblem() { return pProblem; }
 
-  ///Возвращает фиксированные координаты
-  virtual const double* GetFixedY() const { return FixedY; }
   /// Возвращает число функций, сначала ограничения, потом критерии
   virtual int GetNumOfFunc() const { return NumOfFunc; }
   /// Задает число функций
@@ -117,6 +96,9 @@ public:
   {
     NumOfFunc = nf;
   }
+
+  /// Место в дереве процессов
+  int GetProcLevel() { return ProcLevel; }
 
   virtual int GetNumOfFuncAtProblem() const {return NumOfFunc; }
   /// Вычисляет значение функции с номером fNumber в точке y
@@ -250,7 +232,7 @@ public:
 
   virtual bool IsLeaf()
   {
-    return ProcLevel == (parameters.NumOfTaskLevels - 1);
+    return ProcLevel != 0;
   }
 };
 

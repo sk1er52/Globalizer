@@ -125,8 +125,7 @@ void Solver::MpiCalculation()
     }
 
     IProblem* _problem = mProblem;
-    Task* _pTask = TaskFactory::CreateTask(parameters.Dimension, parameters.DimInTaskLevel[0],
-      _problem, 0);;
+    Task* _pTask = TaskFactory::CreateTask(_problem, 0);;
     Calculation* calculation;
     if (parameters.calculationsArray[1] == OMP) {
       calculation = new OMPCalculation(*_pTask);
@@ -166,8 +165,7 @@ void Solver::AsyncCalculation()
     int fNumber = 0;
 
     IProblem* _problem = mProblem;
-    Task* _pTask = TaskFactory::CreateTask(parameters.Dimension, parameters.DimInTaskLevel[0],
-      _problem, 0);
+    Task* _pTask = TaskFactory::CreateTask(_problem, 0);
 
     if (parameters.DebugAsyncCalculation != 0) {
       while (true) {
@@ -269,7 +267,7 @@ int Solver::Solve()
   if (parameters.GetProcRank() == 0)
   {
     if (parameters.GetProcNum() > 1) {
-      int childNum = parameters.ChildInProcLevel[parameters.MyLevel];
+      int childNum = parameters.GetProcNum() - 1;
       int curr_child = 0;
       for (unsigned int i = 0; i < childNum; i++) {
         ///curr_child = parameters.parallel_tree.ProcChild[i];!!!!!
@@ -333,11 +331,11 @@ void Solver::InitAutoPrecision()
   // then set it to 1 / (2^((m + 1) * N) - 1)
   if (Extended::GetPrecision() == 0.01)
   {
-    if (parameters.m * (pTask->GetFreeN() - pTask->GetNumberOfDiscreteVariable()) <= 50)
+    if (parameters.m * (parameters.Dimension - pTask->GetNumberOfDiscreteVariable()) <= 50)
     {
       Extended::SetTypeID(etDouble);
     }
-    Extended::SetPrecision(1 / (::pow(2., parameters.m * (pTask->GetFreeN() -
+    Extended::SetPrecision(1 / (::pow(2., parameters.m * (parameters.Dimension -
       pTask->GetNumberOfDiscreteVariable()))));
   }
 }
@@ -351,8 +349,7 @@ int Solver::CreateProcess()
   /// Ñîçäàíèå çàäà÷è(Task) // ïåðåíåñòè â ôàáðèêó
   if (pTask == 0)
   {
-    pTask = TaskFactory::CreateTask(parameters.Dimension, parameters.DimInTaskLevel[0],
-      _problem, 0);
+    pTask = TaskFactory::CreateTask(_problem, 0);
   }
   /// Ñîçäàåì äàííûå äëÿ ïîèñêîâîé èíôîðìàöèè
 

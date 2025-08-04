@@ -39,8 +39,8 @@ double ParallelHookeJeevesMethod::CheckCoordinate(const OBJECTIV_TYPE* x)
     return HUGE_VAL;
 
   for (int i = 0; i < mDimension; i++)
-    if (x[i] < mPTask->GetA()[mPTask->GetFixedN() + i] ||
-      x[i] > mPTask->GetB()[mPTask->GetFixedN() + i])
+    if (x[i] < mPTask->GetA()[i] ||
+      x[i] > mPTask->GetB()[i])
       return HUGE_VAL;
 
   return 0;
@@ -105,7 +105,7 @@ double ParallelHookeJeevesMethod::MakeResearch(OBJECTIV_TYPE* startPoint)
   else
   {
     Fvalue = CheckCoordinate(startPoint);//проверяем точку, лежит ли в области определения  
-    std::memcpy(mFunctionsArgument + mPTask->GetFixedN(), startPoint, mDimension * sizeof(OBJECTIV_TYPE));
+    std::memcpy(mFunctionsArgument, startPoint, mDimension * sizeof(OBJECTIV_TYPE));
 
     currentTrial = TrialFactory::CreateTrial(mFunctionsArgument);
     if (Fvalue == 0)
@@ -176,7 +176,7 @@ double ParallelHookeJeevesMethod::MakeResearch(OBJECTIV_TYPE* startPoint)
       Fvalue = CheckCoordinate(currCoordinate);//проверяем точку, лежит ли в области определения      
       if (Fvalue == 0)
       {
-        std::memcpy(mFunctionsArgument + mPTask->GetFixedN(), currCoordinate, mDimension * sizeof(OBJECTIV_TYPE));
+        std::memcpy(mFunctionsArgument, currCoordinate, mDimension * sizeof(OBJECTIV_TYPE));
         currentTrial = TrialFactory::CreateTrial(mFunctionsArgument);
 
         inputSet[j] = currentTrial;
@@ -354,11 +354,11 @@ double ParallelHookeJeevesMethod::EvaluateObjectiveFunctiuon(const OBJECTIV_TYPE
     return HUGE_VAL;
 
   for (int i = 0; i < mDimension; i++)
-    if (x[i] < mPTask->GetA()[mPTask->GetFixedN() + i] ||
-      x[i] > mPTask->GetB()[mPTask->GetFixedN() + i])
+    if (x[i] < mPTask->GetA()[i] ||
+      x[i] > mPTask->GetB()[i])
       return HUGE_VAL;
 
-  std::memcpy(mFunctionsArgument + mPTask->GetFixedN(), x, mDimension * sizeof(OBJECTIV_TYPE));
+  std::memcpy(mFunctionsArgument + parameters.Dimension, x, mDimension * sizeof(OBJECTIV_TYPE));
   double value = HUGE_VAL;
   Trial* currentTrial = TrialFactory::CreateTrial(mFunctionsArgument);
 

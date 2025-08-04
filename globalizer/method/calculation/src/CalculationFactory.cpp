@@ -140,31 +140,8 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, Evolvent* evolv
 {
   Calculation* calculation = 0;
 
-  //if (parameters.calculationsArray.GetIsChange())
-  //{
-  //  if (parameters.calculationsArray[parameters.GetProcRank()] != -1)
-  //  {
-  //    printf("\nprocRank = %d\n", parameters.GetProcRank());
-  //    char buf[256] = { 0 };
-  //    sprintf(buf, "%d", parameters.calculationsArray[parameters.GetProcRank()]);
-  //    parameters.SetVal("TypeCalculation", buf);
-  //    parameters.PrintParameter("TypeCalculation");
-
-  //    if (parameters.TypeCalculation == OMP)
-  //      calculation = new OMPCalculation(_pTask);
-  //    //else if (parameters.TypeCalculation == CUDA)
-  //    //  calculation = new CUDACalculation(_parameters, _pTask);
-  //    //else if (parameters.TypeCalculation == PHI)
-  //    //  calculation = new TPHICalculation(_parameters, _pTask);
-  //    if (parameters.TypeCalculation == BlockScheme)
-  //      calculation = new TBlockSchemeCalculation(_pTask);
-  //  }
-  //}
-  if (_pTask.IsLeaf()) //Если в листе
+  if (!_pTask.IsLeaf()) //Если в листе
   {    
-//else if (parameters.TypeCalculation == PHI)
-//  calculation = new TPHICalculation(_parameters, _pTask);
-    
     // Выбор между OMP иCUDA
     if ((parameters.TypeCalculation == OMP))
     {

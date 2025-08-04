@@ -21,11 +21,11 @@ std::vector<int> TaskFactory::permutations;
 
 // ------------------------------------------------------------------------------------------------
 
-Task* TaskFactory::CreateTask(int _N, int _FreeN, IProblem* _problem, int _ProcLevel)
+Task* TaskFactory::CreateTask(IProblem* _problem, int _ProcLevel)
 {
   Task* res = 0;
 
-  res = new Task(parameters.Dimension, parameters.DimInTaskLevel[0], _problem, 0);
+  res = new Task(_problem, 0);
   res->num = num++;
   return res;
 }
