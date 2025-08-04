@@ -6,7 +6,7 @@
   класса #PriorityQueue, которая будет использоваться в тестах
  */
 
-char elemValues [7]= {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
+QueueBaseData tmp;
 
 class TDualQueueTest : public ::testing::Test
 {
@@ -25,9 +25,9 @@ protected:
   }
   void SetUpFullQueue()
   {
-    queue->Push(2, 2, elemValues + 1);
-    queue->Push(4, 4, elemValues + 3);
-    queue->Push(6, 6, elemValues + 5);
+    queue->Push(2, 2, &tmp);
+    queue->Push(4, 4, &tmp);
+    queue->Push(6, 6, &tmp);
   }
 };
 /**
@@ -49,10 +49,10 @@ TEST_F(TDualQueueTest, can_create_queue_with_correct_size)
   ASSERT_NO_THROW(PriorityDualQueue q(1023));
 }
 
-//TEST_F(TDualQueueTest, throws_when_memory_for_queue_not_allocated)
-//{
-//  ASSERT_ANY_THROW(PriorityDualQueue q((MaxDualQueueSize + 1) * 2 - 1));
-//}
+TEST_F(TDualQueueTest, throws_when_memory_for_queue_not_allocated)
+{
+  ASSERT_ANY_THROW(PriorityDualQueue q((MaxDualQueueSize + 1) * 2));
+}
 /**
  * Проверка корректности работы метода #GetMaxSize
  */
@@ -88,28 +88,28 @@ TEST_F(TDualQueueTest, can_push_element)
   double globalKey = 1;
   double localKey = 1;
 
-  queue->Push(globalKey, localKey, elemValues);
+  queue->Push(globalKey, localKey, &tmp);
 
   ASSERT_EQ(1, queue->GetSize());
   ASSERT_EQ(1, queue->GetLocalSize());
 }
 
-//TEST_F(TDualQueueTest, not_doing_push_to_fill_queue_when_element_is_less_then_min_key)
-//{
-//  double key;
-//  void* value;
-//  SetUpFullQueue(); //fill queue {(2, 2, "b"),(4, 4, "d"),(6, 6, "f")}
-//
-//  queue->Push(1, 5, elemValues); //1 < 2
-//
-//  /// get element with min global key
-//  /// and check, that it is not (1, 5, "a")
-//  for (int i = 0; i < 3; i++)
-//  {
-//    queue->Pop(&key, &value);
-//  }
-//  ASSERT_NE(1, key);
-//}
+TEST_F(TDualQueueTest, not_doing_push_to_fill_queue_when_element_is_less_then_min_key)
+{
+  double key;
+  void* value;
+  SetUpFullQueue(); //fill queue {(2, 2, "b"),(4, 4, "d"),(6, 6, "f")}
+
+  queue->Push(1, 5, &tmp); //1 < 2
+
+  /// get element with min global key
+  /// and check, that it is not (1, 5, "a")
+  for (int i = 0; i < 3; i++)
+  {
+    queue->Pop(&key, &value);
+  }
+  ASSERT_NE(1, key);
+}
 
 //TEST_F(TDualQueueTest, not_doing_push_to_fill_local_queue_when_element_is_less_then_min_key)
 //{
@@ -351,7 +351,7 @@ TEST_F(TDualQueueTest, throws_when_pop_from_empty_local_queue)
  */
 TEST_F(TDualQueueTest, can_push_to_empty_queue)
 {
-  queue->PushWithPriority(1, 1, elemValues);
+  queue->PushWithPriority(1, 1, &tmp);
 
   ASSERT_FALSE(queue->IsEmpty());
   ASSERT_FALSE(queue->IsLocalEmpty());
