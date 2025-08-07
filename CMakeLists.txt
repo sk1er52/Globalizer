@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.31)
 
 cmake_policy(SET CMP0057 NEW)#adds support for the new IN_LIST operator
 
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Available build types" FORCE)
 
 set(GLOBALIZER_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/_bin CACHE STRING "Output directory")
 set(GLOBALIZER_MPI_LIB_USER_PATH "" CACHE STRING "Path to MPI libraries")
@@ -44,9 +44,16 @@ else()
 	add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
 endif()
 
-
 set(CMAKE_CXX_STANDARD 17)
 project(${GLOBALIZER_PROJECT_NAME})
+
+include(cmake/globalizer_utils.cmake)
+include(cmake/globalizer_mpi.cmake)
+#include(cmake/globalizer_lib.cmake)
+include(cmake/globalizer_doxygen.cmake)
+GLOBALIZER_initialize()
+
+
 if (IS_GNU_COMPILER)
   include(cmake/GMPConfig.cmake)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
@@ -63,17 +70,11 @@ elseif (IS_MICROSOFT_COMPILER)
   endif()
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /wd4100")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099")
-elseif (IS_INTEL_COMPILER)
-  # TODO: add options for Intel compiler
+else()
+  set(OpenMP_C_FLAGS "-fopenmp")
+  set(OpenMP_CXX_FLAGS "-fopenmp")
 endif()
 
-
-include(cmake/globalizer_utils.cmake)
-include(cmake/globalizer_mpi.cmake)
-#include(cmake/globalizer_lib.cmake)
-include(cmake/globalizer_doxygen.cmake)
-
-GLOBALIZER_initialize()
 
 if(NOT (CMAKE_BUILD_TYPE IN_LIST CMAKE_CONFIGURATION_TYPES))
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "build type" FORCE)
@@ -249,17 +250,19 @@ set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GL
 set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
 set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
 
-# add linker flags for GCC
-if (IS_GNU_COMPILER)
-  target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
-  set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
-
-endif()
-
 find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+# add linker flags for GCC
+if (IS_GNU_COMPILER)
+  target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
+  set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
+elseif (IS_CLANG_COMPILER)
+  target_link_libraries(${GLOBALIZER_LIB_NAME} PRIVATE OpenMP::OpenMP_CXX)
+  target_link_libraries(${GLOBALIZER_PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 #add tests
