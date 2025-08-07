@@ -54,6 +54,9 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         git submodule init
         git submodule update
+    - name: Install OpenMP for Ubuntu Clang 
+      if: matrix.c_compiler == 'clang'
+      run: |
         sudo apt-get update
         sudo apt-get install -y libomp-dev build-essential cmake
 
