@@ -26,8 +26,8 @@
 
 void MPICalculationAsync::AsyncFinilize()
 {
-  /// Необходимо собрать данные со всех, кроме той точки, которая последней прислала ответ 
-  /// (она нашла ответ задачи -> ей не отправили на вычисление новую точку)
+  /// ГЌГҐГ®ГЎГµГ®Г¤ГЁГ¬Г® Г±Г®ГЎГ°Г ГІГј Г¤Г Г­Г­Г»ГҐ Г±Г® ГўГ±ГҐГµ, ГЄГ°Г®Г¬ГҐ ГІГ®Г© ГІГ®Г·ГЄГЁ, ГЄГ®ГІГ®Г°Г Гї ГЇГ®Г±Г«ГҐГ¤Г­ГҐГ© ГЇГ°ГЁГ±Г«Г Г«Г  Г®ГІГўГҐГІ 
+  /// (Г®Г­Г  Г­Г ГёГ«Г  Г®ГІГўГҐГІ Г§Г Г¤Г Г·ГЁ -> ГҐГ© Г­ГҐ Г®ГІГЇГ°Г ГўГЁГ«ГЁ Г­Г  ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГҐ Г­Г®ГўГіГѕ ГІГ®Г·ГЄГі)
   MPI_Status status;
   Trial OptimEstimation;
   int Child;
@@ -55,16 +55,16 @@ void MPICalculationAsync::RecieveCalculatedFunctional()
   int index;
   int i;
 
-  /// Принимаем индекс точки
+  /// ГЏГ°ГЁГ­ГЁГ¬Г ГҐГ¬ ГЁГ­Г¤ГҐГЄГ± ГІГ®Г·ГЄГЁ
   MPI_Recv(&index, 1, MPI_INT, MPI_ANY_SOURCE, TagChildSolved, MPI_COMM_WORLD, &status);
-  ChildNumRecv = status.MPI_SOURCE; // MPI-номер процесса
+  ChildNumRecv = status.MPI_SOURCE; // MPI-Г­Г®Г¬ГҐГ° ГЇГ°Г®Г¶ГҐГ±Г±Г 
 
-  ///Запоминаем индекс в векторе где теперь хранится вычисленное значение
+  ///Г‡Г ГЇГ®Г¬ГЁГ­Г ГҐГ¬ ГЁГ­Г¤ГҐГЄГ± Гў ГўГҐГЄГІГ®Г°ГҐ ГЈГ¤ГҐ ГІГҐГЇГҐГ°Гј ГµГ°Г Г­ГЁГІГ±Гї ГўГ»Г·ГЁГ±Г«ГҐГ­Г­Г®ГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ
   ChildNum = ChildNumRecv - 1;
   vecTrials[ChildNum]->index = index;
-  /// Принимаем точку
+  /// ГЏГ°ГЁГ­ГЁГ¬Г ГҐГ¬ ГІГ®Г·ГЄГі
   MPI_Recv(vecTrials[ChildNum]->y, parameters.Dimension, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
-  /// Принимаем значения функционалов
+  /// ГЏГ°ГЁГ­ГЁГ¬Г ГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГї ГґГіГ­ГЄГ¶ГЁГ®Г­Г Г«Г®Гў
   MPI_Recv(vecTrials[ChildNum]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
 
   int fNumber = 0;
@@ -90,14 +90,14 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
   for (unsigned int i = 0; i < parameters.NumPoints; i++)
   {
     int isFinish = 0;
-    ///Отправляем в Solver флаг, что мы работаем
+    ///ГЋГІГЇГ°Г ГўГ«ГїГҐГ¬ Гў Solver ГґГ«Г ГЈ, Г·ГІГ® Г¬Г» Г°Г ГЎГ®ГІГ ГҐГ¬
     MPI_Send(&isFinish, 1, MPI_INT, i + 1, TagChildSolved, MPI_COMM_WORLD);
 
     vecTrials.push_back(inputSet.trials[i]);
     Trial* trail = inputSet.trials[i];
     trail->index = 0;
     vecTrials[i]->index = 0;
-    ///Отправляем координату y
+    ///ГЋГІГЇГ°Г ГўГ«ГїГҐГ¬ ГЄГ®Г®Г°Г¤ГЁГ­Г ГІГі y
     MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD);
   }
 
@@ -114,9 +114,9 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
 void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Отдаем точку свободному
-  ///Ждем когда пришлют следующую
-  ///И так пока не решим
+  ///ГЋГІГ¤Г ГҐГ¬ ГІГ®Г·ГЄГі Г±ГўГ®ГЎГ®Г¤Г­Г®Г¬Гі
+  ///Г†Г¤ГҐГ¬ ГЄГ®ГЈГ¤Г  ГЇГ°ГЁГёГ«ГѕГІ Г±Г«ГҐГ¤ГіГѕГ№ГіГѕ
+  ///Г€ ГІГ ГЄ ГЇГ®ГЄГ  Г­ГҐ Г°ГҐГёГЁГ¬
 
   int isFinish = 0;
   if (ChildNumRecv < 1 || ChildNumRecv >= parameters.GetProcNum()) {
@@ -131,7 +131,7 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 
   MPI_Send(&isFinish, 1, MPI_INT, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD);
 
-  ///Записываем в ту же ячейку вектора новую точку, которую теперь надо вычислить
+  ///Г‡Г ГЇГЁГ±Г»ГўГ ГҐГ¬ Гў ГІГі Г¦ГҐ ГїГ·ГҐГ©ГЄГі ГўГҐГЄГІГ®Г°Г  Г­Г®ГўГіГѕ ГІГ®Г·ГЄГі, ГЄГ®ГІГ®Г°ГіГѕ ГІГҐГЇГҐГ°Гј Г­Г Г¤Г® ГўГ»Г·ГЁГ±Г«ГЁГІГј
   vecTrials[ChildNum] = inputSet.trials[0];
 
 
@@ -150,7 +150,7 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Когда нам прислали вычисленную точку, мы достаем нужную точку из вектора, вставляем вычисленное значение функции и записываем ее в outputSet
+  ///ГЉГ®ГЈГ¤Г  Г­Г Г¬ ГЇГ°ГЁГ±Г«Г Г«ГЁ ГўГ»Г·ГЁГ±Г«ГҐГ­Г­ГіГѕ ГІГ®Г·ГЄГі, Г¬Г» Г¤Г®Г±ГІГ ГҐГ¬ Г­ГіГ¦Г­ГіГѕ ГІГ®Г·ГЄГі ГЁГ§ ГўГҐГЄГІГ®Г°Г , ГўГ±ГІГ ГўГ«ГїГҐГ¬ ГўГ»Г·ГЁГ±Г«ГҐГ­Г­Г®ГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ ГґГіГ­ГЄГ¶ГЁГЁ ГЁ Г§Г ГЇГЁГ±Г»ГўГ ГҐГ¬ ГҐГҐ Гў outputSet
 
   if (inputSet.trials.size() > 0)
   {
@@ -167,7 +167,7 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
 
   }
 
-  /// Запускать вычисления как только пришли данные
+  /// Г‡Г ГЇГіГ±ГЄГ ГІГј ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГї ГЄГ ГЄ ГІГ®Г«ГјГЄГ® ГЇГ°ГЁГёГ«ГЁ Г¤Г Г­Г­Г»ГҐ
   if (isStartComputingAway)
   {
     if (isFirst) {
@@ -184,7 +184,7 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
       StartCalculate(inputSet, outputSet);
     }
   }
-  else///собрать данные в один блок, и потом вычислить все сразу
+  else///Г±Г®ГЎГ°Г ГІГј Г¤Г Г­Г­Г»ГҐ Гў Г®Г¤ГЁГ­ ГЎГ«Г®ГЄ, ГЁ ГЇГ®ГІГ®Г¬ ГўГ»Г·ГЁГ±Г«ГЁГІГј ГўГ±ГҐ Г±Г°Г Г§Гі
   {
     if (countCalculation > 0)
     {
