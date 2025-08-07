@@ -31,14 +31,14 @@ void MPICalculation::StartCalculate(InformationForCalculation& inputSet,
   for (unsigned int i = 0; i < parameters.GetProcNum() - 1; i++)
   {
     int isFinish = 0;
-    //Îòïðàâëÿåì â Solver ôëàã, ÷òî ìû ðàáîòàåì
+    //ÃŽÃ²Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¥Ã¬ Ã¢ Solver Ã´Ã«Ã Ã£, Ã·Ã²Ã® Ã¬Ã» Ã°Ã Ã¡Ã®Ã²Ã Ã¥Ã¬
     MPI_Send(&isFinish, 1, MPI_INT, i + 1, TagChildSolved, MPI_COMM_WORLD);
 
-    //Îòïðàâëÿåì íåñêîëüêî òî÷åê íà ïðîöåññû
+    //ÃŽÃ²Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¥Ã¬ Ã­Ã¥Ã±ÃªÃ®Ã«Ã¼ÃªÃ® Ã²Ã®Ã·Ã¥Ãª Ã­Ã  Ã¯Ã°Ã®Ã¶Ã¥Ã±Ã±Ã»
     for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
       Trial* trail = inputSet.trials[i*(parameters.mpiBlockSize) + j];
       trail->index = -1;
-      //Îòïðàâëÿåì êîîðäèíàòó y
+      //ÃŽÃ²Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¥Ã¬ ÃªÃ®Ã®Ã°Ã¤Ã¨Ã­Ã Ã²Ã³ y
       MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD);
     }
   }
@@ -46,12 +46,12 @@ void MPICalculation::StartCalculate(InformationForCalculation& inputSet,
   MPI_Status status;
   for (unsigned int i = 0; i < parameters.GetProcNum() - 1; i++)
   {
-    //Ïðèíèìàåì âñå îòïðàâëåííûå òî÷êè îáðàòíî
+    //ÃÃ°Ã¨Ã­Ã¨Ã¬Ã Ã¥Ã¬ Ã¢Ã±Ã¥ Ã®Ã²Ã¯Ã°Ã Ã¢Ã«Ã¥Ã­Ã­Ã»Ã¥ Ã²Ã®Ã·ÃªÃ¨ Ã®Ã¡Ã°Ã Ã²Ã­Ã®
     for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
       Trial* trail = inputSet.trials[i*(parameters.mpiBlockSize) + j];
       trail->index = -1;
 
-      //Ïðèíèìàåì âû÷èñëåííîå çíà÷åíèå ôóíêöèè èç Solver
+      //ÃÃ°Ã¨Ã­Ã¨Ã¬Ã Ã¥Ã¬ Ã¢Ã»Ã·Ã¨Ã±Ã«Ã¥Ã­Ã­Ã®Ã¥ Ã§Ã­Ã Ã·Ã¥Ã­Ã¨Ã¥ Ã´Ã³Ã­ÃªÃ¶Ã¨Ã¨ Ã¨Ã§ Solver
       MPI_Recv(trail->FuncValues, MaxNumOfFunc, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD, &status);
 
       int fNumber = 0;
@@ -80,25 +80,25 @@ void MPICalculation::StartCalculateInBorder(InformationForCalculation& inputSet,
   //for (unsigned int i = 0; i < 2; i++)
   //{
   //  int isFinish = 0;
-  //  //Îòïðàâëÿåì â Solver ôëàã, ÷òî ìû ðàáîòàåì
+  //  //ÃŽÃ²Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¥Ã¬ Ã¢ Solver Ã´Ã«Ã Ã£, Ã·Ã²Ã® Ã¬Ã» Ã°Ã Ã¡Ã®Ã²Ã Ã¥Ã¬
   //  MPI_Send(&isFinish, 1, MPI_INT, i + 1, TagChildSolved, MPI_COMM_WORLD);
 
 
   //  Trial* trail = inputSet.trials[i];
   //  trail->index = -1;
-  //  //Îòïðàâëÿåì êîîðäèíàòó y
+  //  //ÃŽÃ²Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¥Ã¬ ÃªÃ®Ã®Ã°Ã¤Ã¨Ã­Ã Ã²Ã³ y
   //  MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD);
   //}
 
   //MPI_Status status;
   //for (unsigned int i = 0; i < 2; i++)
   //{
-  //  //Ïðèíèìàåì âñå îòïðàâëåííûå òî÷êè îáðàòíî
+  //  //ÃÃ°Ã¨Ã­Ã¨Ã¬Ã Ã¥Ã¬ Ã¢Ã±Ã¥ Ã®Ã²Ã¯Ã°Ã Ã¢Ã«Ã¥Ã­Ã­Ã»Ã¥ Ã²Ã®Ã·ÃªÃ¨ Ã®Ã¡Ã°Ã Ã²Ã­Ã®
 
   //  Trial* trail = inputSet.trials[i];
   //  trail->index = -1;
 
-  //  //Ïðèíèìàåì âû÷èñëåííîå çíà÷åíèå ôóíêöèè èç Solver
+  //  //ÃÃ°Ã¨Ã­Ã¨Ã¬Ã Ã¥Ã¬ Ã¢Ã»Ã·Ã¨Ã±Ã«Ã¥Ã­Ã­Ã®Ã¥ Ã§Ã­Ã Ã·Ã¥Ã­Ã¨Ã¥ Ã´Ã³Ã­ÃªÃ¶Ã¨Ã¨ Ã¨Ã§ Solver
   //  MPI_Recv(trail->FuncValues, MaxNumOfFunc, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD, &status);
 
   //  int fNumber = 0;
@@ -144,7 +144,7 @@ void MPICalculation::Calculate(InformationForCalculation& inputSet,
 
   }
 
-  // Çàïóñêàòü âû÷èñëåíèÿ êàê òîëüêî ïðèøëè äàííûå
+  // Ã‡Ã Ã¯Ã³Ã±ÃªÃ Ã²Ã¼ Ã¢Ã»Ã·Ã¨Ã±Ã«Ã¥Ã­Ã¨Ã¿ ÃªÃ Ãª Ã²Ã®Ã«Ã¼ÃªÃ® Ã¯Ã°Ã¨Ã¸Ã«Ã¨ Ã¤Ã Ã­Ã­Ã»Ã¥
   if (isStartComputingAway)
   {
     if ((isFirst) && ((parameters.isCalculationInBorderPoint == true) || (parameters.LocalTuningType != 0)))
@@ -155,7 +155,7 @@ void MPICalculation::Calculate(InformationForCalculation& inputSet,
     else
       StartCalculate(inputSet, outputSet);
   }
-  else//ñîáðàòü äàííûå â îäèí áëîê, è ïîòîì âû÷èñëèòü âñå ñðàçó
+  else//Ã±Ã®Ã¡Ã°Ã Ã²Ã¼ Ã¤Ã Ã­Ã­Ã»Ã¥ Ã¢ Ã®Ã¤Ã¨Ã­ Ã¡Ã«Ã®Ãª, Ã¨ Ã¯Ã®Ã²Ã®Ã¬ Ã¢Ã»Ã·Ã¨Ã±Ã«Ã¨Ã²Ã¼ Ã¢Ã±Ã¥ Ã±Ã°Ã Ã§Ã³
   {
     if (countCalculation > 0)
     {
