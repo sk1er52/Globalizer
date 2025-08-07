@@ -13,7 +13,9 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #ifndef __PROPERTY_H__
 #define __PROPERTY_H__

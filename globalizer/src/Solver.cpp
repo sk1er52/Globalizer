@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include "solver.h"
+#include "Solver.h"
 
 
 

@@ -30,8 +30,8 @@
 #define DEFAULT_LIB ./librastrigin.so
 #endif
 
-#include "exception.h"
-#include "parameters.h"
+#include "Exception.h"
+#include "Parameters.h"
 
 
 Parameters parameters;

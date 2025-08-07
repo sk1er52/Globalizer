@@ -3,9 +3,8 @@ cmake_minimum_required(VERSION 3.31)
 
 cmake_policy(SET CMP0057 NEW)#adds support for the new IN_LIST operator
 
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Available build types" FORCE)
 
-set(GLOBALIZER_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/_bin CACHE STRING "Output directory")
 set(GLOBALIZER_MPI_LIB_USER_PATH "" CACHE STRING "Path to MPI libraries")
 set(GLOBALIZER_MPI_INCLUDE_USER_PATH "" CACHE STRING "Path to MPI includes")
 set(GLOBALIZER_MPI "ms" CACHE STRING "Set MPI implementation (ms, mpich, intel)")
@@ -15,7 +14,7 @@ option(GLOBALIZER_USE_MPI "Set OFF to disable MPI.
   In this case a stub implementation of MPI will be used and globalizer won't support multi-process mode" ON)
 option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" ON)
-option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" OFF)
+option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
 
 
@@ -32,9 +31,23 @@ set(GLOBALIZER_EXECUTABLE_NAME_RELEASE         ${GLOBALIZER_EXECUTABLE_NAME})
 set(GLOBALIZER_LIB_NAME                        ${GLOBALIZER_EXECUTABLE_NAME}_l)
 set(GLOBALIZER_LIB_NAME_RELEASE                ${GLOBALIZER_EXECUTABLE_NAME}_l)
 set(GLOBALIZER_LIB_NAME_DEBUG                  ${GLOBALIZER_EXECUTABLE_NAME}_l_${GLOBALIZER_DEBUG_SUFFIX})
+
+
+
+set(CMAKE_CXX_STANDARD 17)
+project(${GLOBALIZER_PROJECT_NAME})
+
+set(GLOBALIZER_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/_bin CACHE STRING "Output directory")
+
+message("GLOBALIZER_OUTPUT_DIRECTORY" ${GLOBALIZER_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${GLOBALIZER_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GLOBALIZER_OUTPUT_DIRECTORY})
 
+include(cmake/globalizer_utils.cmake)
+include(cmake/globalizer_mpi.cmake)
+#include(cmake/globalizer_lib.cmake)
+include(cmake/globalizer_doxygen.cmake)
+GLOBALIZER_initialize()
 
 if(${GLOBALIZER_MAX_DIMENSION})
 	message("true " ${GLOBALIZER_MAX_DIMENSION})
@@ -44,9 +57,6 @@ else()
 	add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
 endif()
 
-
-set(CMAKE_CXX_STANDARD 17)
-project(${GLOBALIZER_PROJECT_NAME})
 if (IS_GNU_COMPILER)
   include(cmake/GMPConfig.cmake)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
@@ -63,17 +73,11 @@ elseif (IS_MICROSOFT_COMPILER)
   endif()
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /wd4100")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099")
-elseif (IS_INTEL_COMPILER)
-  # TODO: add options for Intel compiler
+else()
+  set(OpenMP_C_FLAGS "-fopenmp")
+  set(OpenMP_CXX_FLAGS "-fopenmp")
 endif()
 
-
-include(cmake/globalizer_utils.cmake)
-include(cmake/globalizer_mpi.cmake)
-#include(cmake/globalizer_lib.cmake)
-include(cmake/globalizer_doxygen.cmake)
-
-GLOBALIZER_initialize()
 
 if(NOT (CMAKE_BUILD_TYPE IN_LIST CMAKE_CONFIGURATION_TYPES))
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "build type" FORCE)
@@ -228,16 +232,25 @@ target_include_directories(${GLOBALIZER_PROJECT_NAME} PRIVATE ${GLOBALIZER_COMMO
 												  PRIVATE ${Python_NumPy_INCLUDE_DIRS})
 												  
 include_directories(${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
-												  
-target_link_libraries(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES}) #/opt/intel/impi/2017.1.132/intel64/lib/libmpi.so)
 
+	
+if (${IS_CLANG_COMPILER})	
+  target_link_libraries(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
+  target_link_libraries(${GLOBALIZER_LIB_NAME}
+    ${GLOBALIZER_MPI_LIB}
+    ${GLOBALIZER_MPFR_LIB}
+    ${GLOBALIZER_MPIR_LIB}
+    ${DISLIN_LIB}
+	OpenMP::OpenMP_CXX  )
+else()
+  target_link_libraries(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})
+  target_link_libraries(${GLOBALIZER_LIB_NAME}
+    ${GLOBALIZER_MPI_LIB}
+    ${GLOBALIZER_MPFR_LIB}
+    ${GLOBALIZER_MPIR_LIB}
+    ${DISLIN_LIB})
 
-target_link_libraries(${GLOBALIZER_LIB_NAME}
-  ${GLOBALIZER_MPI_LIB}
-  ${GLOBALIZER_MPFR_LIB}
-  ${GLOBALIZER_MPIR_LIB}
-  ${DISLIN_LIB}
-)
+endif()
 
 
 
@@ -249,17 +262,20 @@ set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GL
 set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
 set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
 
+message("Find OpenMP") 
+find_package(OpenMP)
+if (OPENMP_FOUND)
+  message("OpenMP found")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+else()
+  message("OpenMP not found")
+endif()
+
 # add linker flags for GCC
 if (IS_GNU_COMPILER)
   target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
   set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
-
-endif()
-
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
 #add tests
