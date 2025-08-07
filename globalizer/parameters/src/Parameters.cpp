@@ -31,7 +31,7 @@
 #endif
 
 #include "Exception.h"
-#include "parameters.h"
+#include "Parameters.h"
 
 
 Parameters parameters;
