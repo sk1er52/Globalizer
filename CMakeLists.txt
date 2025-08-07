@@ -15,7 +15,7 @@ option(GLOBALIZER_USE_MPI "Set OFF to disable MPI.
   In this case a stub implementation of MPI will be used and globalizer won't support multi-process mode" ON)
 option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" ON)
-option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" OFF)
+option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
 
 
