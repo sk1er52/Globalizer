@@ -81,30 +81,38 @@ int main(int argc, char* argv[])
   ProblemManager manager;
   IProblem* problem = 0;
 
-  parameters.Dimension = 2;
+  bool isUseDLLProblems = true;
 
-  problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
-    std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
-    std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
-    std::vector<std::function<double(const double*)>>(1, [](const double* y)
-      {
-        double pi_ = 3.14159265358979323846;
-        double sum = 0.;
-        for (int j = 0; j < parameters.Dimension; j++)
-          sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
-        return sum;
-      }), // критерий
-    true, // определен ли оптимум
-    0, // значение глобального оптимума
-    std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
-    
+  if (isUseDLLProblems)
+  {
+    if (InitProblem(manager, problem, argc, argv, 1))
+    {
+      print << "Error during problem initialization\n";
+      return 0;
+    }
+  }
+  else
+  {
+    parameters.Dimension = 2;
+
+    problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
+      std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
+      std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
+      std::vector<std::function<double(const double*)>>(1, [](const double* y)
+        {
+          double pi_ = 3.14159265358979323846;
+          double sum = 0.;
+          for (int j = 0; j < parameters.Dimension; j++)
+            sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+          return sum;
+        }), // критерий
+      true, // определен ли оптимум
+      0, // значение глобального оптимума
+      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+
     );
-  problem->Initialize();
-  //if (InitProblem(manager, problem, argc, argv, 1))
-  //{
-  //  print << "Error during problem initialization\n";
-  //  return 0;
-  //}
+    problem->Initialize();
+  }
 
   if (parameters.GetProcRank() == 0 && !parameters.disablePrintParameters)
   {
