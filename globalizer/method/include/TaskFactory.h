@@ -23,7 +23,7 @@ class TaskFactory
 public:
   static int num;
   static std::vector<int> permutations;
-  static Task* CreateTask(int _N, int _FreeN, IProblem* _problem, int _ProcLevel);
+  static Task* CreateTask(IProblem* _problem, int _ProcLevel);
   static Task* CreateTask();
   static Task* CreateTask(Task* t);
 };

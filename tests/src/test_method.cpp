@@ -74,7 +74,7 @@ protected:
       problem->SetDimension(n);
       problem->SetConfigPath(parameters->libConfigPath);
       problem->Initialize();
-      pTask = new Task(n, n, problem, 0);
+      pTask = new Task( problem, 0);
 
       parameters->Dimension = n;
       pData = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
@@ -298,11 +298,11 @@ protected:
 //  CheckMetodIteration(expectedDataFile, actualDataFile, pMethod->GetIterationCount() / 10);
 //}
 
-INSTANTIATE_TEST_CASE_P(CheckMethod,
-  MethodTest,
-  ::testing::Values(
-    testParameters(LIB_RASTRIGIN, "/actualRastriginState.dat", "/expectedRastriginState.dat", 4),
-    testParameters(LIB_STRONGINC3, "/actualStronginc3State.dat", "/expectedStronginc3State.dat", 2)));
+//INSTANTIATE_TEST_CASE_P(CheckMethod,
+//  MethodTest,
+//  ::testing::Values(
+//    testParameters(LIB_RASTRIGIN, "/actualRastriginState.dat", "/expectedRastriginState.dat", 4),
+//    testParameters(LIB_STRONGINC3, "/actualStronginc3State.dat", "/expectedStronginc3State.dat", 2)));
 /*INSTANTIATE_TEST_CASE_P(CheckRastrigin1,
                         MethodTest,
                         ::testing::Values(

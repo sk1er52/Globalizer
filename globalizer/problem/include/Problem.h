@@ -97,8 +97,12 @@ protected:
 
     if (NumberOfDiscreteVariable > 0)
     {
-      if (mNumberOfValues != 0)
+      if (mNumberOfValues != nullptr)
+      {
         delete[] mNumberOfValues;
+        mNumberOfValues = nullptr;
+      }
+
       mNumberOfValues = new int[NumberOfDiscreteVariable];
       for (int i = 0; i < NumberOfDiscreteVariable; i++)
       {

@@ -1,4 +1,4 @@
-#include "MPI.h"
+#include "mpi.h"
 
 int MPI_Init(int *pargc, char ***pargv)
 {

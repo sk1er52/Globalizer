@@ -69,8 +69,6 @@ protected:
   int mNeedMPIProcessorCount;
 
 public:
-  /// Количество разверток обрабатывающие процессом владельцем
-  int* MapCount;
   /// Уровень текущего процесса
   int MyLevel;
   /// Номер
@@ -94,11 +92,9 @@ public:
   TString<Parameters> ResulLog; 
   TInt<Parameters> Dimension; //размерность исходной задачи
   TDouble<Parameters> r; // надежность метода (> 1)
-  TDoubles<Parameters> rs;
   ///Добавка при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
   TDouble<Parameters> rDynamic;
   TDouble<Parameters> rEps; //параметр eps-резервирования
-  TDoubles<Parameters> Eps; //точность решения задачи на каждом уровне; //   размер - NumOfProcLevels
   TDouble<Parameters> Epsilon; //единая точность
   TString<Parameters> Comment; //Коментарий к эксперименту
 
@@ -106,28 +102,9 @@ public:
   TInt<Parameters> m; // плотность построения развертки (точность 1/2^m по к-те)
   TInt<Parameters> deviceCount; //кол-во используемых ускорителей
   TEMapType<Parameters> MapType; // тип развертки (сдвиговая, вращаемая)
-  TInt<Parameters> NumOfTaskLevels; // число уровней в дереве задач ; // максимальное число уровней в дереве - 5 совпадает с NumOfProcLevels
-  TInts<Parameters> DimInTaskLevel; // число размерностей на каждом уровне дерева задач ; // размер - NumOfTaskLevels
-  TInts<Parameters> ChildInProcLevel; // число потомков у процессов на уровнях с 0 до NumOfTaskLevels - 2; // размер - NumOfProcLevels - 1//уровень NumOfTaskLevels - 1 - процессы-листья
-  TInt<Parameters> FullOrShort; // Полное вычисление в параллельной блочной многошаговой схеме или только подсчет значения функции
   TInt<Parameters> DebugAsyncCalculation; // Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
 
-  /** число разверток (L + 1) на каждом уровне дерева процессов
-  размер - NumOfProcLevels
-  последний уровень по разверткам не параллелится
-  * = L общее число разверток на уровне дерева
-  */
-  TInts<Parameters> MapInLevel;
-  /**число процессов на каждом уровне дерева процессов, использующих множественную развертку
-  размер - NumOfProcLevels
-  последний уровень по разверткам не параллелится
-  * число процессов обрабатывающие разные развертки на уровне (узле дерева распараллеливания)
-  *если один корень то MapInLevel[0]*ProcNum=MapInLevel[0]
-  *определяет число соседей
-  */
-  TInts<Parameters> MapProcInLevel;
-
-  /// Печатать ли информацию о сечении в многошаговой схеме
+   /// Печатать ли информацию о сечении в многошаговой схеме
   TBool<Parameters> IsPrintSectionPoint;
 
   TInts<Parameters> MaxNumOfPoints; // максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
@@ -183,57 +160,21 @@ public:
   /// Не использовать Z
   TBool<Parameters> isNotUseZ;
 
-  /// Использовать ли локальный метод при нахождение локального минимума
-  TBool<Parameters> isUseLocalUpdate;
-  /// Кол-во точек которые определяют локальный минимум
-  TInt<Parameters> countPointInLocalMinimum;
-  /// Тип локального метода (0 - Хука-Дживас, 1 - квадратичная апросксимация)
+  /// Тип локального метода (0 - Хука-Дживас)
   TETypeLocalMethod<Parameters> TypeLocalMethod;
-  /// Параметр включения локального уточнения (длина локальной подобласти это 1 / Localr от максимальной длины)
-  TDouble<Parameters> Localr;
-  /// Тип критерия старта локального метода (0 - найдены любые countPointInLocalMinimum точек образующих параболоид, 1 найдено countPointInLocalMinimum / 2 точек слева и справа)
-  TETypeStartLocalMethod<Parameters> TypeStartLocalMethod;
+
   /// Тип добавления точек локального уточнения (0 - как обычные точки, 1 - точки локального метода не учитываются в критерии остановки по точности)
   TETypeAddLocalPoint<Parameters> TypeAddLocalPoint;
   /// Максимальное Кол-во точек устанавлиемых локальным методом
   TInt<Parameters> maxCountLocalPoint;
-  /// Тип взятия точек: 0 - берем сразу np точек, 1 - берем с учетом окрестности локальных минимумов.
-  TInt<Parameters> PointTakingType;
-  /// Тип изменения статуса интервала: 0 - не изменять у потомков, 1 - изменять.
-  TInt<Parameters> StatusIntervalChangeType;
   /// Вычислять ли значения функции в крайних точках интервала
   TBool<Parameters> isCalculationInBorderPoint;
   /// Тип локального уточнения: 0 - без него; 1 - минимаксное; 2 - адаптивное; 3 - адаптивно-минимаксное
   TELocalTuningType<Parameters> LocalTuningType;
   /// Параметр кси, используемый в локальном уточении
   TDouble<Parameters> ltXi;
-  /// Способ выбора интервала хранящего локальный минимум NPoints - по 5 точкам DecisionTrees по дереву решения
-  TETypeLocalMinInterval<Parameters> TypeLocalMinIntervale;
-  /// Максимальная глубина обучения в дереве решения
-  TInt<Parameters> DecisionTreesMaxDepth;
-  /// Точность построения дерева решения
-  TDouble<Parameters> DecisionTreesRegressionAccuracy;
 
-  /// Число точек до запуска апроксимации
-  TInt<Parameters> NumPointsForApproximation;
-
-  //MCO
-  ///параметры свертки
-  TDoubles<Parameters> Lamda;
-  TInt<Parameters> rLamda; //параметры свертки
-  TInt<Parameters> numberOfLamda; //количество коэффициентов свертки
-  TBool<Parameters> isCriteriaScaling; // нужно ли масштабирование значений критериев при свертке
-  TInt<Parameters> itrEps; //число итераций до попадания в eps-окрестность
-  /// Количество критериев в общей постановке задачи MCO
-  TInt<Parameters> MCO_N_Criteria;
-  /// Количество ограничений в общей постановке задачи MCO
-  TInt<Parameters> MCO_N_Constraint;
-  /// Выборка критериев в общей постановке задачи MCO
-  TInts<Parameters> MCO_Criteria_perm;
-  /// Выборка ограничений в общей постановке задачи MCO
-  TInts<Parameters> MCO_Constraint_perm;
-  /// Допуски для ограничений в общей постановке задачи MCO
-  TDoubles<Parameters> MCO_q;
+  
 
   /// Загружать начальныеточки из файла или распределять их равномерно
   TBool<Parameters> isLoadFirstPointFromFile;

@@ -64,19 +64,8 @@ protected:
   int               MaxNumOfTrials;
   /// число итераций до включения смешанного алгоритма
   int               StartLocalIteration;
-  /// точность решения задачи
-  double            Epsilon;
-  /// Надежность метода
-  /// Параметр надежности должне быть строго больше 1
-  double            r;
-  /** Плотность построения развертки
 
-   Развертка, построенная с плотностью m, обеспечивает точность поиска \f$ 1/2^m \f$ по координате
-  */
-  int               m;
 
-  /// число точек испытаний используемое на каждой итерации
-  int               NumPoints;
   /// Обновлено глобальное М
   bool isGlobalMUpdate;
   /// Обновлена лучшая точка в текущей задаче
@@ -139,17 +128,12 @@ protected:
   ///Новая точка устанавливается в интервал принадлежащий окрестности локального минимума
   bool isSetInLocalMinimumInterval;
 
-  /// Массив для сохранения точек для последующей печати и рисования
-  static std::vector< Trial* > printPoints;
   /// количество точек вычисленных локальным методом
-  static int localPointCount;
+  int localPointCount;
   /// число запусков локально метода
-  static int numberLocalMethodtStart;
+  int numberLocalMethodtStart;
   /// Нужно останавливаться
   bool isStop;
-
-  /// Количество вызовов рисовалки
-  static int printCount;
 
   /**
   Количество дискретных значений
@@ -161,8 +145,7 @@ protected:
   std::vector< std::vector< double > > mDiscreteValues;
   /// Индекс первого дискретного параметра
   int startDiscreteVariable;
-  /// Размерность используемая при вычислении длинны интервала
-  int rootDim;
+
 
   /// найденные локальные минимумы
   std::vector<Trial*> localMinimumPoints;
@@ -175,13 +158,11 @@ protected:
   bool isSearchXMax;
   //=====================================================================================================================================================
 
+  /// Массив для сохранения точек для последующей печати и рисования
+  std::vector<Trial*> printPoints;
 
   /// Метод сохраняющий точки в статический массив
   virtual void  SavePoints();
-  /// Рисуем точки в подзадачах
-  virtual void  PlotPoint();
-  /// Рисуем точки образованные разверткой
-  virtual void  PlotPoint2();
 
   /** Вычисление "глобальной" характеристики
 
@@ -252,10 +233,6 @@ protected:
   /// Уже не нужен???
   virtual bool IsIntervalInSegment(SearchInterval* basicInterval, SearchInterval* newInterval);
 
-  /**Изменить количество текущих точек испытаний, переписывает #iteration.pCurTrials и
-  #iteration.BestIntervals
-  */
-  virtual void SetNumPoints(int newNP);
 
   /**
   Изменение при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
@@ -396,10 +373,6 @@ public:
   /// Печатает информацию о сечениях
   virtual void PrintSection();
 
-  /// Рисуем дерево
-  virtual void PlotDecisionTrees();
-
-  virtual void Plot3DDecisionTrees();
 };
 
 #endif

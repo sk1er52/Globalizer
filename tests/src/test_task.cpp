@@ -1,5 +1,5 @@
 #include "Task.h"
-#include "ProblemManager.h"
+#include "Problem.h"
 #include "test_config.h"
 
 #include <gtest/gtest.h>
@@ -27,19 +27,30 @@ protected:
   Task* task;
   //Функционалы
   IProblem* problem;
-  ProblemManager manager;
 
   void SetUp()
   {
-    std::string libPath = std::string(TESTDATA_BIN_PATH) + std::string(LIB_RASTRIGIN);
-    if (ProblemManager::OK_ == manager.LoadProblemLibrary(libPath))
-    {
-      problem = manager.GetProblem();
-      problem->SetDimension(n);
-      task = new Task(n, freeN, problem, 0);
-    }
-    else
-      task = NULL;
+
+    
+    problem = new ProblemFromFunctionPointers(n, // размерность задачи
+      std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
+      std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
+      std::vector<std::function<double(const double*)>>(1, [](const double* y)
+        {
+          double pi_ = 3.14159265358979323846;
+          double sum = 0.;
+          for (int j = 0; j < parameters.Dimension; j++)
+            sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+          return sum;
+        }), // критерий
+      true, // определен ли оптимум
+      0, // значение глобального оптимума
+      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+
+    );
+    parameters.Dimension = 5;
+    task = new Task(problem, 0);
+
   }
 
   void TearDown()
@@ -54,37 +65,26 @@ protected:
  */
 TEST_F(TaskTest, throws_when_create_with_negative_N)
 {
-  ASSERT_ANY_THROW(Task testTask(-1, freeN, problem, 0));
+  int oldN = parameters.Dimension;
+  parameters.Dimension = -1;
+  ASSERT_ANY_THROW(Task testTask( problem, 0));
+  parameters.Dimension = oldN;
 }
 
 TEST_F(TaskTest, throws_when_create_with_null_N)
 {
-  ASSERT_ANY_THROW(Task testTask(0, freeN, problem, 0));
+  int oldN = parameters.Dimension;
+  parameters.Dimension = 0;
+  ASSERT_ANY_THROW(Task testTask( problem, 0));
+  parameters.Dimension = oldN;
 }
 
 TEST_F(TaskTest, throws_when_create_with_too_large_N)
 {
-  ASSERT_ANY_THROW(Task testTask(MaxDim + 1, freeN, problem, 0));
-}
-
-TEST_F(TaskTest, throws_when_create_with_free_N_large_N)
-{
-  ASSERT_ANY_THROW(Task testTask(n, n + 1, problem, 0));
-}
-
-/**
- * Проверка параметра размерности подзадачи FreeN
- * 1<= FreeN <= N
- */
-
-TEST_F(TaskTest, throws_when_create_with_negative_free_N)
-{
-  ASSERT_ANY_THROW(Task testTask(n, -1, problem, 0));
-}
-
-TEST_F(TaskTest, throws_when_create_with_null_free_N)
-{
-  ASSERT_ANY_THROW(Task testTask(n, 0, problem, 0));
+  int oldN = parameters.Dimension;
+  parameters.Dimension = 500;
+  ASSERT_ANY_THROW(Task testTask(problem, 0));
+  parameters.Dimension = oldN;
 }
 
 /**
@@ -92,27 +92,6 @@ TEST_F(TaskTest, throws_when_create_with_null_free_N)
  */
 TEST_F(TaskTest, can_create_with_correct_values)
 {
-  ASSERT_NO_THROW(Task testTask(n, freeN, problem, 0));
+  ASSERT_NO_THROW(Task testTask( problem, 0));
 }
 
-/**
- * Проверка функции #SetFixed
- * FixedN == N - FreeN; FixedY != NULL
- */
-TEST_F(TaskTest, throws_when_set_invalid_FixedN_value)
-{
-  ASSERT_FALSE(task == NULL);
-  ASSERT_ANY_THROW(task->SetFixed(n - freeN + 1, A));
-}
-
-TEST_F(TaskTest, throws_when_set_null_FixedY)
-{
-  ASSERT_FALSE(task == NULL);
-  ASSERT_ANY_THROW(task->SetFixed(n - freeN, NULL));
-}
-
-TEST_F(TaskTest, set_Fixed_with_correct_value)
-{
-  ASSERT_FALSE(task == NULL);
-  ASSERT_NO_THROW(task->SetFixed(n - freeN, A));
-}

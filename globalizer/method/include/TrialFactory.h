@@ -21,35 +21,24 @@
 
 
 class Trial;
-class TMultievolventsTrial;
 class TrialFactory
 {
 public:
   //static Trial* CreateTrial(Trial& interval);
   static Trial* CreateTrial()
   {
-    if ((parameters.TypeMethod == MultievolventsMethod) || (parameters.TypeMethod == ParallelMultievolventsMethod))
-      return new TMultievolventsTrial();
-    else
-      return new Trial();
+    return new Trial();
   }
 
   static Trial* CreateTrial(const OBJECTIV_TYPE* startPoint)
   {
     Trial* res;
-    if ((parameters.TypeMethod == MultievolventsMethod) || (parameters.TypeMethod == ParallelMultievolventsMethod))
-      res = new TMultievolventsTrial();
-    else
-      res = new Trial();
+    res = new Trial();
     memcpy(res->y, startPoint, parameters.Dimension * sizeof(double));
 
     return res;
   }
 
-  static Trial* CreateTrial(TMultievolventsTrial* point)
-  {    
-    return new TMultievolventsTrial(*point);
-  }
 
   static Trial* CreateTrial(Trial* point)
   {
@@ -57,24 +46,6 @@ public:
   }
 };
 
-
-//// ------------------------------------------------------------------------------------------------
-//Trial* TrialFactory::CreateTrial(Trial& interval)
-//{
-//  if (parameters.TypeMethod == MultievolventsMethod)
-//    return new TMultievolventsTrial((SearchInterval&)(interval));
-//  else
-//    return new SearchInterval(interval);
-//}
-
-//// ------------------------------------------------------------------------------------------------
-//Trial* TrialFactory::CreateTrial()
-//{
-//  if (parameters.TypeMethod == MultievolventsMethod)
-//    return new TMultievolventsTrial();
-//  else
-//    return new Trial();
-//}
 
 
 #endif

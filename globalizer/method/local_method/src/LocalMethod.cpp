@@ -33,12 +33,12 @@ LocalMethod::LocalMethod(Task* _pTask, Trial _startPoint, int logPoints) :
 
   mPTask = _pTask;
 
-  mDimension = mPTask->GetN() - mPTask->GetFixedN() - mPTask->GetNumberOfDiscreteVariable();
+  mDimension = mPTask->GetN() - mPTask->GetNumberOfDiscreteVariable();
   mConstraintsNumber = mPTask->GetNumOfFunc() - 1;
 
   mStartPoint = new OBJECTIV_TYPE[mDimension];
   std::memcpy(mStartPoint,
-    _startPoint.y + mPTask->GetFixedN(),
+    _startPoint.y,
     mDimension * sizeof(OBJECTIV_TYPE));
 
   mFunctionsArgument = new OBJECTIV_TYPE[mPTask->GetN()];
@@ -100,8 +100,8 @@ Trial LocalMethod::StartOptimization()
         Trial currentTrial;
         currentTrial.index = mBestPoint.index;
         currentTrial.FuncValues[currentTrial.index] = nextFValue;
-        std::memcpy(currentTrial.y, mFunctionsArgument, sizeof(OBJECTIV_TYPE)*mPTask->GetFixedN());
-        std::memcpy(currentTrial.y + mPTask->GetFixedN(), mCurrentPoint, sizeof(OBJECTIV_TYPE)*mDimension);
+
+        std::memcpy(currentTrial.y, mCurrentPoint, sizeof(OBJECTIV_TYPE)*mDimension);
         mSearchSequence.push_back(currentTrial);
       }
       k++;
@@ -120,7 +120,7 @@ Trial LocalMethod::StartOptimization()
 
   if (currentFValue < mBestPoint.FuncValues[mConstraintsNumber])
   {
-    std::memcpy(mBestPoint.y + mPTask->GetFixedN(),
+    std::memcpy(mBestPoint.y,
       mPreviousResearchDirection, sizeof(OBJECTIV_TYPE)*mDimension);
     mBestPoint.FuncValues[mConstraintsNumber] = currentFValue;
     mSearchSequence.push_back(mBestPoint);
@@ -140,11 +140,11 @@ double LocalMethod::EvaluateObjectiveFunctiuon(const OBJECTIV_TYPE* x)
     return HUGE_VAL;
 
   for (int i = 0; i < mDimension; i++)
-    if (x[i] < mPTask->GetA()[mPTask->GetFixedN() + i] ||
-      x[i] > mPTask->GetB()[mPTask->GetFixedN() + i])
+    if (x[i] < mPTask->GetA()[i] ||
+      x[i] > mPTask->GetB()[i])
       return HUGE_VAL;
 
-  std::memcpy(mFunctionsArgument + mPTask->GetFixedN(), x, mDimension * sizeof(OBJECTIV_TYPE));
+  std::memcpy(mFunctionsArgument, x, mDimension * sizeof(OBJECTIV_TYPE));
   for (int i = 0; i <= mConstraintsNumber; i++)
   {
     double value = mPTask->CalculateFuncs(mFunctionsArgument, i);

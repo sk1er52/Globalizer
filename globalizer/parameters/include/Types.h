@@ -29,7 +29,10 @@
 
 \details Объявление класса #TInteger и его реализация
 */
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <string>
 #include <algorithm>
@@ -423,7 +426,7 @@ public:
   /// Базовые переопределения
   BasicMethods(TEMapType, EMapType);
 
-  TEMapType(EMapType value = mpRotated) :
+  TEMapType(EMapType value = mpBase) :
     ParameterProperty<EMapType, Owner>(value) {}
 
   /// Парсер строки
@@ -444,7 +447,7 @@ public:
   /// Базовые переопределения
   BasicMethods(TETypeDistributionStartingPoints, ETypeDistributionStartingPoints);
 
-  TETypeDistributionStartingPoints(ETypeDistributionStartingPoints value = Adaptively) :
+  TETypeDistributionStartingPoints(ETypeDistributionStartingPoints value = Evenly) :
     ParameterProperty<ETypeDistributionStartingPoints, Owner>(value) {}
 
   /// Парсер строки
@@ -1127,24 +1130,8 @@ void TETypeMethod<Owner>::operator = (std::string data)
 {
   if ((data == "StandartMethod") || (data == "0"))
     *this = StandartMethod;
-  if ((data == "HybridMethod") || (data == "1"))
-    *this = HybridMethod;
-  if ((data == "ManyNumPointMethod") || (data == "2"))
-    *this = ManyNumPointMethod;
-  if ((data == "UniformSearchMethod") || (data == "3"))
-    *this = UniformSearchMethod;
-  if ((data == "GlobalSearchMethod") || (data == "4"))
-    *this = GlobalSearchMethod;
-  if ((data == "MCO_Method") || (data == "5"))
-    *this = MCO_Method;
-  if ((data == "MultievolventsMethod") || (data == "6"))
-    *this = MultievolventsMethod;
-  if ((data == "ParallelMultievolventsMethod") || (data == "7"))
-    *this = ParallelMultievolventsMethod;
-  if ((data == "IntegerMethod") || (data == "8"))
+  if ((data == "IntegerMethod") || (data == "1"))
     *this = IntegerMethod;
-  if ((data == "AdaptivMethod") || (data == "9"))
-    *this = AdaptivMethod;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1155,24 +1142,8 @@ TETypeMethod<Owner>::operator std::string()
   std::string s;
   if (this->mValue == StandartMethod)
     s = "StandartMethod";
-  if (this->mValue == HybridMethod)
-    s = "HybridMethod";
-  if (this->mValue == ManyNumPointMethod)
-    s = "ManyNumPointMethod";
-  if (this->mValue == UniformSearchMethod)
-    s = "UniformSearchMethod";
-  if (this->mValue == GlobalSearchMethod)
-    s = "GlobalSearchMethod";
-  if (this->mValue == MCO_Method)
-    s = "MCO_Method";
-  if (this->mValue == MultievolventsMethod)
-    s = "MultievolventsMethod";
-  if (this->mValue == ParallelMultievolventsMethod)
-    s = "ParallelMultievolventsMethod";
   if (this->mValue == IntegerMethod)
     s = "IntegerMethod";
-  if (this->mValue == AdaptivMethod)
-    s = "AdaptivMethod";
   return s;
 }
 
@@ -1298,23 +1269,11 @@ void TETypeCalculation<Owner>::operator = (std::string data)
     *this = OMP;
   if ((data == "CUDA") || (data == "1"))
     *this = CUDA;
-  if ((data == "PHI") || (data == "2"))
-    *this = PHI;
-  if ((data == "BlockScheme") || (data == "3"))
-    *this = BlockScheme;
-  if ((data == "Adaptiv") || (data == "4"))
-    *this = Adaptiv;
-  if ((data == "Multievolvents") || (data == "5"))
-    *this = Multievolvents;
-  if ((data == "ParallelBlockScheme") || (data == "6"))
-    * this = ParallelBlockScheme;
-  if ((data == "MPI_calc") || (data == "7"))
+  if ((data == "MPI_calc") || (data == "2"))
     *this = MPI_calc;
-  if ((data == "AsyncMPI") || (data == "8"))
+  if ((data == "AsyncMPI") || (data == "3"))
     *this = AsyncMPI;
-  if ((data == "ApproximationScheme") || (data == "9"))
-    * this = ApproximationScheme;
-  if ((data == "OneApi") || (data == "10"))
+  if ((data == "OneApi") || (data == "4"))
     *this = OneApi;
 }
 
@@ -1328,22 +1287,10 @@ TETypeCalculation<Owner>::operator std::string()
     s = "OMP";
   if (this->mValue == CUDA)
     s = "CUDA";
-  if (this->mValue == PHI)
-    s = "PHI";
-  if (this->mValue == BlockScheme)
-    s = "BlockScheme";
-  if (this->mValue == Adaptiv)
-    s = "Adaptiv";
-  if (this->mValue == Multievolvents)
-    s = "Multievolvents";
-  if (this->mValue == ParallelBlockScheme)
-    s = "ParallelBlockScheme";
   if (this->mValue == MPI_calc)
     s = "MPI_calc";
   if (this->mValue == AsyncMPI)
     s = "AsyncMPI";
-  if (this->mValue == ApproximationScheme)
-    s = "ApproximationScheme";
   if (this->mValue == OneApi)
     s = "OneApi";
   return s;
@@ -1360,10 +1307,6 @@ void TETypeProcess<Owner>::operator = (std::string data)
 {
   if ((data == "SynchronousProcess") || (data == "0"))
     *this = SynchronousProcess;
-  if ((data == "SynchronousProcessNew") || (data == "1"))
-    *this = SynchronousProcessNew;
-  if ((data == "AsynchronousProcess") || (data == "2"))
-    *this = AsynchronousProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1374,10 +1317,6 @@ TETypeProcess<Owner>::operator std::string()
   std::string s;
   if (this->mValue == SynchronousProcess)
     s = "SynchronousProcess";
-  if (this->mValue == SynchronousProcessNew)
-    s = "SynchronousProcessNew";
-  if (this->mValue == AsynchronousProcess)
-    s = "AsynchronousProcess";
   return s;
 }
 
@@ -1390,12 +1329,8 @@ void TETypeSolver<Owner>::operator = (std::string data)
 {
   if ((data == "SingleSearch") || (data == "0"))
     *this = SingleSearch;
-  if ((data == "SequentialSearch") || (data == "1"))
-    *this = SequentialSearch;
   if ((data == "SeparableSearch") || (data == "2"))
     *this = SeparableSearch;
-  if ((data == "SeparationVariables") || (data == "3"))
-    *this = SeparationVariables;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1406,12 +1341,8 @@ TETypeSolver<Owner>::operator std::string()
   std::string s;
   if (this->mValue == SeparableSearch)
     s = "SeparableSearch";
-  if (this->mValue == SequentialSearch)
-    s = "SequentialSearch";
   if (this->mValue == SingleSearch)
     s = "SingleSearch";
-  if (this->mValue == SeparationVariables)
-    s = "SeparationVariables";
   return s;
 }
 
@@ -1424,10 +1355,6 @@ TETypeSolver<Owner>::operator std::string()
 template <class Owner>
 void TEMapType<Owner>::operator = (std::string data)
 {
-  if ((data == "mpRotated") || (data == "0"))
-    *this = mpRotated;
-  if ((data == "mpShifted") || (data == "1"))
-    *this = mpShifted;
   if ((data == "mpBase") || (data == "2"))
     *this = mpBase;
 }
@@ -1438,10 +1365,6 @@ template <class Owner>
 TEMapType<Owner>::operator std::string()
 {
   std::string s;
-  if (this->mValue == mpRotated)
-    s = "mpRotated";
-  if (this->mValue == mpShifted)
-    s = "mpShifted";
   if (this->mValue == mpBase)
     s = "mpBase";
   return s;
@@ -1458,8 +1381,6 @@ void TETypeDistributionStartingPoints<Owner>::operator = (std::string data)
 {
   if ((data == "Evenly") || (data == "0"))
     *this = Evenly;
-  if ((data == "Adaptively") || (data == "1"))
-    *this = Adaptively;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1470,8 +1391,6 @@ TETypeDistributionStartingPoints<Owner>::operator std::string()
   std::string s;
   if (this->mValue == Evenly)
     s = "Evenly";
-  if (this->mValue == Adaptively)
-    s = "Adaptively";
   return s;
 }
 
@@ -1489,12 +1408,8 @@ void TETypeLocalMethod<Owner>::operator = (std::string data)
     *this = HookeJeeves;
   if ((data == "LeastSquareMethod") || (data == "1"))
     *this = LeastSquareMethod;
-  if ((data == "L_BFGS_B") || (data == "2"))
-    *this = L_BFGS_B;
   if ((data == "ParallelHookeJeeves") || (data == "3"))
     *this = ParallelHookeJeeves;
-  if ((data == "Parallel_L_BFGS_B") || (data == "4"))
-      *this = Parallel_L_BFGS_B;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1507,12 +1422,8 @@ TETypeLocalMethod<Owner>::operator std::string()
     s = "HookeJeeves";
   if (this->mValue == LeastSquareMethod)
     s = "LeastSquareMethod";
-  if (this->mValue == L_BFGS_B)
-    s = "L_BFGS_B";
   if (this->mValue == ParallelHookeJeeves)
     s = "ParallelHookeJeeves";
-  if (this->mValue == Parallel_L_BFGS_B)
-      s = "Parallel_L_BFGS_B";
   return s;
 }
 
