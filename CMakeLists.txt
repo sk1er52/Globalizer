@@ -17,7 +17,7 @@ option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" ON)
 option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" OFF)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
-
+option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 
 
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
@@ -260,6 +260,11 @@ find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
+#add problems
+if(${GLOBALIZER_BUILD_PROBLEMS})
+	add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/Problems)
 endif()
 
 #add tests
