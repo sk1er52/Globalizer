@@ -135,14 +135,13 @@ public:
   */
   virtual int GetNumberOfDiscreteVariable()
   {
-    if (IsLeaf())
+
+    IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
+    if (newProblem != 0)
     {
-      IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
-      if (newProblem != 0)
-      {
-        return newProblem->GetNumberOfDiscreteVariable();
-      }
+      return newProblem->GetNumberOfDiscreteVariable();
     }
+    
     return 0;
   }
   /**
@@ -153,14 +152,13 @@ public:
   */
   virtual int GetNumberOfValues(int discreteVariable)
   {
-    if (IsLeaf())
+
+    IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
+    if (newProblem != 0)
     {
-      IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
-      if (newProblem != 0)
-      {
-        return newProblem->GetNumberOfValues(discreteVariable);
-      }
+      return newProblem->GetNumberOfValues(discreteVariable);
     }
+  
     return -1;
   }
   /**
@@ -171,14 +169,12 @@ public:
   */
   virtual int GetAllDiscreteValues(int discreteVariable, double* values)
   {
-    if (IsLeaf())
+    IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
+    if (newProblem != 0)
     {
-      IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
-      if (newProblem != 0)
-      {
-        return newProblem->GetAllDiscreteValues(discreteVariable, values);
-      }
+      return newProblem->GetAllDiscreteValues(discreteVariable, values);
     }
+    
     return IProblem::ERROR;
   }
   ///**
@@ -203,14 +199,13 @@ public:
   */
   virtual bool IsPermissibleValue(double value, int discreteVariable)
   {
-    if (IsLeaf())
+
+    IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
+    if (newProblem != 0)
     {
-      IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
-      if (newProblem != 0)
-      {
-        return newProblem->IsPermissibleValue(value, discreteVariable);
-      }
+      return newProblem->IsPermissibleValue(value, discreteVariable);
     }
+    
     return false;
   }
   /**

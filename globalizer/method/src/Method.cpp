@@ -441,7 +441,7 @@ void Method::FirstIteration()
         }
       }
     }
-
+    SetNumPoints(parameters.NumPoints * mDiscreteValuesCount);
   }
   else // читаем из файла FirstPointFilePath
   {
@@ -592,7 +592,10 @@ void Method::CalculateIterationPoints()
   {
     return;
   }
-
+  else if (iteration.IterationCount == 2)
+  {
+    this->SetNumPoints(parameters.NumPoints);
+  }
 
   // Если поднят флаг - то пересчитать все характеристики
   Recalc();
@@ -773,6 +776,28 @@ bool Method::CheckLocalityOptimalPoint(Trial* trial)
   return isFoundOptimalPoint;
 }
 
+
+// ------------------------------------------------------------------------------------------------
+void Method::SetNumPoints(int newNP)
+{
+  if (newNP <= 0)
+    newNP = 1;
+
+  if (iteration.pCurTrials.size() != newNP)
+  {
+    for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
+      iteration.pCurTrials[i] = 0;
+
+    iteration.pCurTrials.resize(newNP);
+  }
+
+  //if (iteration.BestIntervals.size() != NumPoints)
+  //  iteration.BestIntervals.resize(NumPoints);
+
+  inputSet.Resize(newNP);
+  outputSet.Resize(newNP);
+  
+}
 
 // ------------------------------------------------------------------------------------------------
 void Method::CalculateFunctionals()
@@ -1321,6 +1346,11 @@ void Method::FinalizeIteration()
   for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
     iteration.pCurTrials[i] = 0;
 
+  if (parameters.TypeCalculation == AsyncMPI) 
+  {
+    SetNumPoints(1);
+    parameters.NumPoints = 1;
+  }
 
   if (isLocalZUpdate)//Если нужен пересчет - обновился минимум
   {

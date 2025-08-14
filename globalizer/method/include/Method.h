@@ -257,6 +257,12 @@ protected:
   /// Получаем поисковую информацию, важно для адаптивного метода
   virtual SearchData* GetSearchData(Trial* trial);
 
+  /**Изменить количество текущих точек испытаний, переписывает #iteration.pCurTrials и
+#iteration.BestIntervals
+*/
+  virtual void SetNumPoints(int newNP);
+
+
 public:
 
   Method(Task& _pTask, SearchData& _pData,
