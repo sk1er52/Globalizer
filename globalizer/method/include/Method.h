@@ -36,15 +36,7 @@
 #include "SearchIteration.h"
 #include "SearchInterval.h"
 
-#ifdef USE_OpenCV
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/ml/ml.hpp"
 
-//using namespace cv;
-//using namespace ml;
-//
-#endif
 
 // ------------------------------------------------------------------------------------------------
 
@@ -89,8 +81,6 @@ protected:
   - множественная вращаемая развертка
   */
   Evolvent& evolvent;
-
-  int numberOfRepetitions;
 
   // ----------------------------------------------------------------------------
   // Внутренние данные метода
@@ -220,9 +210,6 @@ protected:
   */
   virtual bool UpdateOptimumEstimation(Trial& trial);
 
-  /// Проверяет попала ли точка в окрестность глобального манимума
-  virtual bool CheckLocalityOptimalPoint(Trial* trial);
-
   /// Вычисление координат точек испытания для основной\единственной развертки
   virtual void CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestIntervalsj);
 
@@ -251,11 +238,9 @@ protected:
   virtual void Recalc();
 
 
-  /// Задать значения дискретного параметра
-  virtual void SetDiscreteValue(int u, std::vector< std::vector <double> > dvs);
-
   /// Получаем поисковую информацию, важно для адаптивного метода
   virtual SearchData* GetSearchData(Trial* trial);
+
 
   /**Изменить количество текущих точек испытаний, переписывает #iteration.pCurTrials и
 #iteration.BestIntervals
