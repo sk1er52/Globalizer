@@ -27,7 +27,7 @@
 //  return (i1 < i2);
 //}
 
-  /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
+// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
 std::vector<SearchData*> SearchData::pRecalcDatas;
 
 // ------------------------------------------------------------------------------------------------
@@ -53,13 +53,15 @@ SearchData::SearchData(int _NumOfFuncs, int _MaxSize)
     throw EXCEPTION("NumOfFunc is out of range");
   }
   NumOfFuncs = _NumOfFuncs;
-  for(int i=0;i<NumOfFuncs;i++)
+  for (int i = 0; i < NumOfFuncs; i++)
   {
-    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.; //Начальное значение оценок констант Липшица равно 1
-    Z[i] = MaxDouble;  //Начальное значение минимумов - максимальное
+    // Начальное значение оценок констант Липшица равно 1.0
+    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.0;
+    // Начальное значение минимумов - максимальное
+    Z[i] = MaxDouble;
   }
 
-  BestTrial = 0;
+  BestTrial = nullptr;
   pRecalcDatas.clear();
 }
 
@@ -83,13 +85,15 @@ SearchData::SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
     throw EXCEPTION("NumOfFunc is out of range");
   }
   NumOfFuncs = _NumOfFuncs;
-  for (int i = 0;i<NumOfFuncs;i++)
+  for (int i = 0; i < NumOfFuncs; i++)
   {
-    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.; //Начальное значение оценок констант Липшица равно 1
-    Z[i] = MaxDouble;  //Начальное значение минимумов - максимальное
+    // Начальное значение оценок констант Липшица равно 1.0
+    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.0;
+    // Начальное значение минимумов - максимальное
+    Z[i] = MaxDouble;
   }
 
-  BestTrial = 0;
+  BestTrial = nullptr;
   pRecalcDatas.clear();
 }
 
@@ -114,8 +118,10 @@ void SearchData::Clear()
   ClearQueue();
   for (int i = 0; i < NumOfFuncs; i++)
   {
-    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.;      //Начальное значение оценок констант Липшица равно 1
-    Z[i] = MaxDouble;  //Начальное значение минимумов - максимальное
+    // Начальное значение оценок констант Липшица равно 1.0
+    M[i] = i < parameters.M_constant.GetSize() ? parameters.M_constant[i] : 1.0;
+    // Начальное значение минимумов - максимальное
+    Z[i] = MaxDouble;
   }
   for (unsigned int i = 0; i < trials.size(); i++)
   {
@@ -124,7 +130,7 @@ void SearchData::Clear()
 
   trials.clear();
 
-  BestTrial = 0;
+  BestTrial = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -191,16 +197,11 @@ void SearchData::SetBestTrial(Trial* trial)
   for (int v = 0; v <= BestTrial->index; v++)
   {
     if (v < BestTrial->index)
-    {
       Z[v] = -M[v] * parameters.rEps;
-    }
+    else if (BestTrial->FuncValues[v] != MaxDouble)
+      Z[v] = BestTrial->FuncValues[v];
     else
-    {
-      if (BestTrial->FuncValues[v] != MaxDouble)
-        Z[v] = BestTrial->FuncValues[v];
-      else
-        Z[v] = 0;
-    }
+      Z[v] = 0.0;
   }
 }
 
@@ -209,8 +210,10 @@ TreeNode* SearchData::RotateRight(TreeNode *p)
 {
   TreeNode *pTmp = p->pLeft;
   p->pLeft = pTmp->pRight;
+
   if (p->pLeft)
     p->pLeft->pParent = p;
+
   pTmp->pParent = p->pParent;
   pTmp->pRight = p;
   p->pParent = pTmp;
@@ -259,6 +262,7 @@ TreeNode* SearchData::Minimum(TreeNode *p) const
 TreeNode* SearchData::Balance(TreeNode *p)
 {
   FixHeight(p);
+
   if (GetBalance(p) == 2)
   {
     if (GetBalance(p->pRight) < 0)
@@ -277,6 +281,7 @@ TreeNode* SearchData::Balance(TreeNode *p)
     }
     return RotateRight(p);
   }
+
   return p; // балансировка не нужна
 }
 
@@ -310,6 +315,7 @@ TreeNode* SearchData::Insert(TreeNode *p, SearchInterval &pInterval)
 TreeNode* SearchData::Find(TreeNode *p, Trial* x) const
 {
   TreeNode *res;
+
   if (!p)
     return p;
   if (*x < *(p->pInterval->LeftPoint))
@@ -326,6 +332,7 @@ TreeNode* SearchData::Find(TreeNode *p, Trial* x) const
 TreeNode* SearchData::FindR(TreeNode *p, Trial* x) const
 {
   TreeNode *res;
+
   if (!p)
     return p;
   if (*x < *(p->pInterval->LeftPoint))
@@ -342,6 +349,7 @@ TreeNode* SearchData::FindR(TreeNode *p, Trial* x) const
 TreeNode * SearchData::FindIn(TreeNode * p, Trial* x) const
 {
   TreeNode *res;
+
   if (!p)
     return p;
   if (*x < *(p->pInterval->LeftPoint))
@@ -361,8 +369,10 @@ SearchInterval* SearchData::InsertInterval(SearchInterval &pInterval)
   {
     throw EXCEPTION("Cannot insertinterval with not positive length.");
   }
+
   pRoot = Insert(pRoot, pInterval);
   Count++;
+
   return pCur->pInterval;
 }
 
@@ -370,6 +380,7 @@ SearchInterval* SearchData::InsertInterval(SearchInterval &pInterval)
 void SearchData::UpdateInterval(SearchInterval &pInterval)
 {
   pCur = Find(pRoot, pInterval.LeftPoint);
+
   if (pCur)
   {
     (*pCur->pInterval) = pInterval;
@@ -380,6 +391,7 @@ void SearchData::UpdateInterval(SearchInterval &pInterval)
 SearchInterval* SearchData::GetIntervalByX(Trial* x)
 {
   pCur = Find(pRoot, x);
+
   if (pCur)
     return pCur->pInterval;
   else
@@ -390,6 +402,7 @@ SearchInterval* SearchData::GetIntervalByX(Trial* x)
 SearchInterval * SearchData::FindCoveringInterval(Trial* x)
 {
   pCur = FindIn(pRoot, x);
+
   if (pCur)
     return pCur->pInterval;
   else
@@ -403,10 +416,12 @@ TreeNode* SearchData::Previous(TreeNode *p) const
     return NULL;
   if (p->pLeft != NULL)
     return Maximum(p->pLeft);
-  else {
+  else 
+  {
     TreeNode* tmp = p;
     TreeNode* parentTmp = p->pParent;
-    while (parentTmp != NULL) {
+    while (parentTmp != NULL) 
+    {
       if (parentTmp->pLeft != tmp)
         break;
       tmp = parentTmp;
@@ -423,10 +438,12 @@ TreeNode* SearchData::Next(TreeNode *p) const
     return NULL;
   if (p->pRight != NULL)
     return Minimum(p->pRight);
-  else {
+  else 
+  {
     TreeNode* tmp = p;
     TreeNode* parentTmp = p->pParent;
-    while (parentTmp != NULL) {
+    while (parentTmp != NULL) 
+    {
       if (parentTmp->pRight != tmp)
         break;
       tmp = parentTmp;
@@ -477,8 +494,10 @@ SearchInterval* SearchData::InsertPoint(SearchInterval* coveringInterval,
 SearcDataIterator SearchData::GetIterator(SearchInterval* p)
 {
   SearcDataIterator iter;
+
   iter.pContainer = this;
   iter.pObject = Find(pRoot, p->LeftPoint);
+
   return iter;
 }
 
@@ -486,8 +505,10 @@ SearcDataIterator SearchData::GetIterator(SearchInterval* p)
 SearcDataIterator SearchData::GetBeginIterator()
 {
   SearcDataIterator iter;
+
   iter.pContainer = this;
   iter.pObject = Minimum(pRoot);
+
   return iter;
 }
 
@@ -495,13 +516,16 @@ SearcDataIterator SearchData::GetBeginIterator()
 SearchInterval* SearchData::GetIntervalWithMaxR()
 {
   SearchInterval *pRes = NULL;
-  //Если нужно вынуть два элемента, и текущий размер очереди - 2, то первый поток вынет максимальный элемент,
-  //а потом очередь перестроится по предыдущей МСП, и следующим будет вынут тот же самый элемент!!!
-  // Эта ситуация учтена в функции GetBestIntervals: очередь не будет короче числа интервалов, которые из нее надо извлечь на 1-й итерации метода
+  // Если нужно вынуть два элемента, и текущий размер очереди - 2,
+  // то первый поток вынет максимальный элемент, а потом очередь перестроится по предыдущей МСП,
+  // и следующим будет вынут тот же самый элемент!!!
+  // Эта ситуация учтена в функции GetBestIntervals: очередь не будет короче числа интервалов,
+  // которые из нее надо извлечь на 1 - й итерации метода
   if (pQueue->IsEmpty() || pQueue->GetSize() == 1)
     RefillQueue();
 
   PopFromGlobalQueue(&pRes);
+
   return pRes;
 }
 
@@ -514,18 +538,21 @@ SearchInterval* SearchData::GetIntervalWithMaxLocalR()
     RefillQueue();
 
   PopFromLocalQueue(&pRes);
+
   return pRes;
 }
 
 // ------------------------------------------------------------------------------------------------
 void SearchData::RefillQueue()
 {
-  pQueue->Clear(); // Если очередь уже была пуста, то вызов лишний, но он из одного действия, так
-                   //   что ставить проверку нет смысла
+  pQueue->Clear(); 
+  // Если очередь уже была пуста, то вызов лишний, но он из одного действия, так
+  // что ставить проверку нет смысла
   // Обход всех интервалов, вставка их в очередь
-  //   Push() сначала заполняет очередь, потом вставляет с замещением
+  // Push() сначала заполняет очередь, потом вставляет с замещением
 
   QueueElement* queueElementa = 0;
+
   for (SearcDataIterator it = GetBeginIterator(); it; ++it)
   {
     queueElementa = pQueue->Push(it->R, it->locR, *it);
@@ -538,7 +565,7 @@ void SearchData::RefillQueue()
 
 
 // ------------------------------------------------------------------------------------------------
-void SearchData::DeleteIntervalFromQueue(SearchInterval * i)
+void SearchData::DeleteIntervalFromQueue(SearchInterval* i)
 {
   if (i->GetQueueElementa() == 0)
   {
@@ -559,7 +586,9 @@ SearchInterval& SearchData::FindMax()
   {
     RefillQueue();
   }
+
   QueueElement* tmp = &pQueue->FindMax();
+
   return *((SearchInterval*)tmp->pValue);
 }
 
@@ -571,8 +600,10 @@ void SearchData::TrickleUp(SearchInterval * intervals)
     pQueue->TrickleUp(intervals->GetQueueElementa());
 
     QueueElement* qe = intervals->GetQueueElementa();
+
     double oldKey = qe->Key;
     qe->Key = intervals->R;
+
     if (qe->Key >= oldKey)
       pQueue->TrickleUp(intervals->GetQueueElementa());
     else
@@ -610,6 +641,7 @@ void SearchData::PopFromGlobalQueue(SearchInterval **pInterval)
 {
   void *p;
   double R;
+
   pQueue->Pop(&R, &p);
   *pInterval = (SearchInterval*)p;
   (*pInterval)->SetQueueElementa(0);
@@ -620,6 +652,7 @@ void SearchData::PopFromLocalQueue(SearchInterval **pInterval)
 {
   void *p;
   double R;
+
   ((PriorityDualQueue*)pQueue)->PopFromLocal(&R, &p);
   *pInterval = (SearchInterval*)p;
   (*pInterval)->SetQueueElementa(0);
@@ -642,8 +675,7 @@ int SearchData::GetCount()
 }
 
 // ------------------------------------------------------------------------------------------------
-SearcDataIterator::SearcDataIterator() :
-  pContainer(NULL), pObject(NULL)
+SearcDataIterator::SearcDataIterator() : pContainer(NULL), pObject(NULL)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -715,15 +747,15 @@ SearchInterval* SearchIntervalFactory::CreateSearchInterval()
 // ------------------------------------------------------------------------------------------------
 SearchInterval::SearchInterval()
 {
-  LeftPoint = 0;
-  RightPoint = 0;
+  LeftPoint = nullptr;
+  RightPoint = nullptr;
   R = locR = 0;
   ind = 0;
   // Выделение памяти происходит в момент добавления в матрицу
   K = 0;
   delta = 0;
-  queueElementa = 0;
-  treeNode = 0;
+  queueElementa = nullptr;
+  treeNode = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -740,7 +772,6 @@ SearchInterval::SearchInterval(const SearchInterval &p)
   delta = p.delta;
 
   //МКО
-
 
   queueElementa = p.queueElementa;
   treeNode = p.treeNode;

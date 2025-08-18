@@ -51,10 +51,10 @@ protected:
   /// Текущая вершина дерева
   TreeNode *pCur;
 
-  //TreeNode *pCurIter;
+  // TreeNode *pCurIter;
   /// стек для итератора
   std::stack<TreeNode*> Stack;
-  ///очередь характеристик
+  /// очередь характеристик
   PriorityQueueCommon *pQueue;
 
   /// список всех точек, для их последующего удаления
@@ -73,9 +73,9 @@ protected:
   TreeNode* RotateRight(TreeNode *p); // правый поворот вокруг p
   TreeNode* RotateLeft(TreeNode *p);  // левый поворот вокруг p
   TreeNode* Balance(TreeNode *p);     // балансировка узла p
-  TreeNode* Maximum(TreeNode *p) const; //поиск самого левого интервала в поддереве
-  TreeNode* Minimum(TreeNode *p) const; //поиск самого правого интервала в поддереве
-  TreeNode* Previous(TreeNode *p) const; //получение предыдущего и следующего за p интервалов
+  TreeNode* Maximum(TreeNode *p) const; // поиск самого левого интервала в поддереве
+  TreeNode* Minimum(TreeNode *p) const; // поиск самого правого интервала в поддереве
+  TreeNode* Previous(TreeNode *p) const; // получение предыдущего и следующего за p интервалов
   TreeNode* Next(TreeNode *p) const;
   // вставка в дерево с корнем p (рекурсивная)
   TreeNode* Insert(TreeNode *p, SearchInterval &pInterval);
@@ -84,7 +84,7 @@ protected:
   // поиск узла по правой границе интервала
   TreeNode* FindR(TreeNode *p, Trial* x) const;
   // поиск узла с нужным x по левой и правой границам интервала (рекурсивный)
-  //   xl() < x < xr
+  // xl() < x < xr
   TreeNode* FindIn(TreeNode *p, Trial* x) const;
 public:
   /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
@@ -125,11 +125,11 @@ public:
 
   /** Получить интервал, предыдущий к указанному
      не относится к итератору, не меняет текущий узел в итераторе
-    SearchInterval* GetPrev(SearchInterval &pInterval);
+     SearchInterval* GetPrev(SearchInterval &pInterval);
 
-   Для работы с очередью характеристик
-   вставка, если новый элемент больше минимального в очереди
-     если при этом очередь полна, то замещение минимального
+    Для работы с очередью характеристик
+    вставка, если новый элемент больше минимального в очереди
+    если при этом очередь полна, то замещение минимального
   */
   void PushToQueue(SearchInterval *pInterval);
   /// Перезаполнение очереди (при ее опустошении или при смене оценки константы Липшица)
@@ -192,7 +192,7 @@ public:
 
 
   double local_r;//вычисляемое r
-};
+}; // SearchData
 
 
 #endif
