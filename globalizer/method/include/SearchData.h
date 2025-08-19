@@ -38,53 +38,63 @@ class SearchData
 {
   friend class SearcDataIterator;
 protected:
-  /// число функций задачи
+  /// Число функций задачи
   int NumOfFuncs;
-  /// максимальный размер МСП = максимальному числу итераций метода
+  /// Максимальный размер МСП = максимальному числу итераций метода
   int MaxSize;
-  /// текущее число интервалов в дереве
+  /// Текущее число интервалов в дереве
   int Count;
-  /// текущий индекс, используется в итераторе
+  /// Текущий индекс, используется в итераторе
   int CurIndex;
   /// Корень дерева
   TreeNode *pRoot;
   /// Текущая вершина дерева
   TreeNode *pCur;
 
-  // TreeNode *pCurIter;
-  /// стек для итератора
+  /// Стек для итератора
   std::stack<TreeNode*> Stack;
-  /// очередь характеристик
+  /// Очередь характеристик
   PriorityQueueCommon *pQueue;
 
-  /// список всех точек, для их последующего удаления
+  /// Список всех точек, для их последующего удаления
   std::vector<Trial*> trials;
 
-  /// истина, если нужен пересчет характеристик
+  /// Истина, если нужен пересчет характеристик
   bool recalc;
 
   /// Лучшая точка, полученная для данной поисковой информации
   Trial* BestTrial;
 
+  /// Удалить дерево
   void DeleteTree(TreeNode *pNode);
+  /// Получить высоту
   unsigned char GetHeight(TreeNode *p);
+  /// Отбалансировать
   int GetBalance(TreeNode *p);
+  /// Исправить высоту
   void FixHeight(TreeNode *p);
-  TreeNode* RotateRight(TreeNode *p); // правый поворот вокруг p
-  TreeNode* RotateLeft(TreeNode *p);  // левый поворот вокруг p
-  TreeNode* Balance(TreeNode *p);     // балансировка узла p
-  TreeNode* Maximum(TreeNode *p) const; // поиск самого левого интервала в поддереве
-  TreeNode* Minimum(TreeNode *p) const; // поиск самого правого интервала в поддереве
-  TreeNode* Previous(TreeNode *p) const; // получение предыдущего и следующего за p интервалов
+  /// Правый поворот вокруг p
+  TreeNode* RotateRight(TreeNode *p);
+  /// Левый поворот вокруг p
+  TreeNode* RotateLeft(TreeNode *p);
+  /// Балансировка узла p
+  TreeNode* Balance(TreeNode *p);
+  /// Поиск самого левого интервала в поддереве
+  TreeNode* Maximum(TreeNode *p) const;
+  /// Поиск самого правого интервала в поддереве
+  TreeNode* Minimum(TreeNode *p) const;
+  /// Получение предыдущего за p интервала
+  TreeNode* Previous(TreeNode *p) const;
+  /// Получение следующего за p интервала
   TreeNode* Next(TreeNode *p) const;
-  // вставка в дерево с корнем p (рекурсивная)
+  /// Вставка в дерево с корнем p (рекурсивная)
   TreeNode* Insert(TreeNode *p, SearchInterval &pInterval);
-  // поиск узла с нужным x в дереве с корнем p по левой границе интервала (рекурсивный)
+  /// Поиск узла с нужным x в дереве с корнем p по левой границе интервала (рекурсивный)
   TreeNode* Find(TreeNode *p, Trial* x) const;
-  // поиск узла по правой границе интервала
+  /// Поиск узла по правой границе интервала
   TreeNode* FindR(TreeNode *p, Trial* x) const;
-  // поиск узла с нужным x по левой и правой границам интервала (рекурсивный)
-  // xl() < x < xr
+  /** Поиск узла с нужным x по левой и правой границам интервала(рекурсивный)
+   xl() < x < xr */
   TreeNode* FindIn(TreeNode *p, Trial* x) const;
 public:
   /// Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
@@ -96,9 +106,9 @@ public:
 
   /// Очищает и дерево и очередь интервалов
   void Clear();
-  /// новый интервал (по xl)
+  /// Новый интервал (по xl)
   SearchInterval* InsertInterval(SearchInterval &pInterval); 
-  /// обновление интервала (по xl)
+  /// Обновление интервала (по xl)
   void UpdateInterval(SearchInterval &pInterval); 
   /// Ищет интервал у которого левой точкой является x
   SearchInterval* GetIntervalByX(Trial* x);
@@ -108,7 +118,7 @@ public:
   /** Получение интервала с максимальной хар-кой. Интервал берется из очереди. Если очередь пуста,
      то сначала будет вызван Refill() */
   SearchInterval* GetIntervalWithMaxR();
-  /** Получение интервала с максимальной локалььной хар-кой. Интервал берется из очереди. Если очередь пуста,
+  /** Получение интервала с максимальной локальной хар-кой. Интервал берется из очереди. Если очередь пуста,
   то сначала будет вызван Refill() */
   SearchInterval* GetIntervalWithMaxLocalR();
 
@@ -119,8 +129,9 @@ public:
   SearchInterval* InsertPoint(SearchInterval* coveringInterval, Trial& newPoint,
     int iteration, int methodDimension);
 
-  /// Итератор
+  /// Получить итератор
   SearcDataIterator GetIterator(SearchInterval* p);
+  /// Получить следующий итератор
   SearcDataIterator GetBeginIterator();
 
   /** Получить интервал, предыдущий к указанному
@@ -149,22 +160,25 @@ public:
   /// Возвращает текущее число интервалов в дереве 
   int GetCount();
 
-  /// оценки констант Липшица
+  /// Оценки констант Липшица
   double M[MaxNumOfFunc];
-  /// минимальные значения функций задачи (для индексного метода)
+  /// Минимальные значения функций задачи (для индексного метода)
   double Z[MaxNumOfFunc];
 
+  /// Получить count лучших интервалов
   void GetBestIntervals(SearchInterval** intervals, int count);
+  /// Получить count лучших локальных интервалов
   void GetBestLocalIntervals(SearchInterval** intervals, int count);
+  /// Получить испытания
   std::vector<Trial*>& GetTrials()
   {
     return trials;
   }
 
-  /// возвращает максимальный элемент без извлечения
+  /// Возвращает максимальный элемент без извлечения
   SearchInterval& FindMax();
 
-  /// истина, если нужен пересчет характеристик
+  /// Истина, если нужен пересчет характеристик
   bool IsRecalc()
   {
     return recalc;
@@ -190,8 +204,8 @@ public:
   /// Возвращает размер очереди
   int GetQueueSize();
 
-
-  double local_r;//вычисляемое r
+  /// Вычисляемое r
+  double local_r;
 }; // SearchData
 
 
