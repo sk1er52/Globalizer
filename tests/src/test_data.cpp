@@ -88,6 +88,22 @@ TEST_F(TSearchDataTest, can_create_searchData_with_correct_values)
 }
 
 /**
+ * Проверка корректности работы метода #Clear
+ */
+
+TEST_F(TSearchDataTest, can_clear)
+{
+    SearchData* pData = new SearchData(MaxNumOfFunc, DefaultSearchDataSize);
+    pData->InsertInterval(interval1);
+    pData->InsertInterval(interval2);
+    pData->InsertInterval(interval3);
+    pData->Clear();
+
+    EXPECT_EQ(pData->GetCount(), 0);
+    EXPECT_EQ(pData->GetBestTrial(), nullptr);
+}
+
+/**
  * Проверка корректности работы метода #InsertInterval
  */
 TEST_F(TSearchDataTest, can_insert_interval)
@@ -107,20 +123,24 @@ TEST_F(TSearchDataTest, throws_when_insert_interval_which_already_exist)
 TEST_F(TSearchDataTest, throws_when_insert_interval_with_null_length)
 {
   SearchInterval interval;
+
   interval.LeftPoint = new Trial();
   interval.LeftPoint->SetX(Extended(1.0));
   interval.RightPoint = new Trial();
   interval.RightPoint->SetX(Extended(1.0));
+
   ASSERT_ANY_THROW(data->InsertInterval(interval));
 }
 
 TEST_F(TSearchDataTest, throws_when_insert_interval_with_negative_length)
 {
   SearchInterval interval;
+
   interval.LeftPoint = new Trial();
   interval.LeftPoint->SetX(Extended(2.0));
   interval.RightPoint = new Trial();
   interval.RightPoint->SetX(Extended(1.0));
+
   ASSERT_ANY_THROW(data->InsertInterval(interval));
 }
 /**
@@ -267,6 +287,27 @@ TEST_F(TSearchDataTest, can_return_interval_with_max_local_R)
   SearchInterval* pIntervalWithMaxLocalR = pData->GetIntervalWithMaxLocalR();
 
   ASSERT_DOUBLE_EQ(actualLocalR, pIntervalWithMaxLocalR->locR);
+  ASSERT_DOUBLE_EQ(actualXl, pIntervalWithMaxLocalR->xl().toDouble());
+}
+
+/**
+ * Проверка корректности работы метода #InsertPoint
+ */
+TEST_F(TSearchDataTest, can_insert_new_point)
+{
+    Extended newXl = Extended(5.7);
+    SearchInterval* pInterval;
+    SearchInterval* pCoveringInterval;
+    Trial point;
+    point = Extended(newXl);
+    point.index = 0;
+    pInterval = data->InsertInterval(interval1);
+    pCoveringInterval = data->InsertInterval(interval3);
+    pInterval = data->InsertInterval(interval2);
+
+    SearchInterval* pNewInterval = data->InsertPoint(pCoveringInterval, point, 1, 1);
+
+    ASSERT_EQ(newXl, pNewInterval->xl());
 }
 
 /**
@@ -295,24 +336,4 @@ TEST_F(TSearchDataTest, can_refill_queue)
 
   data->PopFromGlobalQueue(&pInterval);
   ASSERT_DOUBLE_EQ(interval3.R, pInterval->R);
-}
-
-/**
- * Проверка корректности работы метода #InsertPoint
- */
-TEST_F(TSearchDataTest, can_insert_new_point)
-{
-  Extended newXl = Extended(5.7);
-  SearchInterval* pInterval;
-  SearchInterval* pCoveringInterval;
-  Trial point;
-  point = Extended(newXl);
-  point.index = 0;
-  pInterval = data->InsertInterval(interval1);
-  pCoveringInterval = data->InsertInterval(interval3);
-  pInterval = data->InsertInterval(interval2);
-
-  SearchInterval* pNewInterval = data->InsertPoint(pCoveringInterval, point, 1, 1);
-
-  ASSERT_EQ(newXl, pNewInterval->xl());
 }
