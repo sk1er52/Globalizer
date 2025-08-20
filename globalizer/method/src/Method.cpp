@@ -106,19 +106,12 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
   inputSet.trials.resize(parameters.NumPoints);
 
-
-  globalM.resize(pTask.GetNumOfFunc());
-  for (unsigned i = 0; i < globalM.size(); i++)
-    globalM[i] = 1;
-
   isGlobalMUpdate = false;
 
   isSetInLocalMinimumInterval = false;
 
   isStop = false;
 
-
-  intervalXMax = 0;
   isSearchXMax = true;
 
   calculation.SetSearchData(&_pData);
@@ -294,7 +287,6 @@ void Method::FirstIteration()
     }
       
   }
-  intervalXMax = NewInterval[0];
   //====================================================================
 
   // На первой итерации - единственный лучший интервал
@@ -699,6 +691,11 @@ std::vector<int> Method::GetFunctionCalculationCount()
   return functionCalculationCount;
 }
 
+double Method::GetAchievedAccuracy()
+{
+  return AchievedAccuracy;
+}
+
 // ------------------------------------------------------------------------------------------------
 void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
 {
@@ -1074,7 +1071,6 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   if (Xmax[j] < (BestIntervalsj)->delta)
   {
     Xmax[j] = (BestIntervalsj)->delta;
-    intervalXMax = BestIntervalsj;
   }
 
   j = NewInterval->izr();
@@ -1084,7 +1080,6 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   if (Xmax[j] < (NewInterval)->delta)
   {
     Xmax[j] = (NewInterval)->delta;
-    intervalXMax = NewInterval;
   }
 
   // Интервал сформирован - можно добавлять
@@ -1213,6 +1208,11 @@ void Method::FinalizeIteration()
   isLocalZUpdate = false;
 }
 
+int Method::GetIterationCount()
+{
+  return iteration.IterationCount;
+}
+
 
 
 IterationType Method::GetIterationType(int iterationNumber, int localMixParameter)
@@ -1280,11 +1280,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = newValue;
       pData->SetRecalc(true);
       pData->pRecalcDatas.push_back(pData);
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
   case 1:
@@ -1386,7 +1381,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if ((Xm > Xmax[max]) && (max == j))
         {
           Xmax[max] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1396,7 +1390,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[j])
       {
         Xmax[j] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[j] * p->delta) / Xmax[j];
@@ -1407,33 +1400,18 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
+
     }
     if (lambda > pData->M[index])
     {
       pData->M[index] = lambda;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     if (gamma > pData->M[index])
     {
       pData->M[index] = gamma;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     break;
@@ -1482,7 +1460,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if (Xm > Xmax[0])
         {
           Xmax[0] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1492,7 +1469,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[0])
       {
         Xmax[0] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
@@ -1504,11 +1480,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
@@ -1519,11 +1490,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = temp;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
 
@@ -1599,7 +1565,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if (Xm > Xmax[0])
         {
           Xmax[0] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1609,7 +1574,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[0])
       {
         Xmax[0] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
@@ -1618,12 +1582,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (parameters.ltXi > pData->M[index] || pData->M[index] == 1.0 && newValue > _M_ZERO_LEVEL) {
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
@@ -1631,12 +1589,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (temp > pData->M[index]) {
       pData->M[index] = temp;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     //H = fabs(p->zr() - p->zl()) / (p->xr() - p->xl());
@@ -1645,12 +1597,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (H > pData->M[index]) {
       pData->M[index] = H;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
   }
@@ -1781,9 +1727,6 @@ void Method::PrintPoints(const std::string& fileName)
     fout << pTask.GetOptimumValue() << " ";
   }
   fout.close();
-
-  if (pTask.GetProcLevel() == 0)
-    printf("M = %lf\n", globalM[0]);
 }
 
 void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
