@@ -24,6 +24,9 @@
 #include "CalculationFactory.h"
 #include "ParallelHookeJeevesMethod.h"
 
+#include "OmpCalculation.h"
+
+
 #include <cmath>
 #include <vector>
 #include <fstream>
@@ -103,22 +106,13 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
   inputSet.trials.resize(parameters.NumPoints);
 
-
-  globalM.resize(pTask.GetNumOfFunc());
-  for (unsigned i = 0; i < globalM.size(); i++)
-    globalM[i] = 1;
-
   isGlobalMUpdate = false;
 
   isSetInLocalMinimumInterval = false;
 
   isStop = false;
 
-
-  intervalXMax = 0;
   isSearchXMax = true;
-
-  numberOfRepetitions = 0;
 
   calculation.SetSearchData(&_pData);
 
@@ -134,19 +128,7 @@ Method::Method(Task& _pTask, SearchData& _pData,
 Method::~Method()
 {}
 
-// ------------------------------------------------------------------------------------------------
-void Method::SetDiscreteValue(int u, std::vector< std::vector<double> > dvs)
-{
-  //int numDV = 1;
-  int z = u;
-  int w = 0;
-  for (int e = 0; e < pTask.GetNumberOfDiscreteVariable(); e++)
-  {
-    w = z % pTask.GetNumberOfValues(startDiscreteVariable + e);
-    mDiscreteValues[u][e] = dvs[e][w];
-    z = z / pTask.GetNumberOfValues(startDiscreteVariable + e);
-  }
-}
+
 
 SearchData* Method::GetSearchData(Trial* trial)
 {
@@ -196,11 +178,9 @@ void Method::CalculateImage(Trial& pCurTrialsj)
 void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestIntervalsj)
 {
   // Вычисляем x
-  pCurTrialsj.discreteValuesIndex = BestIntervalsj->discreteValuesIndex();
   if (BestIntervalsj->izl() != BestIntervalsj->izr())
   {
     pCurTrialsj.SetX(0.5 * (BestIntervalsj->xl() + BestIntervalsj->xr()));
-    //      pCurTrialsj.x = BestIntervalsj->xl() + 0.5*BestIntervalsj->dx;
   }
   else
   {
@@ -208,9 +188,6 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
       (((BestIntervalsj->zr() - BestIntervalsj->zl()) > 0) ? 1 : -1)*
       pow(fabs(BestIntervalsj->zr() - BestIntervalsj->zl()) /
         pData->M[BestIntervalsj->izl()], parameters.Dimension) / 2 / parameters.r);
-    //      pCurTrialsj.x = BestIntervalsj->xl() + (0.5*BestIntervalsj->dx -
-    //(((BestIntervalsj->zr() - BestIntervalsj->zl)>0)?1:-1)*pow(fabs(BestIntervalsj->zr() -
-    //BestIntervalsj->zl)/pData->M[BestIntervalsj->izl],parameters.Dimension)/(2*r));
   }
 
   pCurTrialsj.leftInterval = BestIntervalsj;
@@ -227,14 +204,6 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
   // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
   CalculateImage(pCurTrialsj);
 
-  for (int k = parameters.Dimension - 1; k >= 0; k--)
-    pCurTrialsj.y[k] = pCurTrialsj.y[k];
-
-
-  // Записываем значение дискретной переменной
-  for (int j = 0; j < pTask.GetNumberOfDiscreteVariable(); j++)
-    pCurTrialsj.y[startDiscreteVariable + j] =
-    mDiscreteValues[pCurTrialsj.discreteValuesIndex][j];
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -250,52 +219,17 @@ void Method::FirstIteration()
   // И сбрасываем достигнутую точность
   AchievedAccuracy = 1.0;
   // И лучшую итерацию
-  //pData->GetBestTrial()->index = -2;
-  // Формируем интервал [0,1]
-
-    // Вычисляем чилсло значений дискретных параметров
-  mDiscreteValuesCount = 1;
-  int numberOfDiscreteVariable = pTask.GetNumberOfDiscreteVariable();
 
 
-  std::vector< std::vector<double> > dvs(numberOfDiscreteVariable);
-  startDiscreteVariable = pTask.GetN() - numberOfDiscreteVariable;
-  for (int e = 0; e < numberOfDiscreteVariable; e++)
-  {
-    dvs[e].resize(pTask.GetNumberOfValues(startDiscreteVariable + e));
-    pTask.GetAllDiscreteValues(startDiscreteVariable + e, dvs[e].data());
-    mDiscreteValuesCount = mDiscreteValuesCount *
-      pTask.GetNumberOfValues(startDiscreteVariable + e);
-  }
 
-
-    mDiscreteValues.resize(mDiscreteValuesCount);
-
-    for (int u = 0; u < mDiscreteValuesCount; u++)
-    {
-      mDiscreteValues[u].resize(numberOfDiscreteVariable);
-      SetDiscreteValue(u, dvs);
-    }
-
-
-  //for (int e = 0; e < numberOfDiscreteVariable(); e++)
-  //{
-  //  delete[] dvs[e];
-  //}
-  //delete[] dvs;
-
-  iteration.pCurTrials.resize(parameters.NumPoints * mDiscreteValuesCount);
-
-  SearchInterval** NewInterval = new SearchInterval*[mDiscreteValuesCount];
+  SearchInterval** NewInterval = new SearchInterval*[1];
     //SearchIntervalFactory::CreateSearchInterval();
-  for (int e = 0; e < mDiscreteValuesCount; e++)
+  for (int e = 0; e < 1; e++)
   {
     NewInterval[e] = SearchIntervalFactory::CreateSearchInterval();
     NewInterval[e]->ind = iteration.IterationCount;
     NewInterval[e]->K = 0;
     NewInterval[e]->CreatePoint();
-    NewInterval[e]->LeftPoint->discreteValuesIndex = e;
-    NewInterval[e]->RightPoint->discreteValuesIndex = e;
     // Гельдеровская длина
     NewInterval[e]->delta = 1.0;
     //Добавляем интервал
@@ -307,15 +241,8 @@ void Method::FirstIteration()
     ///Необходимо сосчитать значения на границах
     CalculateImage(*p->LeftPoint);
 
-    for (int j = 0; j < numberOfDiscreteVariable; j++)
-      p->LeftPoint->y[startDiscreteVariable + j] =
-      mDiscreteValues[p->LeftPoint->discreteValuesIndex][j];
 
     CalculateImage(*p->RightPoint);
-
-    for (int j = 0; j < numberOfDiscreteVariable; j++)
-      p->RightPoint->y[startDiscreteVariable + j] =
-      mDiscreteValues[p->RightPoint->discreteValuesIndex][j];
 
     if (pData->GetBestTrial() == 0)
       pData->SetBestTrial(p->LeftPoint);
@@ -360,12 +287,9 @@ void Method::FirstIteration()
     }
       
   }
-  intervalXMax = NewInterval[0];
   //====================================================================
 
   // На первой итерации - единственный лучший интервал
-  //for (i = 0; i < NumPoints; i++)
-  //  iteration.BestIntervals[i] = p;
 
   // Флаг пересчета - поднят
   pData->SetRecalc(true);
@@ -376,16 +300,14 @@ void Method::FirstIteration()
   double h = 1.0 / (parameters.NumPoints + 1);
   if (!parameters.isLoadFirstPointFromFile) // равномерно распределяем начальные точки
   {
-    for (int e = 0; e < mDiscreteValuesCount; e++)
-    {
       for (int q = 0; q < parameters.NumPoints; q++)
       {
 
         if (parameters.TypeDistributionStartingPoints == Evenly)
         {
-          int ind = e * parameters.NumPoints + q;
+          int ind = q;
           iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
-          iteration.pCurTrials[ind]->discreteValuesIndex = e;
+
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
           iteration.pCurTrials[ind]->SetX((q + 1) * h);
 
@@ -398,18 +320,13 @@ void Method::FirstIteration()
             iteration.pCurTrials[ind]->y[0 + j] = iteration.pCurTrials[ind]->y[j];
           }
 
-          for (int j = 0; j < numberOfDiscreteVariable; j++)
-            iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
-            mDiscreteValues[iteration.pCurTrials[ind]->discreteValuesIndex][j];
-
-          iteration.pCurTrials[ind]->leftInterval = NewInterval[e];
-          iteration.pCurTrials[ind]->rightInterval = NewInterval[e];
+          iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
+          iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
         }
         else
         {
-          int ind = e * parameters.NumPoints + q;
+          int ind =  q;
           iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
-          iteration.pCurTrials[ind]->discreteValuesIndex = e;
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
           
           //iteration.pCurTrials[ind]->SetX((q + 1)* h);
@@ -431,17 +348,11 @@ void Method::FirstIteration()
             iteration.pCurTrials[ind]->y[j] = iteration.pCurTrials[ind]->y[j];
           }
 
-
-          for (int j = 0; j < numberOfDiscreteVariable; j++)
-            iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
-            mDiscreteValues[iteration.pCurTrials[ind]->discreteValuesIndex][j];
-
-          iteration.pCurTrials[ind]->leftInterval = NewInterval[e];
-          iteration.pCurTrials[ind]->rightInterval = NewInterval[e];
+          iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
+          iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
         }
       }
-    }
-
+    
   }
   else // читаем из файла FirstPointFilePath
   {
@@ -593,7 +504,6 @@ void Method::CalculateIterationPoints()
     return;
   }
 
-
   // Если поднят флаг - то пересчитать все характеристики
   Recalc();
 
@@ -737,57 +647,10 @@ bool Method::CheckStopCondition()
 }
 
 
-/// Проверяет попала ли точка в окрестность глобального манимума
-bool Method::CheckLocalityOptimalPoint(Trial* trial)
-{
-  if (pTask.GetIsOptimumPointDefined())
-  {
-    if (!isFoundOptimalPoint)
-    {
-      double e = parameters.Epsilon;
-      bool res = true;
-      double ffmax = 0;
-
-      for (int j = 0; j < parameters.Dimension; j++)
-      {
-        double fm = e * (pTask.GetB()[j] - pTask.GetA()[j]);
-        double fabsx = fabs(trial->y[j] - pTask.GetOptimumPoint()[j]);
-        fm = e * (pTask.GetB()[j] - pTask.GetA()[j]);
-        if (fabsx > fm)
-        {
-          res = false;
-          break;
-        }
-
-        if (fabsx > ffmax)
-          ffmax = fabsx;
-      }
-      if (res)
-      {
-        isFoundOptimalPoint = true;
-        print_l1 << "\n\nFound optimal point!\nIter = "
-          << iteration.IterationCount << "\nDifPoint = " << ffmax << "\n\n";
-      }
-    }
-  }
-  return isFoundOptimalPoint;
-}
-
-
 // ------------------------------------------------------------------------------------------------
 void Method::CalculateFunctionals()
 {
-  /// Входные данные для вычислителя, формирубтся в CalculateFunctionals()
-  /*InformationForCalculation inputSet;
-  /// Выходные данные вычислителя, обрабатывается в CalculateFunctionals()
-  TResultForCalculation outputSet;
-
-  inputSet.Resize(iteration.pCurTrials.size());
-  outputSet.Resize(iteration.pCurTrials.size());*/
-
   std::vector<SearchInterval*> intervalArr(iteration.pCurTrials.size());
-
-
 
   // Эта функция вызывается только в листе дерева - поэтому вычисляем функционалы здесь
   for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
@@ -819,7 +682,6 @@ void Method::CalculateFunctionals()
     functionCalculationCount[j] = outputSet.countCalcTrials[j];
   }
 
-  //pData->SetRecalc(true);
 }
 
 
@@ -827,6 +689,11 @@ void Method::CalculateFunctionals()
 std::vector<int> Method::GetFunctionCalculationCount()
 {
   return functionCalculationCount;
+}
+
+double Method::GetAchievedAccuracy()
+{
+  return AchievedAccuracy;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -864,7 +731,6 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
 
     if (!p)
     {
-      //print << "Not create intrval!\n";
       continue;
     }
     else
@@ -934,15 +800,6 @@ bool Method::UpdateOptimumEstimation(Trial& trial)
   if (trial.index > pData->GetBestTrial()->index || trial.index == pData->GetBestTrial()->index &&
     trial.FuncValues[pData->GetBestTrial()->index] < pData->GetBestTrial()->FuncValues[pData->GetBestTrial()->index])
   {
-    //pData->GetBestTrial()->index = trial.index;
-    //pData->GetBestTrial()->x = trial.x;
-    //memcpy(pData->GetBestTrial()->FuncValues, trial.FuncValues, pTask.GetNumOfFunc() *
-    //  sizeof(double));
-
-    //memcpy(pData->GetBestTrial()->y, trial.y, pTask.GetN() * sizeof(double));
-    //// Оптимум обновился - нужен пересчет
-    //pData->SetRecalc(true);
-    //pData->GetBestTrial()->simVal = trial.simVal;
     pData->SetBestTrial(trial.Clone());
 
     // Оптимум обновился - нужен пересчет
@@ -1214,7 +1071,6 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   if (Xmax[j] < (BestIntervalsj)->delta)
   {
     Xmax[j] = (BestIntervalsj)->delta;
-    intervalXMax = BestIntervalsj;
   }
 
   j = NewInterval->izr();
@@ -1224,7 +1080,6 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
   if (Xmax[j] < (NewInterval)->delta)
   {
     Xmax[j] = (NewInterval)->delta;
-    intervalXMax = NewInterval;
   }
 
   // Интервал сформирован - можно добавлять
@@ -1312,6 +1167,25 @@ bool Method::EstimateOptimum()
   return isOptimumUpdated;
 }
 
+
+// ------------------------------------------------------------------------------------------------
+void Method::SetNumPoints(int newNP)
+{
+  if (newNP <= 0)
+    newNP = 1;
+
+  if (iteration.pCurTrials.size() != newNP)
+  {
+    for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
+      iteration.pCurTrials[i] = 0;
+
+    iteration.pCurTrials.resize(newNP);
+  }
+
+  inputSet.Resize(newNP);
+  outputSet.Resize(newNP);
+}
+
 // ------------------------------------------------------------------------------------------------
 void Method::FinalizeIteration()
 {
@@ -1321,12 +1195,22 @@ void Method::FinalizeIteration()
   for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
     iteration.pCurTrials[i] = 0;
 
+  if (parameters.TypeCalculation == AsyncMPI) 
+  {
+    SetNumPoints(1);
+    parameters.NumPoints = 1;
+  }
 
   if (isLocalZUpdate)//Если нужен пересчет - обновился минимум
   {
     LocalSearch();
   }
   isLocalZUpdate = false;
+}
+
+int Method::GetIterationCount()
+{
+  return iteration.IterationCount;
 }
 
 
@@ -1396,11 +1280,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = newValue;
       pData->SetRecalc(true);
       pData->pRecalcDatas.push_back(pData);
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
   case 1:
@@ -1502,7 +1381,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if ((Xm > Xmax[max]) && (max == j))
         {
           Xmax[max] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1512,7 +1390,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[j])
       {
         Xmax[j] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[j] * p->delta) / Xmax[j];
@@ -1523,33 +1400,18 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
+
     }
     if (lambda > pData->M[index])
     {
       pData->M[index] = lambda;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     if (gamma > pData->M[index])
     {
       pData->M[index] = gamma;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     break;
@@ -1598,7 +1460,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if (Xm > Xmax[0])
         {
           Xmax[0] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1608,7 +1469,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[0])
       {
         Xmax[0] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
@@ -1620,11 +1480,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
@@ -1635,11 +1490,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       pData->M[index] = temp;
       pData->SetRecalc(true);
 
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
 
@@ -1715,7 +1565,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
         if (Xm > Xmax[0])
         {
           Xmax[0] = Xm;
-          intervalXMax = *it;
         }
       }
       isSearchXMax = false;
@@ -1725,7 +1574,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
       if (Xm > Xmax[0])
       {
         Xmax[0] = Xm;
-        intervalXMax = p;
       }
     }
     gamma = (mu[0] * p->delta) / Xmax[0];//pow(Xmax, 1. / parameters.Dimension);
@@ -1734,12 +1582,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (parameters.ltXi > pData->M[index] || pData->M[index] == 1.0 && newValue > _M_ZERO_LEVEL) {
       pData->M[index] = parameters.ltXi;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     temp = (lambda / parameters.r) + (((parameters.r - 1) * gamma) / parameters.r);
@@ -1747,12 +1589,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (temp > pData->M[index]) {
       pData->M[index] = temp;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
 
     //H = fabs(p->zr() - p->zl()) / (p->xr() - p->xl());
@@ -1761,12 +1597,6 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     if (H > pData->M[index]) {
       pData->M[index] = H;
       pData->SetRecalc(true);
-
-      if (globalM[index] < pData->M[index])
-      {
-        globalM[index] = pData->M[index];
-        isGlobalMUpdate = true;
-      }
     }
     break;
   }
@@ -1805,8 +1635,6 @@ void Method::PrintSection()
     double sum = double(NumberOfTrials) / count;
     print << "Section average iteration = " << sum << "\n";
   }
-
-  //PlotDecisionTrees();
 }
 
 void Method::PrintLevelPoints(const std::string& fileName)
@@ -1899,15 +1727,7 @@ void Method::PrintPoints(const std::string& fileName)
     fout << pTask.GetOptimumValue() << " ";
   }
   fout.close();
-
-  if (pTask.GetProcLevel() == 0)
-    printf("M = %lf\n", globalM[0]);
-
-  //if (parameters.IsPlot)
-  //  PlotPoint2();
 }
-
-#include "OmpCalculation.h"
 
 void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
 {

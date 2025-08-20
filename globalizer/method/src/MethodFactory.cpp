@@ -16,6 +16,9 @@
 
 #include "CalculationFactory.h"
 
+#include "MixedIntegerMethod.h"
+
+
 
 // ------------------------------------------------------------------------------------------------
 IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
@@ -24,6 +27,9 @@ IMethod* MethodFactory::CreateMethod(Task& _pTask, SearchData& _pData,
   IMethod* pMethod = 0;
   if (parameters.TypeMethod == StandartMethod)
     pMethod = new Method(_pTask, _pData, _Calculation, _Evolvent);
+  if (parameters.TypeMethod == IntegerMethod)
+    pMethod = new MixedIntegerMethod(_pTask, _pData, _Calculation, _Evolvent);
+
 
   return pMethod;
 }

@@ -36,15 +36,7 @@
 #include "SearchIteration.h"
 #include "SearchInterval.h"
 
-#ifdef USE_OpenCV
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/ml/ml.hpp"
 
-//using namespace cv;
-//using namespace ml;
-//
-#endif
 
 // ------------------------------------------------------------------------------------------------
 
@@ -61,9 +53,9 @@ protected:
   // Копия параметров для конкретного уровня дерева
   // ----------------------------------------------------------------------------
   /// Максимальное число испытаний
-  int               MaxNumOfTrials;
+  int MaxNumOfTrials;
   /// число итераций до включения смешанного алгоритма
-  int               StartLocalIteration;
+  int StartLocalIteration;
 
 
   /// Обновлено глобальное М
@@ -75,9 +67,9 @@ protected:
   // Ссылки на объекты используемых методом
   // ----------------------------------------------------------------------------
   /// Указатель на решаемую задачу
-  Task&            pTask;
+  Task& pTask;
   /// Указатель на матрицу состояния поиска
-  SearchData*      pData;
+  SearchData* pData;
 
   /// Вычислитель
   Calculation& calculation;
@@ -90,23 +82,18 @@ protected:
   */
   Evolvent& evolvent;
 
-  int numberOfRepetitions;
-
   // ----------------------------------------------------------------------------
   // Внутренние данные метода
   // ----------------------------------------------------------------------------
 
-
-
-  ///// Входные данные для вычислителя, формирубтся в CalculateFunctionals()
+  /// Входные данные для вычислителя, формирубтся в CalculateFunctionals()
   InformationForCalculation inputSet;
-  ///// Выходные данные вычислителя, обрабатывается в CalculateFunctionals()
+  /// Выходные данные вычислителя, обрабатывается в CalculateFunctionals()
   TResultForCalculation outputSet;
   /// информация о данных текущей итерации
   SearchIteration iteration;
   /// Была получена точка в окрестности глобального оптимума
   bool isFoundOptimalPoint;
-
 
   /// достигнутая точность
   double            AchievedAccuracy;
@@ -122,8 +109,6 @@ protected:
 
   /// нужно ли искать интервал
   bool isFindInterval;
-
-  std::vector< double > globalM;
 
   ///Новая точка устанавливается в интервал принадлежащий окрестности локального минимума
   bool isSetInLocalMinimumInterval;
@@ -152,9 +137,12 @@ protected:
 
   //=====================================================================================================================================================
   //Для методов локального уточнения нужны миксимумы
+
+  /// Максимальные длины интервалов для разных индексов правой точки
   double* Xmax;
+  /// Значения оценки константы Липшица для разных индексов правой точки
   double* mu;
-  SearchInterval* intervalXMax;
+  /// Инициализирован ли Xmax
   bool isSearchXMax;
   //=====================================================================================================================================================
 
@@ -220,9 +208,6 @@ protected:
   */
   virtual bool UpdateOptimumEstimation(Trial& trial);
 
-  /// Проверяет попала ли точка в окрестность глобального манимума
-  virtual bool CheckLocalityOptimalPoint(Trial* trial);
-
   /// Вычисление координат точек испытания для основной\единственной развертки
   virtual void CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestIntervalsj);
 
@@ -230,7 +215,6 @@ protected:
   virtual void CalculateCurrentPoints(std::vector<SearchInterval*>& BestIntervals);
 
   /// Пренадлежит ли newInterval отрезку в котором находится basicInterval
-  /// Уже не нужен???
   virtual bool IsIntervalInSegment(SearchInterval* basicInterval, SearchInterval* newInterval);
 
 
@@ -251,11 +235,15 @@ protected:
   virtual void Recalc();
 
 
-  /// Задать значения дискретного параметра
-  virtual void SetDiscreteValue(int u, std::vector< std::vector <double> > dvs);
-
   /// Получаем поисковую информацию, важно для адаптивного метода
   virtual SearchData* GetSearchData(Trial* trial);
+
+
+  /**Изменить количество текущих точек испытаний, переписывает #iteration.pCurTrials и
+#iteration.BestIntervals
+*/
+  virtual void SetNumPoints(int newNP);
+
 
 public:
 
@@ -310,8 +298,8 @@ public:
 
   \return число испытаний
   */
-  virtual int GetIterationCount()
-  { return iteration.IterationCount; }
+  virtual int GetIterationCount();
+
 
   /** Получить текущую оценку оптимума
 
@@ -332,6 +320,7 @@ public:
 
   /// Сохраняем все точки, со всех уровней, в файл
   virtual void PrintPoints(const std::string & fileName);
+
   /// Метод Хука-Дживса
   void HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints);
   
@@ -339,10 +328,7 @@ public:
   virtual std::vector<int> GetFunctionCalculationCount();
 
   /// Возвращает достигнутую точность
-  virtual double GetAchievedAccuracy()
-  {
-    return AchievedAccuracy;
-  };
+  virtual double GetAchievedAccuracy();
 
   /** Обновление поисковой информации
   */
@@ -362,6 +348,7 @@ public:
 */
   virtual void InsertLocalPoints(const std::vector<Trial*>& points, Task* task = 0);
 
+  /// Запускает локальный метод
   virtual void LocalSearch();
 
   /// Возвращает число точек полученное от локальныго метода
