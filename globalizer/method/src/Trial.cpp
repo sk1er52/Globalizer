@@ -2,6 +2,7 @@
 
 #include "SearchInterval.h"
 
+// ------------------------------------------------------------------------------------------------
 Trial* Trial::GetLeftPoint()
 {
   if (this->leftInterval != 0)
@@ -14,6 +15,7 @@ Trial* Trial::GetLeftPoint()
   return 0;
 }
 
+// ------------------------------------------------------------------------------------------------
 Trial* Trial::GetRightPoint()
 {
   if (this->rightInterval != 0)
@@ -24,4 +26,166 @@ Trial* Trial::GetRightPoint()
     }
   }
   return 0;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Trial::Trial()
+{
+  discreteValuesIndex = 0;
+
+  x = 0.0;
+  index = -2;
+  K = 0;
+
+  for (int i = 0; i < MaxNumOfFunc; i++)
+    FuncValues[i] = MaxDouble;
+  memset(y, 0, MaxDim * sizeof(*y));
+
+  leftInterval = 0;
+  rightInterval = 0;
+
+  lowAndUpPoints = 0;
+
+  TypeColor = 0;
+
+  generatedTask = 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+Trial::Trial(const Trial& trial)
+{
+  this->discreteValuesIndex = trial.discreteValuesIndex;
+  this->x = trial.x;
+  memcpy(this->y, trial.y, MaxDim * sizeof(double));
+  memcpy(this->FuncValues, trial.FuncValues, MaxNumOfFunc * sizeof(double));
+
+  this->index = trial.index;
+  this->K = trial.K;
+  this->leftInterval = trial.leftInterval;
+  this->rightInterval = trial.rightInterval;
+  this->lowAndUpPoints = trial.lowAndUpPoints;
+  this->TypeColor = trial.TypeColor;
+  this->generatedTask = trial.generatedTask;
+}
+
+// ------------------------------------------------------------------------------------------------
+Trial* Trial::Clone()
+{
+  Trial* res = new Trial();
+
+  res->discreteValuesIndex = discreteValuesIndex;
+  res->x = x;
+  memcpy(res->y, y, MaxDim * sizeof(double));
+  memcpy(res->FuncValues, FuncValues, MaxNumOfFunc * sizeof(double));
+
+  res->index = index;
+  res->K = K;
+  res->leftInterval = leftInterval;
+  res->rightInterval = rightInterval;
+  res->lowAndUpPoints = lowAndUpPoints;
+  res->TypeColor = TypeColor;
+  res->generatedTask = generatedTask;
+  return res;
+}
+
+// ------------------------------------------------------------------------------------------------
+Trial::~Trial()
+{
+  discreteValuesIndex = 0;
+
+  x = 0.0;
+  index = -2;
+  K = 0;
+
+  leftInterval = 0;
+  rightInterval = 0;
+
+  lowAndUpPoints = 0;
+
+  TypeColor = 0;
+
+  generatedTask = 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Trial::SetX(Extended d)
+{
+  x = d;
+}
+
+// ------------------------------------------------------------------------------------------------
+Trial& Trial::operator = (Extended d)
+{
+  SetX(d);
+  return *this;
+}
+
+// ------------------------------------------------------------------------------------------------
+Extended  Trial::X()
+{
+  return x;
+}
+
+// ------------------------------------------------------------------------------------------------
+double Trial::GetFloor()
+{
+  return this->discreteValuesIndex;
+}
+
+// ------------------------------------------------------------------------------------------------
+double Trial::GetValue()
+{
+  if (index < 0 || index >= MaxNumOfFunc)
+    return FuncValues[0];
+  else
+    return FuncValues[index];
+}
+
+// ------------------------------------------------------------------------------------------------
+Trial& Trial::operator = (const Trial& trial)
+{
+  if (this != &trial)
+  {
+    this->discreteValuesIndex = trial.discreteValuesIndex;
+    this->x = trial.x;
+    memcpy(this->y, trial.y, MaxDim * sizeof(double));
+    memcpy(this->FuncValues, trial.FuncValues, MaxNumOfFunc * sizeof(double));
+
+    this->index = trial.index;
+    this->K = trial.K;
+    this->leftInterval = trial.leftInterval;
+    this->rightInterval = trial.rightInterval;
+    this->lowAndUpPoints = trial.lowAndUpPoints;
+    this->TypeColor = trial.TypeColor;
+    this->generatedTask = trial.generatedTask;
+  }
+  return *this;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool Trial::operator == (Trial& t)
+{
+  return (x == t.x) && (discreteValuesIndex == t.discreteValuesIndex);
+}
+
+// ------------------------------------------------------------------------------------------------
+bool Trial::operator > (Trial& t)
+{
+  if (discreteValuesIndex > t.discreteValuesIndex)
+    return true;
+  else if (discreteValuesIndex < t.discreteValuesIndex)
+    return false;
+  else
+    return x > t.x;
+}
+
+bool Trial::operator < (Trial& t)
+{
+  if (discreteValuesIndex < t.discreteValuesIndex)
+    return true;
+  else if (discreteValuesIndex > t.discreteValuesIndex)
+    return false;
+  else
+    return x < t.x;
 }

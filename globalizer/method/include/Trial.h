@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      data.h                                                      //
+//  File:      Trial.h                                                     //
 //                                                                         //
 //  Purpose:   Header file for search data classes                         //
 //                                                                         //
@@ -44,18 +44,6 @@ public:
   int index;
   /// число "вложенных" итераций
   int K;
-  /// Метка точки: потенциальный локальный минимум, убывающая, возрастающая, потенциальный локальный максимум
-  enum Status
-  {
-    low_inflection,
-    low,
-    up,
-    up_inflection,
-    local_min
-  };
-
-  /// Метка точки: потенциальный локальный минимум, убывающая, возрастающая, потенциальный локальный максимум
-  Status pointStatus;
 
   ///Количество нужных для локального метода точек (обновляется только в случае потенциального локального минимума)
   int lowAndUpPoints;
@@ -66,175 +54,60 @@ public:
   
   /// Интервал слева, эта точка для него правая
   SearchInterval* leftInterval;
+
   /// Правый интервал, эта точка для него левая(главная)
   SearchInterval* rightInterval;
+
   /// Цвет рисования точки
   int TypeColor;
-  /// Нужно ли пересчитать координаты
-  bool isNeedRecalculateCoordinates;
 
-  Trial()
-  {
-    discreteValuesIndex = 0;
+  /// Создает не вычесленное испытание в координате х=0
+  Trial();
 
-    x = 0.0;
-    index = -2;
-    K = 0;
+  /// Копия точки
+  Trial(const Trial& trial);
 
-    for (int i = 0; i < MaxNumOfFunc; i++)
-      FuncValues[i] = MaxDouble;
-    memset(y, 0, MaxDim * sizeof(*y));
+  /// Создает копию точки
+  virtual Trial* Clone();
 
-    leftInterval = 0;
-    rightInterval = 0;
+  ~Trial();
 
-    pointStatus = up_inflection;
-    lowAndUpPoints = 0;
+  /** Задаем координату в одномерном пространстве
+  перещет в многомерное не производится!
 
-    TypeColor = 0;
+  \param[in] d - новая координата
+  */
+  void SetX(Extended d);
 
-    generatedTask = 0;
+  /// Присвоение координаты точки в одномерном прогстранстве
+  virtual Trial& operator = (Extended d);
 
-    isNeedRecalculateCoordinates = false;
-  }
+  /// Возвращает координату точки
+  virtual Extended  X();
 
-  Trial(const Trial& trial)
-  {
-    this->discreteValuesIndex = trial.discreteValuesIndex;
-    this->x = trial.x;
-    memcpy(this->y, trial.y, MaxDim * sizeof(double));
-    memcpy(this->FuncValues, trial.FuncValues, MaxNumOfFunc * sizeof(double));
+  /// Возвращает левую границу отрезка == 0
+  virtual double GetFloor();
 
-    this->index = trial.index;
-    this->K = trial.K;
-    this->leftInterval = trial.leftInterval;
-    this->rightInterval = trial.rightInterval;
-    this->pointStatus = trial.pointStatus;
-    this->lowAndUpPoints = trial.lowAndUpPoints;
-    this->TypeColor = trial.TypeColor;
-    this->generatedTask = trial.generatedTask;
-    this->isNeedRecalculateCoordinates = trial.isNeedRecalculateCoordinates;
-  }
+  /// Возвращает значение испытания (с учетом индексной схемы)
+  virtual double GetValue();
 
-  virtual Trial* Clone()
-  {
-    Trial* res = new Trial();
-
-    res->discreteValuesIndex = discreteValuesIndex;
-    res->x = x;
-    memcpy(res->y, y, MaxDim * sizeof(double));
-    memcpy(res->FuncValues, FuncValues, MaxNumOfFunc * sizeof(double));
-
-    res->index = index;
-    res->K = K;
-    res->leftInterval = leftInterval;
-    res->rightInterval = rightInterval;
-    res->pointStatus = pointStatus;
-    res->lowAndUpPoints = lowAndUpPoints;
-    res->TypeColor = TypeColor;
-    res->generatedTask = generatedTask;
-    res->isNeedRecalculateCoordinates = isNeedRecalculateCoordinates;
-    return res;
-  }
-
-  ~Trial()
-  {
-    discreteValuesIndex = 0;
-
-    x = 0.0;
-    index = -2;
-    K = 0;
-
-    leftInterval = 0;
-    rightInterval = 0;
-
-    pointStatus = up_inflection;
-    lowAndUpPoints = 0;
-
-    TypeColor = 0;
-
-    generatedTask = 0;
-  }
-
-  void SetX(Extended d)
-  {
-    x = d;
-  }
-
-  virtual Trial& operator = (Extended d)
-  {
-    SetX(d);
-    return *this;
-  }
-
-  virtual Extended  X()
-  {
-    return x;
-  }
-
-  virtual double GetFloor()
-  {
-    return this->discreteValuesIndex;
-  }
-
-  virtual double GetValue()
-  {
-    if (index < 0 || index >= MaxNumOfFunc)
-      return FuncValues[0];
-    else
-      return FuncValues[index];
-  }
-
+  /// Возврящает соседнюю с лева точку
   virtual Trial* GetLeftPoint();
 
+  /// Возврящает соседнюю с права точку
   virtual Trial* GetRightPoint();
 
-  virtual Trial& operator = (const Trial& trial)
-  {
-    if (this != &trial)
-    {
-      this->discreteValuesIndex = trial.discreteValuesIndex;
-      this->x = trial.x;
-      memcpy(this->y, trial.y, MaxDim * sizeof(double));
-      memcpy(this->FuncValues, trial.FuncValues, MaxNumOfFunc * sizeof(double));
+  /// Копирование точки
+  virtual Trial& operator = (const Trial& trial);
 
-      this->index = trial.index;
-      this->K = trial.K;
-      this->leftInterval = trial.leftInterval;
-      this->rightInterval = trial.rightInterval;
-      this->pointStatus = trial.pointStatus;
-      this->lowAndUpPoints = trial.lowAndUpPoints;
-      this->TypeColor = trial.TypeColor;
-      this->generatedTask = trial.generatedTask;
-    }
-    return *this;
-  }
+  /// Сравнение точек в одномерном пространстве
+  virtual bool operator == (Trial& t);
 
-  virtual bool operator == (Trial& t)
-  {
-    return (x == t.x) && (discreteValuesIndex == t.discreteValuesIndex);
-  }
+  /// Сравнение точек в одномерном пространстве
+  virtual bool operator > (Trial& t);
 
-  virtual bool operator > (Trial& t)
-  {
-    if (discreteValuesIndex > t.discreteValuesIndex)
-      return true;
-    else if (discreteValuesIndex < t.discreteValuesIndex)
-      return false;
-    else
-      return x > t.x;
-  }
-
-  virtual bool operator < (Trial& t)
-  {
-    if (discreteValuesIndex < t.discreteValuesIndex)
-      return true;
-    else if (discreteValuesIndex > t.discreteValuesIndex)
-      return false;
-    else
-      return x < t.x;
-  }
-
+  /// Сравнение точек в одномерном пространстве
+  virtual bool operator < (Trial& t);
 
 };
 
