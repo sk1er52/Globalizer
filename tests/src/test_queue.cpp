@@ -174,7 +174,7 @@ TEST_F(TQueueTest, can_pop_element)
 {
   double key;
   void* value;
- QueueBaseData resvalue;
+  QueueBaseData resvalue;
   queue->Push(1, 1, &tmp1);
   queue->Push(2, 2, &resvalue);
 
