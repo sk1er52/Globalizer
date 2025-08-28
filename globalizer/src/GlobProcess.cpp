@@ -45,7 +45,7 @@ pData(&data), pTask(&task)
   isFirstRun = true;
 
   if (parameters.MapType == mpBase)
-    evolvent = new Evolvent(parameters.Dimension, parameters.m);
+    evolvent = new Evolvent(parameters.Dimension - pTask->GetNumberOfDiscreteVariable(), parameters.m);
   else
     throw EXCEPTION("Unknown type of evolvent");
 

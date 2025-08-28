@@ -106,10 +106,6 @@ void MixedIntegerMethod::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterva
   // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
   CalculateImage(pCurTrialsj);
 
-  for (int k = parameters.Dimension - 1; k >= 0; k--)
-    pCurTrialsj.y[k] = pCurTrialsj.y[k];
-
-
   // Записываем значение дискретной переменной
   for (int j = 0; j < pTask.GetNumberOfDiscreteVariable(); j++)
     pCurTrialsj.y[startDiscreteVariable + j] =
@@ -162,8 +158,7 @@ void MixedIntegerMethod::FirstIteration()
   //  delete[] dvs[e];
   //}
   //delete[] dvs;
-
-  iteration.pCurTrials.resize(parameters.NumPoints * mDiscreteValuesCount);
+  SetNumPoints(parameters.NumPoints * mDiscreteValuesCount);
 
   SearchInterval** NewInterval = new SearchInterval * [mDiscreteValuesCount];
   //SearchIntervalFactory::CreateSearchInterval();
@@ -220,9 +215,7 @@ void MixedIntegerMethod::FirstIteration()
 
         inputlocal.trials[0] = p->LeftPoint;
 
-
         inputlocal.trials[1] = p->RightPoint;
-
 
         Calculation* Calculation_ = CalculationFactory::CreateCalculation2(pTask, &evolvent);
 
@@ -239,7 +232,6 @@ void MixedIntegerMethod::FirstIteration()
     }
 
   }
-  intervalXMax = NewInterval[0];
   //====================================================================
 
   // На первой итерации - единственный лучший интервал
@@ -270,12 +262,6 @@ void MixedIntegerMethod::FirstIteration()
 
           // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
           CalculateImage(*iteration.pCurTrials[ind]);
-          // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
-          // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = parameters.Dimension - 1; j >= 0; j--)
-          {
-            iteration.pCurTrials[ind]->y[0 + j] = iteration.pCurTrials[ind]->y[j];
-          }
 
           for (int j = 0; j < numberOfDiscreteVariable; j++)
             iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
@@ -291,9 +277,6 @@ void MixedIntegerMethod::FirstIteration()
           iteration.pCurTrials[ind]->discreteValuesIndex = e;
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
 
-          //iteration.pCurTrials[ind]->SetX((q + 1)* h);
-          //CalculateImage(*iteration.pCurTrials[ind]);
-
           for (size_t iCNP = 0; iCNP < parameters.Dimension; iCNP++)
           {
             iteration.pCurTrials[ind]->y[iCNP] = pTask.GetA()[iCNP] + ((double(q) + 1.0) * h) * (pTask.GetB()[iCNP] - pTask.GetA()[iCNP]);
@@ -302,14 +285,6 @@ void MixedIntegerMethod::FirstIteration()
           Extended genX(0.0);
           evolvent.GetInverseImage(iteration.pCurTrials[ind]->y, genX);
           iteration.pCurTrials[ind]->SetX(genX);
-
-          // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
-          // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = parameters.Dimension - 1; j >= 0; j--)
-          {
-            iteration.pCurTrials[ind]->y[j] = iteration.pCurTrials[ind]->y[j];
-          }
-
 
           for (int j = 0; j < numberOfDiscreteVariable; j++)
             iteration.pCurTrials[ind]->y[startDiscreteVariable + j] =
@@ -320,7 +295,7 @@ void MixedIntegerMethod::FirstIteration()
         }
       }
     }
-    SetNumPoints(parameters.NumPoints * mDiscreteValuesCount);
+    
   }
   else // читаем из файла FirstPointFilePath
   {
