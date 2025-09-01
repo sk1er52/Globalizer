@@ -27,6 +27,13 @@
 #include <cmath>
 #include <iostream>
 
+#ifdef _GLOBALIZER_BENCHMARKS
+#include "IGlobalOptimizationProblem.h"
+#include "GlobalOptimizationProblemManager.h"
+#endif // _GLOBALIZER_BENCHMARKS
+
+
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -78,20 +85,20 @@ int main(int argc, char* argv[])
   OutputMessage::Init(true, parameters.logFileNamePrefix, parameters.GetProcNum(),
     parameters.GetProcRank());
 
-  ProblemManager manager;
-  IProblem* problem = 0;
+  GlobalOptimizationProblemManager manager;
+  IGlobalOptimizationProblem* problem = 0;
 
   bool isUseDLLProblems = true;
 
-  if (isUseDLLProblems)
+#ifdef _GLOBALIZER_BENCHMARKS
   {
-    if (InitProblem(manager, problem, argc, argv, 1))
+    if (InitGlobalOptimizationProblem(manager, problem, parameters.libPath))
     {
       print << "Error during problem initialization\n";
       return 0;
     }
   }
-  else
+#elif
   {
     parameters.Dimension = 2;
 
@@ -113,7 +120,7 @@ int main(int argc, char* argv[])
     );
     problem->Initialize();
   }
-
+#endif
   if (parameters.GetProcRank() == 0 && !parameters.disablePrintParameters)
   {
     parameters.PrintParameters();

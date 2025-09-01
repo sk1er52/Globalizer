@@ -66,6 +66,19 @@ Solver::Solver(IProblem* problem)
 }
 
 // ------------------------------------------------------------------------------------------------
+Solver::Solver(IGlobalOptimizationProblem* problem)
+{
+  mProblem = problem;
+
+  mProcess = 0;
+
+  pTask = 0;
+  pData = 0;
+
+  result = 0;
+}
+
+// ------------------------------------------------------------------------------------------------
 int Solver::CheckParameters()
 {
   double optimumValue;
