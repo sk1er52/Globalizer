@@ -2,12 +2,12 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2016 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      problem_interface.h                                         //
+//  File:      Problem.h                                                   //
 //                                                                         //
-//  Purpose:   Header file for Globalizer problem interface                //
+//  Purpose:   Header file for Globalizer problem                          //
 //                                                                         //
 //                                                                         //
 //  Author(s): Lebedev I.                                                  //
@@ -16,11 +16,11 @@
 
 /**
 \file problem_interface.h
-\authors Соврасов В.
-\date 2016
+\authors Лебедев И.Г.
+\date 2025
 \copyright ННГУ им. Н.И. Лобачевского
-\brief Объявление абстрактного класса #TIProblem
-\details Объявление абстрактного класса #TIProblem и сопутствующих типов данных
+\brief Базовые классы для задач Globalizer
+\details Базовые классы для задач Globalizer
 */
 
 #ifndef __PROBLEM_H__
@@ -41,8 +41,7 @@
 
 
 /**
-Базовый класс-интерфейс, от которого наследуются классы, описывающие задачи оптимизации.
-В классе #TIProblem описаны прототипы методов, которые должны быть реализованы в подключамых модулях с задачами.
+Базовый класс реализующий основные методы задач
 */
 template <class Owner>
 class BaseProblem : virtual public IIntegerProgrammingProblem, public BaseParameters<Owner>, virtual public ProblemPar
@@ -173,11 +172,12 @@ public:
   /// Умножать ли на пароболоидцелевую функцию
   TBool<Owner> IsMultInt;
 
+  /// Метод возвращающий размерность
   int GetDim() const
   {
     return mDim;
   }
-
+  /// Метод задачющий размерность
   void SetDim(int dim)
   {
     mDim = dim;
@@ -449,6 +449,8 @@ public:
   }
 };
 
+/** Основной класс для работы с задачами
+*/
 template <class Owner>
 class Problem : public BaseProblem<Owner>
 {
@@ -505,7 +507,8 @@ public:
 };
 
 
-
+/** Класс задач принимающий функции как параметры
+*/
 class ProblemFromFunctionPointers : public Problem<ProblemFromFunctionPointers>
 {
 #undef OWNER_NAME
@@ -607,24 +610,34 @@ public:
 
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
-
+/** Класс задачи обертки для интерфейса IGlobalOptimizationProblem
+*/
 class GlobalizerBenchmarksProblem : public Problem<GlobalizerBenchmarksProblem>
 {
 #undef OWNER_NAME
 #define OWNER_NAME GlobalizerBenchmarksProblem
 
 protected:
+  /// Новая задача
   IGlobalOptimizationProblem* problem;
 
+  /// Все комбинации дискретных параметров
   std::vector< std::vector<std::string>> DiscreteVariableValues;
-
+  /// Левая граница области определения
   std::vector<double> A;
+  /// Правая граница области определения
   std::vector<double> B;
+  /// Известная точка оптимума
   std::vector<double> optPoint;
-  //std::vector<double> discreteValues;
+  /// Номера значений дискретных параметров
   std::vector <std::vector<double>> discreteValues;
 
+  /** Метод, получает по координатам непрерывных параметров и номерам дискретных два вектора с непрерывными и дискретными параметрами соответственно
 
+  \param[in] x координаты точки, сначала непрерывные координаты, затем номера дискретных параметров
+  \param[out] y непрерывные координаты точки, в которой необходимо вычислить значение
+  \param[out] u целочисленые координаты точки, в которой необходимо вычислить значение
+  */
   void XtoYU(const double* x, std::vector<double>& y, std::vector<std::string>& u) const
   {
     y.resize(problem->GetNumberOfContinuousVariable());
@@ -644,6 +657,12 @@ protected:
     }
   }
 
+  /** Метод, преобразует вектора с непрерывными и дискретными параметрами объединенный массив с координатами
+
+  \param[in] y непрерывные координаты точки, в которой необходимо вычислить значение
+  \param[in] u целочисленые координаты точки, в которой необходимо вычислить значение
+  \param[out] x координаты точки, сначала непрерывные координаты, затем номера дискретных параметров
+  */
   void YUtoX(std::vector<double>& y, std::vector<std::string>& u, double* x) const
   {
     int i = 0;
@@ -668,8 +687,8 @@ protected:
     }
   }
 
-
 public:
+
   GlobalizerBenchmarksProblem(IGlobalOptimizationProblem* _problem) : problem(_problem)
   {
     mDim = problem->GetDimension();
@@ -705,20 +724,19 @@ public:
     mLeftBorder = A[0];
     mRightBorder = B[0];
 
-    //discreteValues.resize(GetNumberOfDiscreteVariable());
-    ////double d = (mRightBorder - mLeftBorder) / (mDefNumberOfValues - 1);
-    //for (int i = 0; i < mDefNumberOfValues; i++)
-    //{
-    //  discreteValues[i] = mLeftBorder + d * i;
-    //}
-
   }
-
+  /** Метод возвращает значение целевой функции в точке глобального минимума
+  \param[out] value оптимальное значение
+  \return Код ошибки (#OK или #UNDEFINED)
+  */
   virtual int GetOptimumValue(double& value) const
   {
     return problem->GetOptimumValue(value);
   }
-
+  /** Метод возвращает координаты точки глобального минимума целевой функции
+  \param[out] x точка, в которой достигается оптимальное значение
+  \return Код ошибки (#OK или #UNDEFINED)
+  */
   virtual int GetOptimumPoint(double* x) const
   {
     std::vector<double> y(problem->GetNumberOfContinuousVariable());
@@ -730,7 +748,13 @@ public:
 
     return err;
   }
+  /** Метод, вычисляющий функции задачи
 
+  \param[in] x Точка, в которой необходимо вычислить значение
+  \param[in] fNumber Номер вычисляемой функции. 0 соответствует первому ограничению,
+  #GetNumberOfFunctions() - 1 -- последнему критерию
+  \return Значение функции с указанным номером
+  */
   virtual double CalculateFunctionals(const double* x, int fNumber)
   {
     std::vector<double> y(problem->GetNumberOfContinuousVariable());
@@ -741,24 +765,39 @@ public:
     return problem->CalculateFunctionals(y, u, fNumber);
   }
 
+  /** Задание пути до конфигурационного файла
 
+  Данный метод должн вызываться перед #Initialize
+  \param[in] configPath строка, содержащая путь к конфигурационному файлу задачи
+  \return Код ошибки
+  */
   virtual int SetConfigPath(const std::string& configPath)
   {
     return problem->SetConfigPath(configPath);
   }
 
+  /** Метод задаёт размерность задачи
+
+  Данный метод должен вызываться перед #Initialize. Размерность должна быть в
+  списке поддерживаемых.
+  \param[in] dimension размерность задачи
+  \return Код ошибки
+  */
   virtual int SetDimension(int dimension)
   {
     int err = problem->SetDimension(dimension);
     Dimension = problem->GetDimension();
     return err;
   }
+
+  ///Возвращает размерность задачи, можно вызывать после #Initialize
   virtual int GetDimension() const
   {
     return problem->GetDimension();
   }
 
-
+  /** Метод возвращает границы области поиска
+  */
   virtual void GetBounds(double* lower, double* upper)
   {
     std::vector<double> lower_(mDim);
@@ -773,11 +812,11 @@ public:
   }
 
   /**
-Возвращает число значений дискретного параметра discreteVariable.
-GetDimension() возвращает общее число параметров.
-(GetDimension() - GetNumberOfDiscreteVariable()) - номер начальной дискретной переменной
-Для не дискретных переменных == -1
-*/
+  Возвращает число значений дискретного параметра discreteVariable.
+  GetDimension() возвращает общее число параметров.
+  (GetDimension() - GetNumberOfDiscreteVariable()) - номер начальной дискретной переменной
+  Для не дискретных переменных == -1
+  */
   virtual int GetNumberOfValues(int discreteVariable)
   {
     if ((discreteVariable > GetDimension()) ||
@@ -848,13 +887,13 @@ GetDimension() возвращает общее число параметров.
       return IProblem::OK;
     }
     else if (previousNumber == -2)
-    {      
+    {
       mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()]++;
       value = mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()];
       return IProblem::OK;
     }
     else
-    {     
+    {
       mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()] =
         previousNumber;
       mCurrentDiscreteValueIndex[discreteVariable - GetNumberOfDiscreteVariable()]++;

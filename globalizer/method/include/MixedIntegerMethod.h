@@ -2,7 +2,7 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2015 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
 //  File:      MixedIntegerMethod.h                                        //
