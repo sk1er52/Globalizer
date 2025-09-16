@@ -74,7 +74,11 @@ protected:
 public:
   Solver(IProblem* problem);
 
+#ifdef _GLOBALIZER_BENCHMARKS
+
   Solver(IGlobalOptimizationProblem* problem);
+
+#endif
 
   /// Решение задачи по умолчанию
   virtual int Solve();
