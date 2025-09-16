@@ -65,6 +65,21 @@ Solver::Solver(IProblem* problem)
   result = 0;
 }
 
+#ifdef _GLOBALIZER_BENCHMARKS
+// ------------------------------------------------------------------------------------------------
+Solver::Solver(IGlobalOptimizationProblem* problem)
+{
+  mProblem = new GlobalizerBenchmarksProblem(problem);
+
+  mProcess = 0;
+
+  pTask = 0;
+  pData = 0;
+
+  result = 0;
+}
+#endif
+
 // ------------------------------------------------------------------------------------------------
 int Solver::CheckParameters()
 {

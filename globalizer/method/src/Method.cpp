@@ -220,8 +220,6 @@ void Method::FirstIteration()
   AchievedAccuracy = 1.0;
   // И лучшую итерацию
 
-
-
   SearchInterval** NewInterval = new SearchInterval*[1];
     //SearchIntervalFactory::CreateSearchInterval();
   for (int e = 0; e < 1; e++)
@@ -268,9 +266,7 @@ void Method::FirstIteration()
 
         inputlocal.trials[0] = p->LeftPoint;
 
-
         inputlocal.trials[1] = p->RightPoint;
-
 
         Calculation* Calculation_ = CalculationFactory::CreateCalculation2(pTask, &evolvent);
 
@@ -313,12 +309,6 @@ void Method::FirstIteration()
 
           // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
           CalculateImage(*iteration.pCurTrials[ind]);
-          // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
-          // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = parameters.Dimension - 1; j >= 0; j--)
-          {
-            iteration.pCurTrials[ind]->y[0 + j] = iteration.pCurTrials[ind]->y[j];
-          }
 
           iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
           iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
@@ -329,9 +319,6 @@ void Method::FirstIteration()
           iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
           pData->GetTrials().push_back(iteration.pCurTrials[ind]);
           
-          //iteration.pCurTrials[ind]->SetX((q + 1)* h);
-          //CalculateImage(*iteration.pCurTrials[ind]);
-
           for (size_t iCNP = 0; iCNP < parameters.Dimension; iCNP++)
           {
             iteration.pCurTrials[ind]->y[iCNP] = pTask.GetA()[iCNP] + ((double(q) + 1.0) * h) * (pTask.GetB()[iCNP] - pTask.GetA()[iCNP]);
@@ -340,13 +327,6 @@ void Method::FirstIteration()
           Extended genX(0.0);
           evolvent.GetInverseImage(iteration.pCurTrials[ind]->y, genX);
           iteration.pCurTrials[ind]->SetX(genX);
-
-          // Смещаем вычисленные координаты в соответствии с уровнем подзадачи
-          // Смещение надо делать начиная с координаты с бОльшим номером
-          for (int j = parameters.Dimension - 1; j >= 0; j--)
-          {
-            iteration.pCurTrials[ind]->y[j] = iteration.pCurTrials[ind]->y[j];
-          }
 
           iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
           iteration.pCurTrials[ind]->rightInterval = NewInterval[0];

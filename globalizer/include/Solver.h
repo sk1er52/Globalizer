@@ -17,6 +17,12 @@
 #include "SolutionResult.h"
 #include "SolverInterface.h"
 
+#ifdef _GLOBALIZER_BENCHMARKS
+#include "IGlobalOptimizationProblem.h"
+#include "GlobalOptimizationProblemManager.h"
+#endif // _GLOBALIZER_BENCHMARKS
+
+
 
 /**
 * Базовые классы для решения задач глобальной оптимизации
@@ -67,6 +73,12 @@ protected:
 
 public:
   Solver(IProblem* problem);
+
+#ifdef _GLOBALIZER_BENCHMARKS
+
+  Solver(IGlobalOptimizationProblem* problem);
+
+#endif
 
   /// Решение задачи по умолчанию
   virtual int Solve();

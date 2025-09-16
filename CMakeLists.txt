@@ -181,6 +181,18 @@ if (GLOBALIZER_USE_CUDA)
   find_package(CUDA REQUIRED)
 endif()
 
+
+#add problems
+if(${GLOBALIZER_BUILD_PROBLEMS})
+  add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/Problems)
+	
+  set(GLOBALIZER_BENCHMARKS_Interface ${PROJECT_SOURCE_DIR}/third_party/Problems/Interface)
+  file(GLOB GLOBALIZER_BENCHMARKS_Interface_HEADERS ${GLOBALIZER_BENCHMARKS_Interface}/include/*.h ${GLOBALIZER_BENCHMARKS_Interface}/include/*.hpp )
+  file(GLOB GLOBALIZER_BENCHMARKS_Interface_SOURCES ${GLOBALIZER_BENCHMARKS_Interface}/src/*.c ${GLOBALIZER_BENCHMARKS_Interface}/src/*.cpp)
+  add_definitions(-D_GLOBALIZER_BENCHMARKS)		
+  include_directories(${GLOBALIZER_BENCHMARKS_Interface}/include/)
+endif()
+
 # build main library and executable
 set(ALL_SRC_FILES ${ROOT_HEADERS} ${PARAMETERS_HEADERS} ${ROOT_SOURCES}
 ${evolvent_HEADERS} 
@@ -190,6 +202,7 @@ ${problem_HEADERS}
 ${method_HEADERS}
 ${calculation_HEADERS}
 ${local_method_HEADERS}
+${GLOBALIZER_BENCHMARKS_Interface_HEADERS}
 ${evolvent_SOURCES}
 ${extended_SOURCES}
 ${output_system_SOURCES}
@@ -198,6 +211,7 @@ ${method_SOURCES}
 ${calculation_SOURCES}
 ${local_method_SOURCES}
 ${PARAMETERS_SOURCES}
+${GLOBALIZER_BENCHMARKS_Interface_SOURCES}
 )
 list(REMOVE_ITEM ALL_SRC_FILES ${GLOBALIZER_COMMON_SRC_DIR}/Main.cpp)
 
@@ -284,10 +298,7 @@ if (IS_GNU_COMPILER)
   set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
 endif()
 
-#add problems
-if(${GLOBALIZER_BUILD_PROBLEMS})
-	add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/Problems)
-endif()
+
 
 #add tests
 if(${GLOBALIZER_BUILD_TESTS})
@@ -318,7 +329,7 @@ if (IS_MICROSOFT_COMPILER)
   source_group("Header Files\\evolvent" FILES ${evolvent_HEADERS}) 
   source_group("Header Files\\extended" FILES ${extended_HEADERS})
   source_group("Header Files\\output_system" FILES ${output_system_HEADERS})
-  source_group("Header Files\\problem" FILES ${problem_HEADERS})
+  source_group("Header Files\\problem" FILES ${problem_HEADERS} ${GLOBALIZER_BENCHMARKS_Interface_HEADERS})
   source_group("Header Files\\method" FILES ${method_HEADERS})
   source_group("Header Files\\calculation" FILES ${calculation_HEADERS})
   source_group("Header Files\\local_method" FILES ${local_method_HEADERS})
@@ -327,7 +338,7 @@ if (IS_MICROSOFT_COMPILER)
   source_group("Source Files\\evolvent" FILES ${evolvent_SOURCES})
   source_group("Source Files\\extended" FILES ${extended_SOURCES})
   source_group("Source Files\\output_system" FILES ${output_system_SOURCES})
-  source_group("Source Files\\problem" FILES ${problem_SOURCES})
+  source_group("Source Files\\problem" FILES ${problem_SOURCES} ${GLOBALIZER_BENCHMARKS_Interface_SOURCES})
   source_group("Source Files\\method" FILES ${method_SOURCES})
   source_group("Source Files\\calculation" FILES ${calculation_SOURCES})
   source_group("Source Files\\local_method" FILES ${local_method_SOURCES})

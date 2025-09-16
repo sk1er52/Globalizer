@@ -27,6 +27,13 @@
 #include <cmath>
 #include <iostream>
 
+#ifdef _GLOBALIZER_BENCHMARKS
+#include "IGlobalOptimizationProblem.h"
+#include "GlobalOptimizationProblemManager.h"
+#endif // _GLOBALIZER_BENCHMARKS
+
+
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -41,7 +48,7 @@ int main(int argc, char* argv[])
     std::cout << argv[i] << " ";
   }
   std::cout << "\n\n" << std::endl;
-  
+
 
   MPI_Init(&argc, &argv);
 
@@ -78,41 +85,6 @@ int main(int argc, char* argv[])
   OutputMessage::Init(true, parameters.logFileNamePrefix, parameters.GetProcNum(),
     parameters.GetProcRank());
 
-  ProblemManager manager;
-  IProblem* problem = 0;
-
-  bool isUseDLLProblems = true;
-
-  if (isUseDLLProblems)
-  {
-    if (InitProblem(manager, problem, argc, argv, 1))
-    {
-      print << "Error during problem initialization\n";
-      return 0;
-    }
-  }
-  else
-  {
-    parameters.Dimension = 2;
-
-    problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
-      std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
-      std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
-      std::vector<std::function<double(const double*)>>(1, [](const double* y)
-        {
-          double pi_ = 3.14159265358979323846;
-          double sum = 0.;
-          for (int j = 0; j < parameters.Dimension; j++)
-            sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
-          return sum;
-        }), // критерий
-      true, // определен ли оптимум
-      0, // значение глобального оптимума
-      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
-
-    );
-    problem->Initialize();
-  }
 
   if (parameters.GetProcRank() == 0 && !parameters.disablePrintParameters)
   {
@@ -145,19 +117,52 @@ int main(int argc, char* argv[])
 
     printf("%s\tProcRank=%d\tProcNum=%d\n", CompName, parameters.GetProcRank(), parameters.GetProcNum());
   }
-  
-//#ifdef WIN32
-//  unexpected_function prev, cur;
-//  cur = &Unexpected;
-//  prev = set_unexpected(cur);
-//  set_terminate(Terminate);
-//#endif
 
+
+
+
+#ifdef _GLOBALIZER_BENCHMARKS
+  GlobalOptimizationProblemManager manager;
+  IGlobalOptimizationProblem* problem = 0;
+  if (InitGlobalOptimizationProblem(manager, problem, parameters.libPath))
+  {
+    print << "Error during problem initialization\n";
+    return 0;
+  }
+  parameters.Dimension = problem->GetDimension();
   // Решатель
   Solver solver(problem);
   // Решаем задачу
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
+#else
+
+  parameters.Dimension = 2;
+
+  auto problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
+    std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
+    std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
+    std::vector<std::function<double(const double*)>>(1, [](const double* y)
+      {
+        double pi_ = 3.14159265358979323846;
+        double sum = 0.;
+        for (int j = 0; j < parameters.Dimension; j++)
+          sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+        return sum;
+      }), // критерий
+    true, // определен ли оптимум
+    0, // значение глобального оптимума
+    std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+
+  );
+  problem->Initialize();
+  // Решатель
+  Solver solver(problem);
+  // Решаем задачу
+  if (solver.Solve() != SYSTEM_OK)
+    throw EXCEPTION("Error: solver.Solve crash!!!");
+
+#endif
 
 
   MPI_Finalize();

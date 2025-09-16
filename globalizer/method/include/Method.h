@@ -120,18 +120,6 @@ protected:
   /// Нужно останавливаться
   bool isStop;
 
-  /**
-  Количество дискретных значений
-  Произведение числа значений всех дискретных переменных.
-  Равно числу интервалов.
-  */
-  int mDiscreteValuesCount;
-  /// Значения дискретных параметров
-  std::vector< std::vector< double > > mDiscreteValues;
-  /// Индекс первого дискретного параметра
-  int startDiscreteVariable;
-
-
   /// найденные локальные минимумы
   std::vector<Trial*> localMinimumPoints;
 
