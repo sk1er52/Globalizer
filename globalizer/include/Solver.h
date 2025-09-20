@@ -16,6 +16,7 @@
 #include "Messages.h"
 #include "SolutionResult.h"
 #include "SolverInterface.h"
+#include "GlobalizerProblem.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"

@@ -18,7 +18,7 @@
 #endif
 
 #include "Solver.h"
-
+#include "GlobalizerProblem.h"
 
 #include <algorithm>
 #include <fstream>
