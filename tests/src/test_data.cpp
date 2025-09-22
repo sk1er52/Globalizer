@@ -1,5 +1,6 @@
 #include "SearchInterval.h"
 #include "SearchData.h"
+#include "TreeNode.h"
 #include "gtest/gtest.h"
 #include "Trial.h"
 
@@ -45,6 +46,14 @@ protected:
     return interval;
   }
 };
+
+/**
+ * Создание дерева с корректным входным параметром
+ */
+TEST_F(TSearchDataTest, can_create_TreeNode_with_correct_values)
+{
+    ASSERT_NO_THROW(TreeNode treeNode(interval1));
+}
 
 /**
  * Проверка параметра максимальный размер МСП #MaxSize

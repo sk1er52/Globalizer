@@ -16,31 +16,31 @@
 #ifndef __TREE_NODE_H__
 #define __TREE_NODE_H__
 
-
 #include "SearchInterval.h"
 #include "SearchIntervalFactory.h"
 
-
-
 class SearchInterval;
 // ------------------------------------------------------------------------------------------------
-struct TreeNode
+class TreeNode
 {
-  SearchInterval *pInterval;
-  unsigned char Height;
-  TreeNode *pLeft;
-  TreeNode *pRight;
-  TreeNode *pParent;
-  TreeNode(SearchInterval &p)
-  {
-    pInterval = SearchIntervalFactory::CreateSearchInterval(p);
-      //new SearchInterval(p);
-    Height = 1;
-    pParent = pLeft = pRight = NULL;
-  }
-  ~TreeNode() { delete pInterval; }
-};
+public:
+    /// Интервал поиска
+    SearchInterval* pInterval;
 
+    /// Высота дерева
+    unsigned char Height;
+
+    /// Левая ветвь дерева
+    TreeNode* pLeft;
+    /// Правая ветвь дерева
+    TreeNode* pRight;
+    /// Родительский узел
+    TreeNode* pParent;
+
+    TreeNode(SearchInterval& p);
+
+    ~TreeNode();
+};
 
 #endif
 // - end of file ----------------------------------------------------------------------------------
