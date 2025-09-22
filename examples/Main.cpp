@@ -18,6 +18,7 @@
 #endif
 
 #include "Solver.h"
+#include "SeparableOptimizationSolver.h"
 #include "GlobalizerProblem.h"
 
 #include <algorithm>
@@ -130,11 +131,25 @@ int main(int argc, char* argv[])
     return 0;
   }
   parameters.Dimension = problem->GetDimension();
-  // Решатель
-  Solver solver(problem);
-  // Решаем задачу
-  if (solver.Solve() != SYSTEM_OK)
-    throw EXCEPTION("Error: solver.Solve crash!!!");
+
+  bool isUseSeparableOptimizationSolver = false;
+
+  if (!isUseSeparableOptimizationSolver)
+  {
+    // Решатель
+    Solver solver(problem);
+    // Решаем задачу
+    if (solver.Solve() != SYSTEM_OK)
+      throw EXCEPTION("Error: solver.Solve crash!!!");
+  }
+  else
+  {
+    // Решатель
+    SeparableOptimizationSolver solver(problem);
+    // Решаем задачу
+    if (solver.Solve() != SYSTEM_OK)
+      throw EXCEPTION("Error: solver.Solve crash!!!");
+  }
 #else
 
   parameters.Dimension = 2;

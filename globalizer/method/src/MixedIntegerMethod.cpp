@@ -217,7 +217,7 @@ void MixedIntegerMethod::FirstIteration()
 
         inputlocal.trials[1] = p->RightPoint;
 
-        Calculation* Calculation_ = CalculationFactory::CreateCalculation2(pTask, &evolvent);
+        Calculation* Calculation_ = CalculationFactory::CreateCalculation(pTask, &evolvent);
 
         Calculation_->Calculate(inputlocal, outputlocal);
 

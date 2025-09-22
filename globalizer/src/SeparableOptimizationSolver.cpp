@@ -1,0 +1,154 @@
+#include "SeparableOptimizationSolver.h"
+#include "TaskFactory.h"
+
+// ------------------------------------------------------------------------------------------------
+void SeparableOptimizationSolver::SetDimentions(std::vector<int> _dimentions)
+{
+  if (_dimentions.size() == 0)
+  {
+    dimensions.resize(parameters.Dimension);
+    for (int i = 0; i < dimensions.size(); i++)
+      dimensions[i] = 1;
+  }
+  else
+  {
+    dimensions = _dimentions;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void SeparableOptimizationSolver::CreateStartPoint()
+{
+  if (parameters.startPoint.GetIsChange() == false)
+  {
+    double* A = new double[parameters.Dimension];
+    double* B = new double[parameters.Dimension];
+    problem->GetBounds(A, B);
+    parameters.startPoint.SetSize(parameters.Dimension);
+    for (int i = 0; i < parameters.Dimension; i++)
+    {
+      parameters.startPoint[i] = A[i] + (B[i] - A[i]) / 2.0;
+    }
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+void SeparableOptimizationSolver::Construct()
+{
+  solvers.resize(dimensions.size());
+  tasks.resize(dimensions.size());
+  for (int i = 0; i < dimensions.size(); i++)
+  {
+    solvers[i] = new Solver(problem);
+    tasks[i] = nullptr;
+  }
+  solutionResult = nullptr;
+  originalDimension = parameters.Dimension;
+  CreateStartPoint();
+  parameters.TypeSolver = SeparableSearch;
+}
+
+
+
+// ------------------------------------------------------------------------------------------------
+SeparableOptimizationSolver::SeparableOptimizationSolver(IProblem* _problem, std::vector<int> _dimentions)
+{
+  problem = _problem;
+  SetDimentions(_dimentions);
+  Construct();
+}
+
+// ------------------------------------------------------------------------------------------------
+#ifdef _GLOBALIZER_BENCHMARKS
+SeparableOptimizationSolver::SeparableOptimizationSolver(IGlobalOptimizationProblem* _problem, std::vector<int> _dimentions)
+{
+  problem = new GlobalizerBenchmarksProblem(_problem);
+  SetDimentions(_dimentions);
+  Construct();
+}
+#endif
+
+// ------------------------------------------------------------------------------------------------
+SeparableOptimizationSolver::~SeparableOptimizationSolver()
+{
+  if (solutionResult == nullptr)
+    delete solutionResult;
+  for (int i = 0; i < solvers.size(); i++)
+  {
+    if (solvers[i] != nullptr)
+      delete solvers[i];
+    if (tasks[i] != nullptr)
+      delete tasks[i];
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+int SeparableOptimizationSolver::Solve()
+{
+  try
+  {
+
+    int startParameterNumber = 0;
+    for (int i = 0; i < solvers.size(); i++)
+    {
+      Solver* soler = solvers[i];
+      if (tasks[i] != nullptr)
+        delete tasks[i];
+      tasks[i] = dynamic_cast<SeparableOptimizationTask*>(TaskFactory::CreateTask(problem, 0));      
+
+      tasks[i]->SetStartParameterNumber(startParameterNumber);
+      parameters.Dimension = dimensions[i];
+      soler->Solve(tasks[i]);
+      startParameterNumber = startParameterNumber + parameters.Dimension;
+      parameters.Dimension = originalDimension;
+    }
+    if (solutionResult != nullptr)
+      delete solutionResult;
+    solutionResult = solvers[solvers.size() - 1]->GetSolutionResult();
+
+  }
+  catch (const Exception& e)
+  {
+    std::string excFileName = std::string("exception_") +
+      toString(parameters.GetProcRank()) + ".txt";
+    e.Print(excFileName.c_str());
+
+    for (int i = 0; i < parameters.GetProcNum(); i++)
+      if (i != parameters.GetProcRank())
+        MPI_Abort(MPI_COMM_WORLD, i);
+    return 1;
+  }
+  catch (...)
+  {
+    print << "\nUNKNOWN EXCEPTION !!!\n";
+    std::string excFileName = std::string("exception_") +
+      toString(parameters.GetProcRank()) + ".txt";
+    Exception e("UNKNOWN FILE", -1, "UNKNOWN FUCNTION", "UNKNOWN EXCEPTION");
+    e.Print(excFileName.c_str());
+
+    for (int i = 0; i < parameters.GetProcNum(); i++)
+      if (i != parameters.GetProcRank())
+        MPI_Abort(MPI_COMM_WORLD, i);
+    return 1;
+  }
+  if (parameters.GetProcRank() == 0)
+  {
+    if (parameters.GetProcNum() > 1) {
+      int childNum = parameters.GetProcNum() - 1;
+      int curr_child = 0;
+      for (unsigned int i = 0; i < childNum; i++) {
+        ///curr_child = parameters.parallel_tree.ProcChild[i];!!!!!
+        int finish = 1;
+        MPI_Send(&finish, 1, MPI_INT, curr_child, TagChildSolved, MPI_COMM_WORLD);
+      }
+    }
+  }
+
+  return 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+SolutionResult* SeparableOptimizationSolver::GetSolutionResult()
+{
+  return solutionResult;
+}

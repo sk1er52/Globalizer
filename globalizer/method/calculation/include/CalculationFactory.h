@@ -28,9 +28,7 @@ public:
   static Calculation* CreateCalculation(Task& _pTask, Evolvent* evolvent = 0);
   static Calculation* CreateCalculation2(Task& _pTask, Evolvent* evolvent = 0);
   
-  ///Всегда создает новый вычислитель, НЕ ИСПОЛЬЗОВАТЬ В МНОГОШАГОВОЙ СХЕМЕ!
-  static Calculation* CreateNewCalculation(Task& _pTask, Evolvent* evolvent = 0);
-  
+ 
 };
 
 #endif
