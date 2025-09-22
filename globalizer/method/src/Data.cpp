@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -19,28 +19,10 @@
 #include "SearchIntervalFactory.h"
 #include "SearcDataIterator.h"
 #include "Trial.h"
-#include "TreeNode.h"
 #include "TrialFactory.h"
 
 // Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
 std::vector<SearchData*> SearchData::pRecalcDatas;
-
-// ------------------------------------------------------------------------------------------------
-// TreeNode Methods
-// ------------------------------------------------------------------------------------------------
-TreeNode::TreeNode(SearchInterval& p)
-{
-    pInterval = SearchIntervalFactory::CreateSearchInterval(p);
-    //new SearchInterval(p);
-    Height = 1;
-    pParent = pLeft = pRight = nullptr;
-}
-
-// ------------------------------------------------------------------------------------------------
-TreeNode::~TreeNode()
-{
-    delete pInterval;
-}
 
 // ------------------------------------------------------------------------------------------------
 // SearchData Methods

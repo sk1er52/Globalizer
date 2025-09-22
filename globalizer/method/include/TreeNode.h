@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -24,22 +24,31 @@ class SearchInterval;
 class TreeNode
 {
 public:
-    /// Интервал поиска
+    /// РРЅС‚РµСЂРІР°Р» РїРѕРёСЃРєР°
     SearchInterval* pInterval;
 
-    /// Высота дерева
+    /// Р’С‹СЃРѕС‚Р° РґРµСЂРµРІР°
     unsigned char Height;
 
-    /// Левая ветвь дерева
+    /// Р›РµРІР°СЏ РІРµС‚РІСЊ РґРµСЂРµРІР°
     TreeNode* pLeft;
-    /// Правая ветвь дерева
+    /// РџСЂР°РІР°СЏ РІРµС‚РІСЊ РґРµСЂРµРІР°
     TreeNode* pRight;
-    /// Родительский узел
+    /// Р РѕРґРёС‚РµР»СЊСЃРєРёР№ СѓР·РµР»
     TreeNode* pParent;
 
-    TreeNode(SearchInterval& p);
+    TreeNode(SearchInterval& p)
+    {
+        pInterval = SearchIntervalFactory::CreateSearchInterval(p);
+        //new SearchInterval(p);
+        Height = 1;
+        pParent = pLeft = pRight = nullptr;
+    }
 
-    ~TreeNode();
+    ~TreeNode()
+    {
+        delete pInterval;
+    }
 };
 
 #endif
