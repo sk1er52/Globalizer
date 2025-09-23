@@ -5,42 +5,26 @@
 //                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      TreeNode.h                                                  //
+//  File:      TreeNode.cpp                                                //
 //                                                                         //
-//  Purpose:   Header file for search data classes                         //
+//  Purpose:   Source file for search data classes                         //
 //                                                                         //
 //  Author(s): Sysoyev A., Barkalov K., Sovrasov V., Zaitsev A.            //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __TREE_NODE_H__
-#define __TREE_NODE_H__
-
 #include "SearchInterval.h"
 #include "SearchIntervalFactory.h"
+#include "TreeNode.h"
 
-class SearchInterval;
-// ------------------------------------------------------------------------------------------------
-class TreeNode
+TreeNode::TreeNode(SearchInterval& p)
 {
-public:
-    /// Интервал поиска
-    SearchInterval* pInterval;
+    pInterval = SearchIntervalFactory::CreateSearchInterval(p);
+    Height = 1;
+    pParent = pLeft = pRight = nullptr;
+}
 
-    /// Высота дерева
-    unsigned char Height;
-
-    /// Левая ветвь дерева
-    TreeNode* pLeft;
-    /// Правая ветвь дерева
-    TreeNode* pRight;
-    /// Родительский узел
-    TreeNode* pParent;
-
-    TreeNode(SearchInterval& p);
-
-    ~TreeNode();
-};
-
-#endif
-// - end of file ----------------------------------------------------------------------------------
+TreeNode::~TreeNode()
+{
+    delete pInterval;
+}
