@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -19,13 +19,7 @@
 #include "SearchIntervalFactory.h"
 #include "SearcDataIterator.h"
 #include "Trial.h"
-#include "TreeNode.h"
 #include "TrialFactory.h"
-
-//bool operator<(const SearchInterval& i1, const SearchInterval& i2)
-//{
-//  return (i1 < i2);
-//}
 
 // Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
 std::vector<SearchData*> SearchData::pRecalcDatas;
@@ -65,6 +59,7 @@ SearchData::SearchData(int _NumOfFuncs, int _MaxSize)
   pRecalcDatas.clear();
 }
 
+// ------------------------------------------------------------------------------------------------
 SearchData::SearchData(int _NumOfFuncs, int _MaxSize, int _queueSize)
 {
   if (_MaxSize <= 0)
@@ -675,6 +670,8 @@ int SearchData::GetCount()
 }
 
 // ------------------------------------------------------------------------------------------------
+// SearcDataIterator Methods
+// ------------------------------------------------------------------------------------------------
 SearcDataIterator::SearcDataIterator() : pContainer(NULL), pObject(NULL)
 {}
 
@@ -733,6 +730,8 @@ SearchInterval* SearcDataIterator::operator*() const
 }
 
 // ------------------------------------------------------------------------------------------------
+// SearchIntervalFactory Methods
+// ------------------------------------------------------------------------------------------------
 SearchInterval* SearchIntervalFactory::CreateSearchInterval(SearchInterval& interval)
 {
   return new SearchInterval(interval);
@@ -744,6 +743,8 @@ SearchInterval* SearchIntervalFactory::CreateSearchInterval()
   return new SearchInterval();
 }
 
+// ------------------------------------------------------------------------------------------------
+// SearchInterval Methods
 // ------------------------------------------------------------------------------------------------
 SearchInterval::SearchInterval()
 {
