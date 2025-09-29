@@ -112,15 +112,15 @@ void Solver::MpiCalculation()
   while (isFinish == 0)
   {
     MPI_Status status;
-    //Ïðèíèìàåì äàííûå èç mpi_calculation
-    //Ïðîâåðÿåì, ÷òî åùå ðàáîòàåì
+    // Принимаем данные из mpi_calculation
+    // Проверяем, что ещё работаем
     MPI_Recv(&isFinish, 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD, &status);
     if (isFinish == 1)
       break;
 
-    /// Âõîäíûå äàííûå äëÿ âû÷èñëèòåëÿ, ôîðìèðóáòñÿ â CalculateFunctionals()
+    /// Входные данные для вычислителя, формируются в CalculateFunctionals()
     InformationForCalculation inputSet;
-    /// Âûõîäíûå äàííûå âû÷èñëèòåëÿ, îáðàáàòûâàåòñÿ â CalculateFunctionals()
+    /// Выходные данные вычислителя, обрабатываются в CalculateFunctionals()
     TResultForCalculation outputSet;
 
     Trial* trail = TrialFactory::CreateTrial();
@@ -130,7 +130,7 @@ void Solver::MpiCalculation()
 
     for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
       inputSet.trials[j] = TrialFactory::CreateTrial();
-      //Ïîëó÷àåì êîîðäèíàòû òî÷êè
+      // Получаем координаты точки
       MPI_Recv(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD, &status);
       trail->index = -1;
 
@@ -152,7 +152,7 @@ void Solver::MpiCalculation()
     calculation->Calculate(inputSet, outputSet);
 
     for (unsigned int j = 0; j < parameters.mpiBlockSize; j++) {
-      //Îòïðàâëÿåì îáðàòíî çíà÷åíèå ôóíêöèè
+      // Отправляем обратно значение функции
       MPI_Send(inputSet.trials[j]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
     }
   }
@@ -165,15 +165,15 @@ void Solver::AsyncCalculation()
   while (isFinish == 0)
   {
     MPI_Status status;
-    //Ïðèíèìàåì äàííûå èç mpi_calculation
-    //Ïðîâåðÿåì, ÷òî åùå ðàáîòàåì
+    // Принимаем данные из mpi_calculation
+    // Проверяем, что ещё работаем
     MPI_Recv(&isFinish, 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD, &status);
     if (isFinish == 1)
       break;
 
     Trial* trail = TrialFactory::CreateTrial();
 
-    //Ïîëó÷àåì êîîðäèíàòû òî÷êè
+    // Получаем координаты точки
     MPI_Recv(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD, &status);
     trail->index = -1;
 
@@ -198,7 +198,7 @@ void Solver::AsyncCalculation()
       }
     }
 
-    //Âû÷èñëÿåì çíà÷åíèå ôóíêöèè
+    // Вычисляем значение функции
     while ((trail->index == -1) && (fNumber < _pTask->GetNumOfFunc()))
     {
       trail->FuncValues[fNumber] = _pTask->CalculateFuncs(trail->y, fNumber);
@@ -221,11 +221,11 @@ void Solver::AsyncCalculation()
       fNumber++;
     }
 
-    //Îòïðàâëÿåì èíäåêñ òî÷êè
+    // Отправляем индекс точки
     MPI_Send(&(trail->index), 1, MPI_INT, 0, TagChildSolved, MPI_COMM_WORLD);
-    //Îòïðàâëÿåì òî÷êó
+    // Отправляем точку
     MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
-    //Îòïðàâëÿåì îáðàòíî çíà÷åíèå ôóíêöèè
+    // Отправляем обратно значение функции
     MPI_Send(trail->FuncValues, MaxNumOfFunc, MPI_DOUBLE, 0, TagChildSolved, MPI_COMM_WORLD);
   }
 }
@@ -358,15 +358,15 @@ void Solver::InitAutoPrecision()
 // ------------------------------------------------------------------------------------------------
 int Solver::CreateProcess()
 {
-  // Â ñëó÷àå åñëè íå ñîâïàäàþò(çàäà÷à ïðèøëà ñíàðóæè áåðåì íîâûå) èíà÷å âñå ðàâíî
+  // В случае, если не совпадают (задача пришла снаружи — берём новые), иначе всё равно
   IProblem* _problem = mProblem;
 
-  /// Ñîçäàíèå çàäà÷è(Task) // ïåðåíåñòè â ôàáðèêó
+  /// Создание задачи (Task) // перенести в фабрику
   if (pTask == 0)
   {
     pTask = TaskFactory::CreateTask(_problem, 0);
   }
-  /// Ñîçäàåì äàííûå äëÿ ïîèñêîâîé èíôîðìàöèè
+  /// Создаём данные для поисковой информации
 
   {
     //delete pData;
@@ -387,7 +387,7 @@ int Solver::CreateProcess()
       pData->Clear();
     }
   }
-  // Èíèöèàëèçèóåì ÷èñëà ñ ðàñøèðåííîé òî÷íîñòüþ
+  // Инициализируем числа с расширенной точностью
   InitAutoPrecision();
 
   if (mProcess != 0)

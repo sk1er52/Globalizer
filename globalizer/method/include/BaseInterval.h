@@ -21,7 +21,7 @@
 class QueueBaseData
 {
 protected:
-  /// Ýëåìåíò î÷åðåäè õðàíÿùèé ýòîò èíòåðâàë
+  /// Элемент очереди, хранящий этот интервал
   QueueElement* queueElementa;
 public:
   virtual void SetQueueElementa(QueueElement* q)

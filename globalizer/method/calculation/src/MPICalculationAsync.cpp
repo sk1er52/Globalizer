@@ -26,8 +26,8 @@
 
 void MPICalculationAsync::AsyncFinilize()
 {
-  /// Íåîáõîäèìî ñîáðàòü äàííûå ñî âñåõ, êðîìå òîé òî÷êè, êîòîðàÿ ïîñëåäíåé ïðèñëàëà îòâåò 
-  /// (îíà íàøëà îòâåò çàäà÷è -> åé íå îòïðàâèëè íà âû÷èñëåíèå íîâóþ òî÷êó)
+  /// Необходимо собрать данные со всех, кроме той точки, которая последней прислала ответ
+  /// (она нашла ответ задачи -> ей не отправили на вычисление новую точку)
   MPI_Status status;
   Trial OptimEstimation;
   int Child;
@@ -55,16 +55,16 @@ void MPICalculationAsync::RecieveCalculatedFunctional()
   int index;
   int i;
 
-  /// Ïðèíèìàåì èíäåêñ òî÷êè
+  /// Принимаем индекс точки
   MPI_Recv(&index, 1, MPI_INT, MPI_ANY_SOURCE, TagChildSolved, MPI_COMM_WORLD, &status);
-  ChildNumRecv = status.MPI_SOURCE; // MPI-íîìåð ïðîöåññà
+  ChildNumRecv = status.MPI_SOURCE; // MPI-номер процесса
 
-  ///Çàïîìèíàåì èíäåêñ â âåêòîðå ãäå òåïåðü õðàíèòñÿ âû÷èñëåííîå çíà÷åíèå
+  /// Запоминаем индекс в векторе, где теперь хранится вычисленное значение
   ChildNum = ChildNumRecv - 1;
   vecTrials[ChildNum]->index = index;
-  /// Ïðèíèìàåì òî÷êó
+  /// Принимаем точку
   MPI_Recv(vecTrials[ChildNum]->y, parameters.Dimension, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
-  /// Ïðèíèìàåì çíà÷åíèÿ ôóíêöèîíàëîâ
+  /// Принимаем значения функционалов
   MPI_Recv(vecTrials[ChildNum]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
 
   int fNumber = 0;
@@ -90,14 +90,14 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
   for (unsigned int i = 0; i < parameters.NumPoints; i++)
   {
     int isFinish = 0;
-    ///Îòïðàâëÿåì â Solver ôëàã, ÷òî ìû ðàáîòàåì
+    /// Принимаем значения функционалов
     MPI_Send(&isFinish, 1, MPI_INT, i + 1, TagChildSolved, MPI_COMM_WORLD);
 
     vecTrials.push_back(inputSet.trials[i]);
     Trial* trail = inputSet.trials[i];
     trail->index = 0;
     vecTrials[i]->index = 0;
-    ///Îòïðàâëÿåì êîîðäèíàòó y
+    /// Отправляем координату y
     MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD);
   }
 
@@ -114,9 +114,9 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
 void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Îòäàåì òî÷êó ñâîáîäíîìó
-  ///Æäåì êîãäà ïðèøëþò ñëåäóþùóþ
-  ///È òàê ïîêà íå ðåøèì
+  /// Отдадим точку свободному
+  /// Ждём, когда пришлют следующую
+  /// И так, пока не решим
 
   int isFinish = 0;
   if (ChildNumRecv < 1 || ChildNumRecv >= parameters.GetProcNum()) {
@@ -131,7 +131,7 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 
   MPI_Send(&isFinish, 1, MPI_INT, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD);
 
-  ///Çàïèñûâàåì â òó æå ÿ÷åéêó âåêòîðà íîâóþ òî÷êó, êîòîðóþ òåïåðü íàäî âû÷èñëèòü
+  /// Записываем в ту же ячейку вектора новую точку, которую теперь надо вычислить
   vecTrials[ChildNum] = inputSet.trials[0];
 
 
@@ -150,7 +150,7 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Êîãäà íàì ïðèñëàëè âû÷èñëåííóþ òî÷êó, ìû äîñòàåì íóæíóþ òî÷êó èç âåêòîðà, âñòàâëÿåì âû÷èñëåííîå çíà÷åíèå ôóíêöèè è çàïèñûâàåì åå â outputSet
+  /// Когда нам прислали вычисленную точку, мы достаём нужную точку из вектора, вставляем вычисленное значение функции и записываем её в outputSet
 
   if (inputSet.trials.size() > 0)
   {
@@ -167,7 +167,7 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
 
   }
 
-  /// Çàïóñêàòü âû÷èñëåíèÿ êàê òîëüêî ïðèøëè äàííûå
+  /// Запускать вычисления, как только пришли данные
   if (isStartComputingAway)
   {
     if (isFirst) {
@@ -184,7 +184,7 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
       StartCalculate(inputSet, outputSet);
     }
   }
-  else///ñîáðàòü äàííûå â îäèí áëîê, è ïîòîì âû÷èñëèòü âñå ñðàçó
+  else/// Собрать данные в один блок и потом вычислить всё сразу
   {
     if (countCalculation > 0)
     {

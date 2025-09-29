@@ -17,11 +17,11 @@
 /**
 \file problemWithConstraints.h
 
-\authors Ëåáåäåâ È.
+\authors Лебедев И.
 \date 2016
-\copyright ÍÍÃÓ èì. Í.È. Ëîáà÷åâñêîãî
+\copyright ННГУ им. Н.И. Лобачевского
 
-\brief Îáúÿâëåíèå áàçîâîãî êëàññà äëÿ çàäà÷ ñ îãðàíè÷åíèÿìè
+\brief Объявление базового класса для задач с ограничениями
 
 \details
 */
@@ -42,20 +42,20 @@ class ProblemWithConstraints :
 #undef OWNER_NAME
 #define OWNER_NAME ProblemWithConstraints
 protected:
-  /// Ïðîâåðêà ïðàâèëüíîñòè ïîñëå îêîí÷àíèÿ ÷òåíèÿ ïàðàìåòðîâ
+  /// Проверка правильности после окончания чтения параметров
   virtual int CheckValue(int index = -1);
 
-  /// Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ áàçîâûõ ïàðàìåòðîâ
+  /// Задание значений по умолчанию базовых параметров
   virtual void SetBaseDefaultParameters();
 
 
-  /** Ìåòîä âîçâðàùàåò ÷èñëî îáùåå ôóíêöèé â çàäà÷å (îíî ðàâíî ÷èñëî îãðàíè÷åíèé + ÷èñëî êðèòåðèåâ)
-  \return ×èñëî ôóíêöèé
+  /** Метод возвращает общее число функций в задаче (оно равно числу ограничений + число критериев)
+  \return Число функций
   */
   virtual int GetRealNumberOfFunctions() const;
 
-  /** Ìåòîä âîçâðàùàåò ÷èñëî îãðàíè÷åíèé â çàäà÷å
-  \return ×èñëî îãðàíè÷åíèé
+  /** Метод возвращает число ограничений в задаче
+  \return Число ограничений
   */
   virtual int GetRealNumberOfConstraints() const;
 
@@ -89,110 +89,110 @@ public:
 
   ProblemWithConstraints();
 
-  /// Êîëè÷åñòâî îãðàíè÷åíèé
+  /// Количество ограничений
   TInt<Owner> constraint_count;
-  /// Äîëÿ îáëàñòè ïîèñêà, åñëè çàäîíî, òî Q âû÷èñëÿåòñÿ
+  /// Доля области поиска; если задана, то Q вычисляется
   TDoubles<Owner> Deltas;
-  /// Ñäâèã îãðàíè÷åíèé, îíî æå RHS
+  /// Сдвиг ограничений, он же RHS (правая часть)
   TDoubles<Owner> Q;
-  /// Ìàñøòàáèðîâàòü èëè íåò îãðàíè÷åíèÿ, åñëè õîòü ó îäíîãî îãðàíè÷åíèÿ ãëîáàëüíûé ìèíèìóì íà ãðàíèöå, òî íå èñïîëüçóåòñÿ
+  /// Масштабировать или нет ограничения; если хотя бы у одного ограничения глобальный минимум на границе — не используется
   TFlag<Owner> IsZoom;
-  /// Ñäâèãàòü èëè íåò ãëîáàëüíûé ìèíèìóì îãðàíè÷åíèé â êîîðäèíàòû ãëîáàëüíîãî ìèíèìóìà öåëåâîé ôóíêöèè
+  /// Сдвигать или нет глобальный минимум ограничений в координаты глобального минимума целевой функции
   TFlag<Owner> IsShift;
-  /// Ñäâèãàòü èëè íåò ãëîáàëüíûé ìèíèìóì öåëåâîé ôóíêöèè íà ãðàíèöó äîïóñòèìîé îáëàñòè
+  /// Сдвигать или нет глобальный минимум целевой функции на границу допустимой области
   TFlag<Owner> IsBoundaryShift;
-  /// Òî÷íîñòü ïîèñêà áëèæàéøåé òî÷êè íà ãðàíèöå äîïóñòèìîé îáëàñòè (ñòåïåíü 2^{-1})
+  /// Точность поиска ближайшей точки на границе допустимой области (степень 2^{-1})
   TInt<Owner> BoundarySearchPrecision;
-  /// èçìåíÿòü ëè öåëåâóþ ôóíêöèþ ïóòåì ïðèáàëåíèÿ ôóíêöèîíàëà îò îãðàíè÷åíèé
+  /// Изменять ли целевую функцию путём прибавления функционала от ограничений
   TFlag<Owner> IsImprovementOfTheObjective;
-  /// Êîýôèöèåíòû èçìåíåíèÿ
+  /// Коэффициенты изменения
   TDoubles<Owner> ImprovementCoefficients;
 
-  /// Èíèöèàëèçèðóåò ôóíêöèþ ñ íîìåðîì index
-  //virtual void InitFunc(FType* func, int index) = 0;
+  /// Инициализирует функцию с номером index
+  // virtual void InitFunc(FType* func, int index) = 0;
 
-  /// Èíèöèàëèçàöèÿ ïàðàìåòðîâ
+  /// Инициализация параметров
   virtual void Init(int argc, char* argv[], bool isMPIInit = false);
 
   virtual double CalculateFunctionals(const double* y, int fNumber);
 
 
-  /** Ìåòîä âîçâðàùàåò ÷èñëî îáùåå ôóíêöèé â çàäà÷å (îíî ðàâíî ÷èñëî îãðàíè÷åíèé + ÷èñëî êðèòåðèåâ)
-  \return ×èñëî ôóíêöèé
+  /** Метод возвращает общее число функций в задаче (оно равно числу ограничений + число критериев)
+  \return Число функций
   */
   virtual int GetNumberOfFunctions() const;
-  /** Ìåòîä âîçâðàùàåò ÷èñëî îãðàíè÷åíèé â çàäà÷å
-  \return ×èñëî îãðàíè÷åíèé
+  /** Метод возвращает число ограничений в задаче
+  \return Число ограничений
   */
   virtual int GetNumberOfConstraints() const;
 
-  /// Âîçâðàùàåò ÷èñëî îãðàíè÷åíèé
+  /// Возвращает, нужно ли масштабировать задачу
   virtual int GetConstraintsNumber() const
   {
     return GetNumberOfConstraints();
   }
 
-  /// Âîçâðàùàåò, íóæíî ëè ìàñøòàáèðîâàòü çàäà÷ó
+  /// Задаёт, нужно ли масштабировать задачу
   bool GetIsZoom() const
   {
     return this->mIsZoom;
   }
-  /// Çàäàåò, íóæíî ëè ìàñøòàáèðîâàòü çàäà÷ó
+  /// Возвращает, нужно ли сдвигать функции ограничений
   void SetIsZoom(bool isZoom)
   {
     this->mIsZoom = isZoom;
   }
-  /// Âîçâðàùàåò, íóæíî ëè ñäâèãàòü ôóíêöèè îãðàíè÷åíèé
+  // Задаёт, нужно ли сдвигать функции ограничений
   bool GetIsShift() const
   {
     return this->mIsShift;
   }
-  /// Çàäàåò, íóæíî ëè ñäâèãàòü ôóíêöèè îãðàíè÷åíèé
+  /// Возвращает, нужно ли сдвигать оптимум целевой функции на границу
   void SetIsShift(bool isShift)
   {
     this->mIsShift = isShift;
   }
-  /// Âîçâðàùàåò, íóæíî ëè ñäâèãàòü îïòèìóì öåëåâîé ôóíêöèè íà ãðàíèöó
+  /// Задаёт, нужно ли сдвигать оптимум целевой функции на границу
   bool GetIsBoundaryShift() const
   {
     return this->mIsBoundaryShift;
   }
-  /// Çàäàåò, íóæíî ëè ñäâèãàòü îïòèìóì öåëåâîé ôóíêöèè íà ãðàíèöó
+  /// Задаёт, нужно ли сдвигать оптимум целевой функции на границу
   void SetIsBoundaryShift(bool isBoundaryShift)
   {
     this->mIsBoundaryShift = isBoundaryShift;
   }
-  /// Âîçâðàùàåò òî÷íîñòü ïîèñêà áëèæàéøåé òî÷êè íà ãðàíèöå îáëàñòè (ñòåïåíü 0.5)
+  /// Возвращает точность поиска ближайшей точки на границе области (степень 0.5)
   int GetBoundarySearchPrecision() const
   {
     return this->mBoundarySearchPrecision;
   }
-  /// Çàäàåò òî÷íîñòü ïîèñêà áëèæàéøåé òî÷êè íà ãðàíèöå îáëàñòè (ñòåïåíü 0.5)
+  /// Задаёт точность поиска ближайшей точки на границе области (степень 0.5)
   void SetBoundarySearchPrecision(int boundarySearchPrecision)
   {
     this->mBoundarySearchPrecision = boundarySearchPrecision;
   }
-  /// Âîçâðàùàåò, íóæíî ëè ìîäèôèöèðîâàòü öåëåâóþ ôóíêöèþ
+  /// Возвращает, нужно ли модифицировать целевую функцию
   bool GetIsImprovementOfTheObjective() const
   {
     return this->mIsImprovementOfTheObjective;
   }
-  /// Çàäàåò, íóæíî ëè ìîäèôèöèðîâàòü öåëåâóþ ôóíêöèþ
+  /// Задаёт, нужно ли модифицировать целевую функцию
   void SetIsImprovementOfTheObjective(bool isImprovementOfTheObjective)
   {
     this->mIsImprovementOfTheObjective = isImprovementOfTheObjective;
   }
 
-  /** Ìåòîä âîçâðàùàåò êîîðäèíàòû òî÷êè ãëîáàëüíîãî ìèíèìóìà öåëåâîé ôóíêöèè
-  \param[out] y òî÷êà, â êîòîðîé äîñòèãàåòñÿ îïòèìàëüíîå çíà÷åíèå
-  \return Êîä îøèáêè (#OK èëè #UNDEFINED)
+  /** Метод возвращает координаты точки глобального минимума целевой функции
+  \param[out] y — точка, в которой достигается оптимальное значение
+  \return Код ошибки (#OK или #UNDEFINED)
   */
   virtual int GetOptimumPoint(double* y) const
   {
     return BaseProblem<Owner>::UNDEFINED;
   }
 
-  /// Âîçâðàùàåò òî÷êó ãëîáàëüíîãî îïòèìóìà äëÿ ôóíêöèè fNumber
+  /// Возвращает точку глобального оптимума для функции fNumber
   virtual int GetConstraintOptimumPoint(double* point, int fNumber)
   {
     return BaseProblem<Owner>::UNDEFINED;
@@ -200,7 +200,7 @@ public:
 };
 
 // ------------------------------------------------------------------------------------------------
-/// Ïðîâåðêà ïðàâèëüíîñòè ïîñëå îêîí÷àíèÿ ÷òåíèÿ ïàðàìåòðîâ
+/// Проверка правильности после окончания чтения параметров
 template <class Owner, class FType>
 int ProblemWithConstraints<Owner, FType>::CheckValue(int index)
 {
@@ -301,7 +301,7 @@ int ProblemWithConstraints<Owner, FType>::CheckValue(int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ áàçîâûõ ïàðàìåòðîâ
+/// Задание значений по умолчанию базовых параметров
 template <class Owner, class FType>
 void ProblemWithConstraints<Owner, FType>::SetBaseDefaultParameters()
 {
@@ -368,9 +368,9 @@ void ProblemWithConstraints<Owner, FType>::SetBaseDefaultParameters()
 }
 
 // ------------------------------------------------------------------------------------------------
-/** Ìåòîä âîçâðàùàåò ÷èñëî îáùåå ôóíêöèé â çàäà÷å (îíî ðàâíî ÷èñëî îãðàíè÷åíèé + ÷èñëî êðèòåðèåâ)
-\return ×èñëî ôóíêöèé
-*/
+/** Метод возвращает общее число функций в задаче (оно равно числу ограничений + число критериев)
+  \return Число функций
+  */
 template <class Owner, class FType>
 int ProblemWithConstraints<Owner, FType>::GetRealNumberOfFunctions() const
 {
@@ -378,9 +378,9 @@ int ProblemWithConstraints<Owner, FType>::GetRealNumberOfFunctions() const
 }
 
 // ------------------------------------------------------------------------------------------------
-/** Ìåòîä âîçâðàùàåò ÷èñëî îãðàíè÷åíèé â çàäà÷å
-\return ×èñëî îãðàíè÷åíèé
-*/
+/** Метод возвращает число ограничений в задаче
+  \return Число ограничений
+  */
 template <class Owner, class FType>
 int ProblemWithConstraints<Owner, FType>::GetRealNumberOfConstraints() const
 {
@@ -396,7 +396,7 @@ ProblemWithConstraints<Owner, FType>::ProblemWithConstraints() :
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Èíèöèàëèçàöèÿ ïàðàìåòðîâ
+/// Инициализация параметров
 template <class Owner, class FType>
 void ProblemWithConstraints<Owner, FType>::Init(int argc, char* argv[], bool isMPIInit)
 {
@@ -502,8 +502,8 @@ double ProblemWithConstraints<Owner, FType>::CalculateFunctionals(const double* 
 }
 
 // ------------------------------------------------------------------------------------------------
-/** Ìåòîä âîçâðàùàåò ÷èñëî îáùåå ôóíêöèé â çàäà÷å (îíî ðàâíî ÷èñëî îãðàíè÷åíèé + ÷èñëî êðèòåðèåâ)
-\return ×èñëî ôóíêöèé
+/** Метод возвращает общее число функций в задаче (оно равно числу ограничений + числу критериев)
+  \return Число функций
 */
 template <class Owner, class FType>
 int ProblemWithConstraints<Owner, FType>::GetNumberOfFunctions() const
@@ -512,8 +512,8 @@ int ProblemWithConstraints<Owner, FType>::GetNumberOfFunctions() const
 }
 
 // ------------------------------------------------------------------------------------------------
-/** Ìåòîä âîçâðàùàåò ÷èñëî îãðàíè÷åíèé â çàäà÷å
-\return ×èñëî îãðàíè÷åíèé
+/** Метод возвращает число ограничений в задаче
+  \return Число ограничений
 */
 template <class Owner, class FType>
 int ProblemWithConstraints<Owner, FType>::GetNumberOfConstraints() const
