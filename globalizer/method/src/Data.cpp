@@ -263,7 +263,6 @@ TreeNode* SearchData::Balance(TreeNode *p)
     if (GetBalance(p->pRight) < 0)
     {
       p->pRight = RotateRight(p->pRight);
-      //p->pRight->pParent = p;
     }
     return RotateLeft(p);
   }
@@ -272,7 +271,6 @@ TreeNode* SearchData::Balance(TreeNode *p)
     if (GetBalance(p->pLeft) > 0)
     {
       p->pLeft = RotateLeft(p->pLeft);
-      //p->pLeft->pParent = p;
     }
     return RotateRight(p);
   }
@@ -456,9 +454,7 @@ SearchInterval* SearchData::InsertPoint(SearchInterval* coveringInterval,
   if (newPoint == *(coveringInterval->LeftPoint) || newPoint == *(coveringInterval->RightPoint))
     return NULL;
 
-  //SearchInterval NewInterval;
-
-  // правый подинтервал
+  // правый подынтервал
   SearchInterval* NewInterval = SearchIntervalFactory::CreateSearchInterval();
 
   NewInterval->ind = iteration;
@@ -750,41 +746,38 @@ SearchInterval::SearchInterval()
 {
   LeftPoint = nullptr;
   RightPoint = nullptr;
-  R = locR = 0;
+
+  R = locR = 0.0;
   ind = 0;
   // Выделение памяти происходит в момент добавления в матрицу
   K = 0;
-  delta = 0;
+  delta = 0.0;
+
   queueElementa = nullptr;
   treeNode = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
-SearchInterval::SearchInterval(const SearchInterval &p)
+SearchInterval::SearchInterval(const SearchInterval& p)
 {
+    LeftPoint = p.LeftPoint;
+    RightPoint = p.RightPoint;
 
-  LeftPoint = p.LeftPoint;//->Clone();
-  RightPoint = p.RightPoint;//->Clone();
+    ind = p.ind;
+    K = p.K;
+    R = p.R;
+    locR = p.locR;
+    delta = p.delta;
 
-  ind = p.ind;
-  K = p.K;
-  R = p.R;
-  locR = p.locR;
-  delta = p.delta;
+    //МКО
 
-  //МКО
-
-  queueElementa = p.queueElementa;
-  treeNode = p.treeNode;
+    queueElementa = p.queueElementa;
+    treeNode = p.treeNode;
 }
 
 // ------------------------------------------------------------------------------------------------
 SearchInterval::~SearchInterval()
 {
-  //Конфликт с функцией RenewSearchData
-  //Решение 1 - статический массив z() в SearchInterval
-  //Решение 2 - выделять память перед записью в массив
-
 }
 
 // ------------------------------------------------------------------------------------------------
