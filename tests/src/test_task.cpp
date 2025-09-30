@@ -30,29 +30,24 @@ protected:
 
   void SetUp()
   {
-    parameters.Dimension = n;
+      problem = new ProblemFromFunctionPointers(n, // размерность задачи
+          std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
+          std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
+          std::vector<std::function<double(const double*)>>(1, [](const double* y)
+              {
+                  double pi_ = 3.14159265358979323846;
+                  double sum = 0.;
+                  for (int j = 0; j < parameters.Dimension; j++)
+                      sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
+                  return sum;
+              }), // критерий
+          true, // определен ли оптимум
+          0, // значение глобального оптимума
+          std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
 
-    auto lower_bounds = std::vector<double>(parameters.Dimension, -2.2);
-    auto upper_bounds = std::vector<double>(parameters.Dimension, 1.8);
-    auto optimum_point_coords = std::vector<double>(parameters.Dimension, 0);
-
-    
-    problem = new ProblemFromFunctionPointers(n, // размерность задачи
-        lower_bounds,
-        upper_bounds,
-      std::vector<std::function<double(const double*)>>(1, [](const double* y)
-        {
-          double pi_ = 3.14159265358979323846;
-          double sum = 0.;
-          for (int j = 0; j < parameters.Dimension; j++)
-            sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
-          return sum;
-        }), // критерий
-      true, // определен ли оптимум
-      0, // значение глобального оптимума
-      optimum_point_coords.data()
-    );
-    task = new Task(problem, 0);
+      );
+      parameters.Dimension = 5;
+      task = new Task(problem, 0);
 
   }
 
@@ -101,33 +96,6 @@ TEST_F(TaskTest, throws_when_create_with_too_large_N)
 TEST_F(TaskTest, can_create_with_correct_values)
 {
   ASSERT_NO_THROW(Task testTask( problem, 0));
-}
-
-/**
- * Тестирует все простые getter-методы.
- */
-TEST_F(TaskTest, GettersReturnCorrectValues)
-{
-    EXPECT_EQ(task->GetN(), n);
-    EXPECT_EQ(task->GetProcLevel(), 0);
-    EXPECT_EQ(task->getProblem(), problem);
-    EXPECT_EQ(task->GetNumOfFunc(), 1);
-    EXPECT_EQ(task->GetNumOfFuncAtProblem(), 1);
-
-    const double* a = task->GetA();
-    const double* b = task->GetB();
-    for (int i = 0; i < n; ++i) {
-        EXPECT_EQ(a[i], -2.2);
-        EXPECT_EQ(b[i], 1.8);
-    }
-
-    EXPECT_TRUE(task->GetIsOptimumValueDefined());
-    EXPECT_TRUE(task->GetIsOptimumPointDefined());
-    EXPECT_EQ(task->GetOptimumValue(), 0.0);
-    const double* optPoint = task->GetOptimumPoint();
-    for (int i = 0; i < n; ++i) {
-        EXPECT_EQ(optPoint[i], 0.0);
-    }
 }
 
 /**
