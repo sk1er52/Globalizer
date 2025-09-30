@@ -38,8 +38,8 @@ protected:
 
     
     problem = new ProblemFromFunctionPointers(n, // размерность задачи
-      std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
-      std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
+        lower_bounds,
+        upper_bounds,
       std::vector<std::function<double(const double*)>>(1, [](const double* y)
         {
           double pi_ = 3.14159265358979323846;
@@ -62,6 +62,7 @@ protected:
   }
 };
 
+// Определения статических переменных
 const int TaskTest::n;
 const int TaskTest::freeN;
 const int TaskTest::numOfFunc;
