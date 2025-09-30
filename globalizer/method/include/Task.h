@@ -13,6 +13,20 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * \file task.h
+ *
+ * \authors Сысоев А., Баркалов К.
+ * \date 2015-2016
+ * \copyright ННГУ им. Н.И. Лобачевского
+ *
+ * \brief Объявление класса #Task
+ *
+ * \details Объявление класса #Task, который представляет собой обертку
+ * над решаемой задачей оптимизации (#IProblem).
+ */
+
 #ifndef __TASK_H__
 #define __TASK_H__
 
@@ -23,95 +37,189 @@
 #include "BaseInterval.h"
 
 // ------------------------------------------------------------------------------------------------
+
+/**
+ * \brief Класс, инкапсулирующий информацию о задаче оптимизации.
+ *
+ * #Task является оберткой над интерфейсом #IProblem и предоставляет
+ * доступ к параметрам задачи, таким как границы поиска, число функций,
+ * известные оптимальные значения, а также предоставляет методы для
+ * вычисления значений функций.
+ */
+
 class Task: public QueueBaseData
 {
 protected:
-  /// левая граница области поиска
+  /// Левая граница области поиска
   double     A[MaxDim];
-  /// правая граница области поиска
+  /// Правая граница области поиска
   double     B[MaxDim];
-  /// число функционалов (последний - критерий)
+  /// Число функционалов (последний - критерий)
   int        NumOfFunc;
-  /// указатель на саму задачу оптимизации
+  /// Указатель на саму задачу оптимизации
   IProblem*  pProblem;
-
-  /// оптимальное значение целевой функции (определено, если известно из задачи)
+  /// Оптимальное значение целевой функции (определено, если известно из задачи)
   double     OptimumValue;
-  /// координаты глобального минимума целевой функции (определено, если известно)
+  /// Координаты глобального минимума целевой функции (определено, если известно)
   double     OptimumPoint[MaxDim];
   /// true, если в задаче известно оптимальное значение критерия
   bool       IsOptimumValueDefined;
   /// true, если в задаче известна точка глобального минимума
   bool       IsOptimumPointDefined;
-
-  /// уровень процесса в дереве процессов
+  /// Уровень процесса в дереве процессов
   int ProcLevel;
-
+  /// Флаг, указывающий, был ли класс инициализирован
   bool isInit;
 
 public:
   int num;
+
+  /**
+   * \brief Конструктор.
+   * \param[in] _problem Указатель на объект задачи оптимизации.
+   * \param[in] _ProcLevel Уровень процесса в дереве процессов.
+   */
   Task(IProblem* _problem, int _ProcLevel);
+
+  /**
+   * \brief Конструктор по умолчанию.
+   * Создает неинициализированный объект.
+   */
   Task();
+
+  /**
+   * \brief Деструктор.
+   */
   virtual ~Task();
+
+  /**
+   * \brief Создает клон текущего объекта.
+   * \return Указатель на новый объект #Task.
+   */
   virtual Task* Clone();
+
+  /**
+   * \brief Создает клон текущего объекта с новыми данными (в данной реализации эквивалентно #Clone).
+   * \return Указатель на новый объект #Task.
+   */
   virtual Task* CloneWithNewData()
   {
     return Clone();
   }
+
+  /**
+   * \brief Инициализирует объект данными задачи.
+   * \param[in] _problem Указатель на объект задачи оптимизации.
+   * \param[in] _ProcLevel Уровень процесса в дереве процессов.
+   */
   virtual void Init(IProblem* _problem, int _ProcLevel);
 
-  /// Возвращает общую рамерность задачи
+  /**
+   * \brief Возвращает общую размерность задачи.
+   * \return Размерность задачи.
+   */
   virtual int GetN() const { return parameters.Dimension; }
 
-
-  /// Возвращает левую границу области поиска
+  /**
+   * \brief Возвращает левую границу области поиска.
+   * \return Указатель на массив со значениями левой границы.
+   */
   virtual const double* GetA() const { return A; }
-  /// Возвращает правую границу области поиска
+  
+  /**
+   * \brief Возвращает правую границу области поиска.
+   * \return Указатель на массив со значениями правой границы.
+   */
   virtual const double* GetB() const { return B; }
 
-  /// Возвращает априори известное значение глобального минимума
+  /**
+  * \brief Возвращает априори известное значение глобального минимума.
+  * \return Значение глобального минимума.
+  */
   virtual double GetOptimumValue() const { return OptimumValue; }
-  /// Определяет априори известные координаты точки глобального минимума
+ 
+  /**
+   * \brief Обновляет координаты точки глобального минимума из объекта #IProblem.
+   */
   virtual void resetOptimumPoint()
   {
     pProblem->GetOptimumPoint(OptimumPoint);
   }
+ 
   /**
-  Возвращает априори известные координаты точки глобального минимума
-  Перед первым вызовом нужно вызвать resetOptimumPoint()
-  */
+   * \brief Возвращает априори известные координаты точки глобального минимума.
+   * \details Перед первым вызовом рекомендуется вызвать #resetOptimumPoint().
+   * \return Указатель на массив с координатами точки глобального минимума.
+   */
   virtual const double* GetOptimumPoint() const { return OptimumPoint; }
-  /// Возвращает известно ли для задачи значение глобального минимума
+  
+  /**
+   * \brief Проверяет, известно ли для задачи значение глобального минимума.
+   * \return true, если значение известно, иначе false.
+   */
   virtual bool GetIsOptimumValueDefined() const { return IsOptimumValueDefined; }
-  /// Возвращает известны ли для задачи координаты глобального минимума
+ 
+  /**
+   * \brief Проверяет, известны ли для задачи координаты глобального минимума.
+   * \return true, если координаты известны, иначе false.
+   */
+
   virtual bool GetIsOptimumPointDefined() const { return IsOptimumPointDefined; }
-  /// Возвращает текущую задачу
+ 
+  /**
+  * \brief Возвращает указатель на текущую задачу.
+  * \return Указатель на объект #IProblem.
+  */
   virtual IProblem* getProblem() { return pProblem; }
 
-  /// Возвращает число функций, сначала ограничения, потом критерии
+  /**
+   * \brief Возвращает число функций (ограничения и критерии).
+   * \return Число функций.
+   */
   virtual int GetNumOfFunc() const { return NumOfFunc; }
-  /// Задает число функций
+
+  /**
+     * \brief Задает число функций.
+     * \param[in] nf Новое число функций.
+     */
   virtual void SetNumofFunc(int nf)
   {
     NumOfFunc = nf;
   }
 
-  /// Место в дереве процессов
+  /**
+     * \brief Возвращает уровень процесса в дереве процессов.
+     * \return Уровень процесса.
+     */
   int GetProcLevel() { return ProcLevel; }
 
+  /**
+   * \brief Возвращает число функций в исходной задаче.
+   * \return Число функций.
+   */
   virtual int GetNumOfFuncAtProblem() const {return NumOfFunc; }
-  /// Вычисляет значение функции с номером fNumber в точке y
+
+  /**
+     * \brief Вычисляет значение функции с номером fNumber в точке y.
+     * \param[in] y Указатель на массив с координатами точки.
+     * \param[in] fNumber Номер вычисляемой функции.
+     * \return Значение функции.
+     */
   virtual double CalculateFuncs(const double *y, int fNumber)
   {
     double multInLevel = parameters.functionSignMultiplier[GetProcLevel()];
     double result = multInLevel * pProblem->CalculateFunctionals(y, fNumber);
     return result;
   }
+  
   /**
-  Вычисляет numPoints значений функции с номером fNumber, в координатах y в массив values
-  Работает только если задача является наследником IGPUProblem
-  */
+ * \brief Вычисляет значения функции в нескольких точках (для GPU).
+ * \details Работает только если задача является наследником #IGPUProblem.
+ * \param[in] y Указатель на массив координат точек.
+ * \param[in] fNumber Номер функции.
+ * \param[in] numPoints Количество точек.
+ * \param[out] values Массив для записи результатов.
+ */
   virtual void CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values)
   {
     IGPUProblem* newProblem = dynamic_cast<IGPUProblem*>(pProblem);
@@ -131,7 +239,9 @@ public:
   }
 
   /**
-  Возвращает число дискретных параметров, дискретные параметры всегда последние в векторе y
+  * \brief Возвращает число дискретных параметров.
+  * \details Дискретные параметры всегда последние в векторе y.
+  * \return Число дискретных переменных или 0, если задача не является целочисленной.
   */
   virtual int GetNumberOfDiscreteVariable()
   {
@@ -144,11 +254,11 @@ public:
     
     return 0;
   }
+ 
   /**
-  Возвращает число значений дискретного параметра discreteVariable.
-  GetDimension() возвращает общее число параметров.
-  (GetDimension() - GetNumberOfDiscreteVariable()) - номер начальной дискретной переменной
-  Для не дискретных переменных == -1
+  * \brief Возвращает число допустимых значений для дискретного параметра.
+  * \param[in] discreteVariable Индекс дискретной переменной.
+  * \return Число значений или -1, если задача не является целочисленной.
   */
   virtual int GetNumberOfValues(int discreteVariable)
   {
@@ -161,12 +271,13 @@ public:
   
     return -1;
   }
+
   /**
-  Определяет значения дискретного параметра с номером discreteVariable
-  Возвращает код ошибки.
-  \param[out] values массив, в который будут сохранены значения дискретного параметра
-  нулевой элемент это левая граница, поледний элемент это правая граница.
-  */
+     * \brief Определяет все допустимые значения дискретного параметра.
+     * \param[in] discreteVariable Индекс дискретной переменной.
+     * \param[out] values Массив, в который будут сохранены значения.
+     * \return Код ошибки (#IProblem::OK или #IProblem::ERROR).
+     */
   virtual int GetAllDiscreteValues(int discreteVariable, double* values)
   {
     IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
@@ -177,25 +288,12 @@ public:
     
     return IProblem::ERROR;
   }
-  ///**
-  //Определяет значения дискретного параметра с номером discreteVariable после номера previousNumber
-  //Возвращает код ошибки.
-  //\param[in] previousNumber - номер значения после которого возвращается значение
-  //-2 - значение по умолчанию, возвращает следующее значение
-  //-1 - возвращает после -1, т.е. левую границу области
-  //\param[out] value переменная в которую сохраняется значение дискретного параметра
-  //*/
-  //virtual int GetNextDiscreteValues(double& value, int discreteVariable, int previousNumber = -2)
-  //{
-  //  IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
-  //  if (newProblem != 0)
-  //  {
-  //    return newProblem->GetNextDiscreteValues(value, discreteVariable, previousNumber);
-  //  }
-  //  return IProblem::ERROR;
-  //}
+  
   /**
-  Проверяет является ли value допустимым значением для параметра с номером discreteVariable
+  * \brief Проверяет, является ли значение допустимым для дискретного параметра.
+  * \param[in] value Проверяемое значение.
+  * \param[in] discreteVariable Индекс дискретной переменной.
+  * \return true, если значение допустимо, иначе false.
   */
   virtual bool IsPermissibleValue(double value, int discreteVariable)
   {
@@ -208,23 +306,32 @@ public:
     
     return false;
   }
+ 
   /**
-  Возвращает максимальные значения функций
-  Только для многокритериальной оптимизации
-  */
+   * \brief Возвращает минимальные значения функций (для многокритериальной оптимизации).
+   * \return NULL в текущей реализации.
+   */
   virtual double * getMin() { return NULL; }
+ 
   /**
-  Возвращает максимальное значения функций
-  Только для многокритериальной оптимизации
-  */
+   * \brief Возвращает максимальные значения функций (для многокритериальной оптимизации).
+   * \return NULL в текущей реализации.
+   */
   virtual double * getMax() { return NULL; }
 
-
+  /**
+   * \brief Проверяет, был ли объект инициализирован.
+   * \return true, если объект инициализирован, иначе false.
+   */
   virtual bool IsInit()
   {
     return isInit;
   }
 
+  /**
+  * \brief Проверяет, является ли задача листом в дереве процессов.
+  * \return true, если ProcLevel не равен 0, иначе false.
+  */
   virtual bool IsLeaf()
   {
     return ProcLevel != 0;

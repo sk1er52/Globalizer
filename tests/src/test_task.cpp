@@ -95,3 +95,93 @@ TEST_F(TaskTest, can_create_with_correct_values)
   ASSERT_NO_THROW(Task testTask( problem, 0));
 }
 
+/**
+ * Тестирует все простые getter-методы.
+ */
+TEST_F(TaskTest, GettersReturnCorrectValues)
+{
+    EXPECT_EQ(task->GetN(), n);
+    EXPECT_EQ(task->GetProcLevel(), 0);
+    EXPECT_EQ(task->getProblem(), problem);
+    EXPECT_EQ(task->GetNumOfFunc(), 1);
+    EXPECT_EQ(task->GetNumOfFuncAtProblem(), 1);
+
+    const double* a = task->GetA();
+    const double* b = task->GetB();
+    for (int i = 0; i < n; ++i) {
+        EXPECT_EQ(a[i], -2.2);
+        EXPECT_EQ(b[i], 1.8);
+    }
+
+    EXPECT_TRUE(task->GetIsOptimumValueDefined());
+    EXPECT_TRUE(task->GetIsOptimumPointDefined());
+    EXPECT_EQ(task->GetOptimumValue(), 0.0);
+    const double* optPoint = task->GetOptimumPoint();
+    for (int i = 0; i < n; ++i) {
+        EXPECT_EQ(optPoint[i], 0.0);
+    }
+}
+
+/**
+ * Тестирует метод SetNumofFunc.
+ */
+TEST_F(TaskTest, SetNumOfFuncUpdatesValue)
+{
+    task->SetNumofFunc(10);
+    EXPECT_EQ(task->GetNumOfFunc(), 10);
+}
+
+/**
+ * Тестирует методы, проверяющие состояние объекта: IsInit и IsLeaf.
+ */
+TEST_F(TaskTest, StateCheckMethods)
+{
+    EXPECT_TRUE(task->IsInit());
+    EXPECT_FALSE(task->IsLeaf());
+
+    Task leafTask(problem, 1);
+    EXPECT_TRUE(leafTask.IsLeaf());
+}
+
+/**
+ * Тестирует клонирование объекта.
+ */
+TEST_F(TaskTest, CloneCreatesIdenticalCopy)
+{
+    Task* clone = task->Clone();
+    ASSERT_NE(clone, nullptr);
+    ASSERT_NE(clone, task);
+
+    EXPECT_EQ(clone->IsInit(), task->IsInit());
+    EXPECT_EQ(clone->GetN(), task->GetN());
+    EXPECT_EQ(clone->GetNumOfFunc(), task->GetNumOfFunc());
+    EXPECT_EQ(clone->getProblem(), task->getProblem());
+
+    delete clone;
+}
+
+/**
+ * Тестирует вычисление функции и учет множителя.
+ */
+TEST_F(TaskTest, CalculateFuncsAppliesMultiplier)
+{
+    double y[n] = { 1.0, 1.0, 1.0, 1.0, 1.0 };
+    double baseValue = 5.0; // f(y) = 5 * (1 - 10*cos(2pi) + 10) = 5
+
+    parameters.functionSignMultiplier[0] = 1.0;
+    EXPECT_DOUBLE_EQ(task->CalculateFuncs(y, 0), baseValue);
+
+    parameters.functionSignMultiplier[0] = -2.0;
+    EXPECT_DOUBLE_EQ(task->CalculateFuncs(y, 0), baseValue * -2.0);
+
+    parameters.functionSignMultiplier[0] = 1.0;
+}
+
+/**
+ * Проверяет, что getMin() и getMax() возвращают NULL.
+ */
+TEST_F(TaskTest, GetMinMaxReturnNull)
+{
+    EXPECT_EQ(task->getMin(), nullptr);
+    EXPECT_EQ(task->getMax(), nullptr);
+}
