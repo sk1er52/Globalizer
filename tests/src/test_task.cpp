@@ -6,6 +6,10 @@
 #include <string>
 #include <cstdlib>
 
+const int TaskTest::n;
+const int TaskTest::freeN;
+const int TaskTest::numOfFunc;
+
 /**
   Вспомогательный класс, помогающий задать начальную конфигурацию объекта класса #Task,
   которая будет использоваться в тестах
@@ -30,6 +34,11 @@ protected:
 
   void SetUp()
   {
+    parameters.Dimension = n;
+
+    auto lower_bounds = std::vector<double>(parameters.Dimension, -2.2);
+    auto upper_bounds = std::vector<double>(parameters.Dimension, 1.8);
+    auto optimum_point_coords = std::vector<double>(parameters.Dimension, 0);
 
     
     problem = new ProblemFromFunctionPointers(n, // размерность задачи
@@ -45,10 +54,8 @@ protected:
         }), // критерий
       true, // определен ли оптимум
       0, // значение глобального оптимума
-      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
-
+      optimum_point_coords.data()
     );
-    parameters.Dimension = 5;
     task = new Task(problem, 0);
 
   }
