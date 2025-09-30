@@ -6,10 +6,6 @@
 #include <string>
 #include <cstdlib>
 
-const int TaskTest::n;
-const int TaskTest::freeN;
-const int TaskTest::numOfFunc;
-
 /**
   Вспомогательный класс, помогающий задать начальную конфигурацию объекта класса #Task,
   которая будет использоваться в тестах
@@ -65,6 +61,10 @@ protected:
     delete task;
   }
 };
+
+const int TaskTest::n;
+const int TaskTest::freeN;
+const int TaskTest::numOfFunc;
 
 /**
  * Проверка параметра размерности задачи N
