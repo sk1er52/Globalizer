@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -29,7 +29,7 @@
 #include <vector>
 
 
-struct TreeNode;
+class TreeNode;
 class SearchInterval;
 class SearcDataIterator;
 class Trial;

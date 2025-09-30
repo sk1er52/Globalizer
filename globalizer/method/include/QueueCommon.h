@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -63,7 +63,7 @@ public:
   virtual QueueElement* PushWithPriority(double globalKey, double localKey, void *value) = 0;
   virtual void Pop(double *key, void **value) = 0;
   virtual void DeleteByValue(void *value) = 0;
-  /// Удаляет элемент
+  /// РЈРґР°Р»СЏРµС‚ СЌР»РµРјРµРЅС‚
   virtual void DeleteElement(QueueElement * item) = 0;
   virtual void Clear() = 0;
   virtual void Resize(int size) = 0;

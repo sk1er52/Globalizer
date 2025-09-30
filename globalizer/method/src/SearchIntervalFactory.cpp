@@ -2,36 +2,29 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2015 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      data.h                                                      //
+//  File:      SearchIntervalFactory.cpp                                    //
 //                                                                         //
-//  Purpose:   Header file for search data classes                         //
+//  Purpose:   Source file for search interval factory classes             //
 //                                                                         //
-//  Author(s): Sysoyev A., Barkalov K., Sovrasov V.                        //
+//  Author(s): Sysoyev A., Barkalov K., Sovrasov V., Zaitsev A.            //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __BASE_INTERVAL_H__
-#define __BASE_INTERVAL_H__
+#include "SearchIntervalFactory.h"
 
-#include "QueueCommon.h"
-
-class QueueBaseData
+SearchInterval* SearchIntervalFactory::CreateSearchInterval(SearchInterval& interval)
 {
-protected:
-  /// Элемент очереди, хранящий этот интервал
-  QueueElement* queueElementa;
-public:
-  virtual void SetQueueElementa(QueueElement* q)
-  {
-    queueElementa = q;
-  }
-  virtual QueueElement* GetQueueElementa()
-  {
-    return queueElementa;
-  }
-};
+    return new SearchInterval(interval);
+}
 
-#endif //__BASE_INTERVAL_H__
+// ------------------------------------------------------------------------------------------------
+SearchInterval* SearchIntervalFactory::CreateSearchInterval()
+{
+    return new SearchInterval();
+}
+
+
+// - end of file ----------------------------------------------------------------------------------

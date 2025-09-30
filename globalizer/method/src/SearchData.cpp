@@ -2,24 +2,19 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2013 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      Data.cpp                                                    //
+//  File:      SearchData.cpp                                              //
 //                                                                         //
 //  Purpose:   Source file for search data classes                         //
 //                                                                         //
-//  Author(s): Sysoyev A., Barkalov K., Sovrasov V.                        //
+//  Author(s): Sysoyev A., Barkalov K., Sovrasov V. Zaitsev A.             //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-
-#include "Exception.h"
 #include "SearchData.h"
-#include "SearchIntervalFactory.h"
 #include "SearcDataIterator.h"
-#include "Trial.h"
-#include "TrialFactory.h"
 
 // Вектор указателей на матрицы состояния поиска, для которых нужно произвести пересчет
 std::vector<SearchData*> SearchData::pRecalcDatas;
@@ -263,7 +258,6 @@ TreeNode* SearchData::Balance(TreeNode *p)
     if (GetBalance(p->pRight) < 0)
     {
       p->pRight = RotateRight(p->pRight);
-      //p->pRight->pParent = p;
     }
     return RotateLeft(p);
   }
@@ -272,7 +266,6 @@ TreeNode* SearchData::Balance(TreeNode *p)
     if (GetBalance(p->pLeft) > 0)
     {
       p->pLeft = RotateLeft(p->pLeft);
-      //p->pLeft->pParent = p;
     }
     return RotateRight(p);
   }
@@ -456,9 +449,7 @@ SearchInterval* SearchData::InsertPoint(SearchInterval* coveringInterval,
   if (newPoint == *(coveringInterval->LeftPoint) || newPoint == *(coveringInterval->RightPoint))
     return NULL;
 
-  //SearchInterval NewInterval;
-
-  // правый подинтервал
+  // правый подынтервал
   SearchInterval* NewInterval = SearchIntervalFactory::CreateSearchInterval();
 
   NewInterval->ind = iteration;
@@ -669,128 +660,4 @@ int SearchData::GetCount()
   return Count;
 }
 
-// ------------------------------------------------------------------------------------------------
-// SearcDataIterator Methods
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator::SearcDataIterator() : pContainer(NULL), pObject(NULL)
-{}
-
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator & SearcDataIterator::operator++()
-{
-  pObject = pContainer->Next(pObject);
-  return *this;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator SearcDataIterator::operator++(int)
-{
-  SearcDataIterator tmp = *this;
-  ++(*this);
-  return tmp;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator & SearcDataIterator::operator--()
-{
-  pObject = pContainer->Previous(pObject);
-  return *this;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator SearcDataIterator::operator--(int)
-{
-  SearcDataIterator tmp = *this;
-  --(*this);
-  return tmp;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearcDataIterator::operator void*() const
-{
-  if (pContainer && pObject)
-    return pObject;
-  else
-    return NULL;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearchInterval * SearcDataIterator::operator->()
-{
-  return pObject->pInterval;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearchInterval* SearcDataIterator::operator*() const
-{
-  if (pObject)
-    return pObject->pInterval;
-  else
-    return NULL;
-}
-
-// ------------------------------------------------------------------------------------------------
-// SearchIntervalFactory Methods
-// ------------------------------------------------------------------------------------------------
-SearchInterval* SearchIntervalFactory::CreateSearchInterval(SearchInterval& interval)
-{
-  return new SearchInterval(interval);
-}
-
-// ------------------------------------------------------------------------------------------------
-SearchInterval* SearchIntervalFactory::CreateSearchInterval()
-{
-  return new SearchInterval();
-}
-
-// ------------------------------------------------------------------------------------------------
-// SearchInterval Methods
-// ------------------------------------------------------------------------------------------------
-SearchInterval::SearchInterval()
-{
-  LeftPoint = nullptr;
-  RightPoint = nullptr;
-  R = locR = 0;
-  ind = 0;
-  // Выделение памяти происходит в момент добавления в матрицу
-  K = 0;
-  delta = 0;
-  queueElementa = nullptr;
-  treeNode = nullptr;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearchInterval::SearchInterval(const SearchInterval &p)
-{
-
-  LeftPoint = p.LeftPoint;//->Clone();
-  RightPoint = p.RightPoint;//->Clone();
-
-  ind = p.ind;
-  K = p.K;
-  R = p.R;
-  locR = p.locR;
-  delta = p.delta;
-
-  //МКО
-
-  queueElementa = p.queueElementa;
-  treeNode = p.treeNode;
-}
-
-// ------------------------------------------------------------------------------------------------
-SearchInterval::~SearchInterval()
-{
-  //Конфликт с функцией RenewSearchData
-  //Решение 1 - статический массив z() в SearchInterval
-  //Решение 2 - выделять память перед записью в массив
-
-}
-
-// ------------------------------------------------------------------------------------------------
-void SearchInterval::CreatePoint()
-{
-  LeftPoint = TrialFactory::CreateTrial();
-  RightPoint = TrialFactory::CreateTrial();
-  RightPoint->SetX(1);
-}
+// - end of file ----------------------------------------------------------------------------------
