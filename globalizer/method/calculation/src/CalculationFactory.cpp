@@ -224,10 +224,10 @@ Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, Evolvent* ev
 {
   Calculation* calculation = 0;
 
-  if (_pTask.IsLeaf()) //Åñëè â ëèñòå
+  if (_pTask.IsLeaf()) // Если в листе
   {    
 
-    // Âûáîð ìåæäó OMP èCUDA
+    // Выбор между OMP и CUDA
     if ((parameters.TypeCalculation == OMP))
     {
       calculation = new OMPCalculation(_pTask);
