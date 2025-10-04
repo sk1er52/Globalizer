@@ -130,9 +130,13 @@ int main(int argc, char* argv[])
     print << "Error during problem initialization\n";
     return 0;
   }
-  parameters.Dimension = problem->GetDimension();
 
-  bool isUseSeparableOptimizationSolver = false;
+  if (parameters.Dimension.GetIsChange())
+    problem->SetDimension(parameters.Dimension);
+  else
+    parameters.Dimension = problem->GetDimension();
+
+  bool isUseSeparableOptimizationSolver = true;
 
   if (!isUseSeparableOptimizationSolver)
   {
