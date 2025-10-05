@@ -17,11 +17,11 @@
 /**
 \file problemWithMulctFunction.h
 
-\authors Ëåáåäåâ Â.
+\authors Лебедев В.
 \date 2016
-\copyright ÍÍÃÓ èì. Í.È. Ëîáà÷åâñêîãî
+\copyright ННГУ им. Н.И. Лобачевского
 
-\brief Îáúÿâëåíèå áàçîâîãî êëàññà äëÿ çàäà÷ ñ îãðàíè÷åíèÿìè
+\brief Объявление базового класса для задач с ограничениями
 
 \details
 */
@@ -68,7 +68,7 @@ protected:
     return 0;
   }
 
-  /// Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ áàçîâûõ ïàðàìåòðîâ
+  /// Задание значений по умолчанию базовых параметров
   virtual void SetBaseDefaultParameters()
   {
     ProblemWithConstraints::SetBaseDefaultParameters();
@@ -87,7 +87,7 @@ public:
   {
   }
 
-  /// Êîýôèöèåíò øòðàôà
+  /// Коэффициент штрафа
   TDoubles<Owner> Mulcts;
 
   virtual double CalculateFunctionals(const double* y, int fNumber)
@@ -110,16 +110,16 @@ public:
     return result;
   }
 
-    /** Ìåòîä âîçâðàùàåò ÷èñëî îáùåå ôóíêöèé â çàäà÷å (îíî ðàâíî ÷èñëî îãðàíè÷åíèé + ÷èñëî êðèòåðèåâ)
-  \return ×èñëî ôóíêöèé
+    /** Метод возвращает общее число функций в задаче (оно равно числу ограничений + числу критериев)
+  \return Число функций
   */
   virtual int GetNumberOfFunctions() const
   {
     return 1;
   }
 
-  /** Ìåòîä âîçâðàùàåò ÷èñëî îãðàíè÷åíèé â çàäà÷å
-  \return ×èñëî îãðàíè÷åíèé
+  /** Метод возвращает число ограничений в задаче
+  \return Число ограничений
   */
   virtual int GetNumberOfConstraints() const
   {

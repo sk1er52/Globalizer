@@ -45,7 +45,7 @@ public:
   void Pop(double *key, void **value);
   void DeleteByValue(void *value);
 
-  /// Óäàëÿåò ýëåìåíò
+  /// Удаляет элемент
   void DeleteElement(QueueElement * item);
 
   void Clear();

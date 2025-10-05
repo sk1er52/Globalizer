@@ -19,11 +19,11 @@
 /**
 \file baseParameters.h
 
-\authors Ëåáåäåâ È.
+\authors Лебедев И.
 \date 2015-2016
-\copyright ÍÍÃÓ èì. Í.È. Ëîáà÷åâñêîãî
+\copyright ННГУ им. Н.И. Лобачевского
 
-\brief Îáúÿâëåíèå áàçîûõ êëàññîâ äëÿ ñâîéñòâ
+\brief Объявление базовых классов для свойств
 
 */
 
@@ -31,9 +31,9 @@
 #include "CombinableBaseParameters.h"
 
 /**
-Áàçîâûé êëàññ ïàðàìåòðîâ
-Ïðè ñîçäàíèå íàñëåäíèêà íåîáõîäèìî ïåðåîïðåäåëèòü êîíñòàíó OWNER_NAME
-è â êîíñòðóêòîðå çàäàòü mOwner
+Базовый класс параметров
+При создании наследника необходимо переопределить константу OWNER_NAME
+и в конструкторе задать mOwner
 (mOwner = this;)
 */
 template <class Owner>
@@ -43,133 +43,133 @@ class BaseParameters : public CombinableBaseParameters
 #define OWNER_NAME Owner
 
 protected:
-  /// Ìàññèâ ñâîéñòâ îïðåäåëåííûõ â äðóãèõ êëàññàõ
+  /// Массив свойств, определённых в других классах
   IBaseValueClass** mOtherOptions;
-  /// Ìàññèâ ñâîéñòâ îïðåäåëåííûõ â ýòîì êëàññå
+  /// Массив свойств, определённых в этом классе
   BaseProperty<Owner>** mOptions;
-  /// Ìàññèâ ñâîéñòâ îïðåäåëåííûõ â ýòîì êëàññå ïðèâåäåííûå ê áàçîâîìó òèïó
+  /// Массив свойств, определённых в этом классе, приведённых к базовому типу
   IBaseValueClass** mBaseTypeOptions;
-  /// Êîëè÷åñòâî îïöèé
+  /// Количество опций
   int mOptionsCount;
-  /// Êîëè÷åñòâî îïöèé èç äðóãèõ êëàññîâ
+  /// Количество опций из других классов
   int mOtherOptionsCount;
-  /// Ìàêñèìàëüíûé ðàçìåð ìàññèâà ïàðàìåòðîâ
+  /// Максимальный размер массива параметров
   int mOptionsSize;
-  /// Ìàêñèìàëüíûé ðàçìåð ìàññèâà ïàðàìåòðîâ  îïðåäåëåííûõ â äðóãèõ êëàññàõ
+  /// Максимальный размер массива параметров, определённых в других классах
   int mOtherOptionsSize;
 
-  /// Ïå÷àòàòü ñïðàâêó
+  /// Печатать справку
   bool mIsPrintHelp;
-  /// Èìåþòñÿ àðãóìåíòû êîìàíäíîé ñòðîêè
+  /// Имеются аргументы командной строки
   bool mIsHaveArguments;
-  /// Âëàäåëåö ýòîãî êëàññà
+  /// Владелец этого класса
   Owner* mOwner;
-  /// Ïðîèíèöèàëèçèðîâàíû ëè ïàðàìåòðû
+  /// Проинициализированы ли параметры
   bool mIsInit;
-  /// Ïóòü ïî óìîë÷àíèþ äî êîôèãóðàöèîííîãî ôàéëà
+  /// Путь по умолчанию до конфигурационного файла
   std::string mConfigPath;
 
-  /// Ïðîâåðêà ïðàâèëüíîñòè ïîñëå îêîí÷àíèÿ ÷òåíèÿ ïàðàìåòðîâ
+  /// Проверка правильности после окончания чтения параметров
   virtual int CheckValue(int index = -1);
 
   /**
-  Èíèöèàëèçàöèÿ ïàðàìåòðà
-  \param[in] option - ïàðàìåòð êîòîðûé èíèöèàëèçèðóåì
-  \param[in] sizeVal - ðàçìåð ìàññèâà çíà÷åíèé, äëÿ òèïîâ äàííûõ íå ÿâëÿþùèìèñÿ ìàñèâàìè - âñåãäà ðàâåí 1
-  \param[in] name - èìÿ ñâîéñòâà
-  \param[in] help - âûâîäèìàÿ íà êîíñîëü ñïðàâêà
-  \param[in] com - êîðîòêàÿ ñòðîêà äëÿ çàïóñêà
-  \param[in] defVal - çíà÷åíèå ïî óìîë÷àíèþ
-  */
+      Инициализация параметра
+      \param[in] option - параметр, который инициализируем
+      \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+      \param[in] name - имя свойства
+      \param[in] help - выводимая на консоль справка
+      \param[in] com - короткая строка для запуска(ключ командной строки)
+      \param[in] defVal - значение по умолчанию
+      */
   virtual void InitializationOption(BaseProperty<Owner>* option, std::string name, std::string defVal,
     std::string com, std::string help, int sizeVal);
-  /// Äîáàâëÿåò îïöèþ â îáùèé ñïèñîê
+  /// Добавляет опцию в общий список
   virtual void AddOption(BaseProperty<Owner>* option);
-  /// Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ áàçîâûõ ïàðàìåòðîâ
+  /// Задание значений по умолчанию базовых параметров
   virtual void SetBaseDefaultParameters();
   /**
-  Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ äëÿ âñåõ ïàðàìåòðîâ
-  Ïðèìåð:
-  InitOption(èìÿ ïàðàìåòðà, çíà÷åíèå ïî óìîë÷àíèþ, "êîðîòêàÿ êîìàíäà", "ñïðàâêà ïî ïàðàìåòðó", êîë-âî ýëåìåíòîâ);
-  *êîë-âî ýëåìåíòîâ äëÿ íå ìàññèâîâ âñåãäà ðàâíî 1.
-  InitOption(Separator,_, "-Separator", "eparator", 1);
+  Задание значений по умолчанию для всех параметров
+  Пример:
+  InitOption(имя_параметра, значение_по_умолчанию, "короткая_команда", "справка_по_параметру", кол-во_элементов);
+  * кол-во элементов для не-массивов всегда равно 1.
+  InitOption(Separator, _, "-Separator", "Separator", 1);
   */
   virtual void SetDefaultParameters() = 0;
-  /// ×òåíèå ïàðàìåòðîâ èç ôàéëà ConfigPath
+  /// Чтение параметров из файла ConfigPath
   //virtual void ReadConfigFile();
-  /// ×òåíèå ïàðàìåòðîâ êîìàíäíîé ñòðîêè
+  /// Чтение параметров командной строки
   virtual void ReadParameters(int argc, char* argv[]);
-  /// Çàäàòü ðàçäåëèòåëü ìàññèâà äëÿ âñåõ îïöèé
+  /// Задать разделитель массива для всех опций
   void SetSeparator();
 
 
 public:
-  ///Ïå÷àòàòü èëè íåò ñïðàâêó ïðè ïóñòîé êîìàíäíîé ñòðîêå
+   /// Печатать или нет справку при пустой командной строке
   TBool<BaseParameters<Owner>> IsPrintHelpWithoutArguments;
-  /// Çàïóñêàòü ëè ïðè ïóñòîé êîìàíäíîé ñòðîêå
+  /// Запускать ли при пустой командной строке
   TBool<BaseParameters<Owner>> IsStartWithoutArguments;
-  /// Ðàçäåëèòåëü ýëåìåíòîâ ìàññèâà
+  /// Разделитель элементов массива
   TString<BaseParameters<Owner>> Separator;
-  /// Ïóòü äî êîíôèã ôàéëà ïðîãðàììû
+  /// Путь до конфиг-файла программы
   TString<BaseParameters<Owner>> ConfigPath;
-  /// Ïå÷àòü ñïðàâêè ïî ïàðàìåòðàì
+  /// Печать справки по параметрам
   void PrintHelp();
-  /// Ïå÷àòü òåêóùèõ çíà÷åíèé ïàðàìåòðîâ
+  /// Печать текущих значений параметров
   void PrintParameters();
-  /// Çàïóñêàòü ëè ðàáîòó ïðîãðàììû
+  /// Запускать ли работу программы
   bool IsStart();
 
   /**
-  Ïðîâåðêà ïðàâèëüíîñòè ïðè èçìåíåíèå ïàðàìåòðîâ
-  Ïðè ïåðåîïðåäåëåíèå íåîáõîäèìî âûçâàòü âûçâàòü ìåòîä áàçîâîãî êëàññà!
+  Проверка правильности при изменении параметров
+  При переопределении необходимо вызвать метод базового класса!
   */
   virtual int CheckValueParameters(int index = 0);
 
-  /// Ïå÷àòü çíà÷åíèÿ ïàðàìåòðà ñ èìåíåì name
+  /// Печать значения параметра с именем name
   void PrintParameter(std::string name);
-  /// Çàäàíèå ïàðàìåòðó ñ èìåíåì name çíà÷åíèÿ val
+  /// Задание параметру с именем name значения val
   void SetVal(std::string name, std::string val);
-  /// Çàäàíèå ïàðàìåòðó ñ èìåíåì name çíà÷åíèÿ val
+  /// Задание параметру с именем name значения val
   void SetVal(std::string name, void* val);
-  /// Âîçâðàùàåò ñòðîêó ñ çíà÷åíèåì ïàðàìåòðà ñ èìåíåì name
+  /// Возвращает строку с значением параметра с именем name
   std::string GetStringVal(std::string name);
-  /// Âîçâðàùàåò çíà÷åíèå ïàðàìåòðà ñ èìåíåì name
+  /// Возвращает значение параметра с именем name
   void* GetVal(std::string name);
 
   /**
-  Èíèöèàëèçàöèÿ ïàðàìåòðà
-  \param[in] pt - òèï ïàðàìåòðà
-  \param[in] sizeVal - ðàçìåð ìàññèâà çíà÷åíèé, äëÿ òèïîâ äàííûõ íå ÿâëÿþùèìèñÿ ìàñèâàìè - âñåãäà ðàâåí 1
-  \param[in] name - èìÿ ñâîéñòâà
-  \param[in] help - âûâîäèìàÿ íà êîíñîëü ñïðàâêà
-  \param[in] com - êîðîòêàÿ ñòðîêà äëÿ çàïóñêà
-  \param[in] defVal - çíà÷åíèå ïî óìîë÷àíèþ
+  Инициализация параметра
+  \param[in] pt - тип параметра
+  \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+  \param[in] name - имя свойства
+  \param[in] help - выводимая на консоль справка
+  \param[in] com - короткая строка для запуска (ключ командной строки)
+  \param[in] defVal - значение по умолчанию
   */
   virtual void AddOption(EParameterType pt, std::string name, std::string defVal,
     std::string com, std::string help, int sizeVal);
 
-  /// Îáúåäèíÿåò âñå ïàðàìåòðû äâóõ êëàññîâ â îáîèõ
+  /// Объединяет все параметры двух классов в обоих
   virtual void CombineOptions(IBaseValueClass** otherOptions, int count);
-  /// Âîçâðàùàåò èìåþùèåñÿ ñâîéñòâà
+  /// Возвращает имеющиеся свойства
   virtual IBaseValueClass** GetOptions();
-  /// Âîçâðàùàåò äîïîëíèòåëüíûå ñâîéñòâÿ âçÿòûå èç äðóãèõ êëàññîâ ïàðàìåòðîâ
+  /// Возвращает дополнительные свойства, взятые из других классов параметров
   virtual IBaseValueClass** GetOtherOptions();
-  /// Âîçâðàùàåò êîëè÷åñòâî îïöèé
+  /// Возвращает количество опций
   virtual int GetOptionsCount();
-  /// Âîçâðàùàåò êîëè÷åñòâî äîïîëíèòåëüíûõ ñâîéñòâ âçÿòûå èç äðóãèõ êëàññîâ ïàðàìåòðîâ
+  /// Возвращает количество дополнительных свойств, взятых из других классов параметров
   virtual int GetOtherOptionsCount();
 
-  /// Èíèöèàëèçàöèÿ ïàðàìåòðîâ
+  /// Инициализация параметров
   virtual void Init(int argc, char* argv[], bool isMPIInit = false);
   BaseParameters();
   BaseParameters(BaseParameters& _parameters);
   virtual ~BaseParameters();
-  /// ßâëÿåòñÿ ëè êëàññ çàäà÷åé
+  /// Является ли класс задачей
   virtual bool IsProblem();
 };
 
 // ------------------------------------------------------------------------------------------------
-/// Ïðîâåðêà ïðàâèëüíîñòè
+/// Проверка правильности
 template <class Owner>
 int BaseParameters<Owner>::CheckValue(int index)
 {
@@ -183,7 +183,7 @@ int BaseParameters<Owner>::CheckValue(int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Èíèöèàëèçàöèÿ ïàðàìåòðà
+/// Инициализация параметра
 template <class Owner>
 void BaseParameters<Owner>::InitializationOption(BaseProperty<Owner>* option, std::string name, std::string defVal,
   std::string com, std::string help, int sizeVal)
@@ -196,7 +196,7 @@ void BaseParameters<Owner>::InitializationOption(BaseProperty<Owner>* option, st
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Äîáàâëÿåò îïöèþ â îáùèé ñïèñîê
+/// Добавляет опцию в общий список
 template <class Owner>
 void BaseParameters<Owner>::AddOption(BaseProperty<Owner>* option)
 {
@@ -241,7 +241,7 @@ void BaseParameters<Owner>::AddOption(BaseProperty<Owner>* option)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàäàíèå çíà÷åíèé ïî óìîë÷àíèþ áàçîâûõ ïàðàìåòðîâ
+/// Задание значений по умолчанию базовых параметров
 template <class Owner>
 void BaseParameters<Owner>::SetBaseDefaultParameters()
 {
@@ -266,7 +266,7 @@ void BaseParameters<Owner>::SetBaseDefaultParameters()
 }
 
 //// ------------------------------------------------------------------------------------------------
-///// ×òåíèå ïàðàìåòðîâ èç ôàéëà ConfigPath
+///// Чтение параметров из файла ConfigPath
 //template <class Owner>
 //void BaseParameters<Owner>::ReadConfigFile()
 //{
@@ -310,7 +310,7 @@ void BaseParameters<Owner>::SetBaseDefaultParameters()
 //}
 
 // ------------------------------------------------------------------------------------------------
-/// ×òåíèå ïàðàìåòðîâ êîìàíäíîé ñòðîêè
+/// Чтение параметров командной строки
 template <class Owner>
 void BaseParameters<Owner>::ReadParameters(int argc, char* argv[])
 {
@@ -350,7 +350,7 @@ void BaseParameters<Owner>::ReadParameters(int argc, char* argv[])
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàäàòü ðàçäåëèòåëü ìàññèâà äëÿ âñåõ îïöèé
+/// Задать разделитель массива для всех опций
 template <class Owner>
 void BaseParameters<Owner>::SetSeparator()
 {
@@ -361,7 +361,7 @@ void BaseParameters<Owner>::SetSeparator()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Ïå÷àòü ñïðàâêè ïî ïàðàìåòðàì
+/// Печать справки по параметрам
 template <class Owner>
 void BaseParameters<Owner>::PrintHelp()
 {
@@ -395,7 +395,7 @@ void BaseParameters<Owner>::PrintParameters()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàïóñêàòü ëè ðàáîòó ïðîãðàììû
+/// Запускать ли работу программы
 template <class Owner>
 bool BaseParameters<Owner>::IsStart()
 {
@@ -406,8 +406,8 @@ bool BaseParameters<Owner>::IsStart()
 
 // ------------------------------------------------------------------------------------------------
 /**
-Ïðîâåðêà ïðàâèëüíîñòè ïðè èçìåíåíèå ïàðàìåòðîâ
-Ïðè ïåðåîïðåäåëåíèå íåîáõîäèìî âûçâàòü âûçâàòü ìåòîä áàçîâîãî êëàññà!
+  Проверка правильности при изменении параметров
+  При переопределении необходимо вызвать метод базового класса!
 */
 template <class Owner>
 int BaseParameters<Owner>::CheckValueParameters(int index)
@@ -446,7 +446,7 @@ int BaseParameters<Owner>::CheckValueParameters(int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Ïå÷àòü çíà÷åíèÿ ïàðàìåòðà ñ èìåíåì name
+/// Печать значения параметра с именем name
 template <class Owner>
 void BaseParameters<Owner>::PrintParameter(std::string name)
 {
@@ -469,7 +469,7 @@ void BaseParameters<Owner>::PrintParameter(std::string name)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàäàíèå ïàðàìåòðó ñ èìåíåì name çíà÷åíèÿ val
+/// Задание параметру с именем name значения val
 template <class Owner>
 void BaseParameters<Owner>::SetVal(std::string name, std::string val)
 {
@@ -493,7 +493,7 @@ void BaseParameters<Owner>::SetVal(std::string name, std::string val)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Çàäàíèå ïàðàìåòðó ñ èìåíåì name çíà÷åíèÿ val
+/// Задание параметру с именем name значения val
 template <class Owner>
 void BaseParameters<Owner>::SetVal(std::string name, void* val)
 {
@@ -516,7 +516,7 @@ void BaseParameters<Owner>::SetVal(std::string name, void* val)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò ñòðîêó ñ çíà÷åíèåì ïàðàìåòðà ñ èìåíåì name
+/// Возвращает строку с значением параметра с именем name
 template <class Owner>
 std::string BaseParameters<Owner>::GetStringVal(std::string name)
 {
@@ -540,7 +540,7 @@ std::string BaseParameters<Owner>::GetStringVal(std::string name)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò çíà÷åíèå ïàðàìåòðà ñ èìåíåì name
+/// Возвращает значение параметра с именем name
 template <class Owner>
 void* BaseParameters<Owner>::GetVal(std::string name)
 {
@@ -565,13 +565,13 @@ void* BaseParameters<Owner>::GetVal(std::string name)
 
 // ------------------------------------------------------------------------------------------------
 /**
-Èíèöèàëèçàöèÿ ïàðàìåòðà
-\param[in] pt - òèï ïàðàìåòðà
-\param[in] sizeVal - ðàçìåð ìàññèâà çíà÷åíèé, äëÿ òèïîâ äàííûõ íå ÿâëÿþùèìèñÿ ìàñèâàìè - âñåãäà ðàâåí 1
-\param[in] name - èìÿ ñâîéñòâà
-\param[in] help - âûâîäèìàÿ íà êîíñîëü ñïðàâêà
-\param[in] com - êîðîòêàÿ ñòðîêà äëÿ çàïóñêà
-\param[in] defVal - çíà÷åíèå ïî óìîë÷àíèþ
+  Инициализация параметра
+  \param[in] pt     - тип параметра
+  \param[in] sizeVal - размер массива значений; для типов данных, не являющихся массивами, всегда равен 1
+  \param[in] name   - имя свойства
+  \param[in] help   - выводимая на консоль справка
+  \param[in] com    - короткая строка для запуска (ключ командной строки)
+  \param[in] defVal - значение по умолчанию
 */
 template <class Owner>
 void BaseParameters<Owner>::AddOption(EParameterType pt, std::string name, std::string defVal,
@@ -612,7 +612,7 @@ void BaseParameters<Owner>::AddOption(EParameterType pt, std::string name, std::
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Îáúåäèíÿåò âñå ïàðàìåòðû äâóõ êëàññîâ â îáîèõ
+/// Объединяет все параметры двух классов в обоих
 template <class Owner>
 void BaseParameters<Owner>::CombineOptions(IBaseValueClass** otherOptions, int count)
 {
@@ -675,7 +675,7 @@ void BaseParameters<Owner>::CombineOptions(IBaseValueClass** otherOptions, int c
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò èìåþùèåñÿ ñâîéñòâà
+/// Возвращает имеющиеся свойства
 template <class Owner>
 IBaseValueClass** BaseParameters<Owner>::GetOptions()
 {
@@ -683,7 +683,7 @@ IBaseValueClass** BaseParameters<Owner>::GetOptions()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò äîïîëíèòåëüíûå ñâîéñòâà âçÿòûå èç äðóãèõ êëàññîâ ïàðàìåòðîâ
+/// Возвращает дополнительные свойства, взятые из других классов параметров
 template <class Owner>
 IBaseValueClass** BaseParameters<Owner>::GetOtherOptions()
 {
@@ -691,7 +691,7 @@ IBaseValueClass** BaseParameters<Owner>::GetOtherOptions()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò êîëè÷åñòâî îïöèé
+/// Возвращает количество опций
 template <class Owner>
 int BaseParameters<Owner>::GetOptionsCount()
 {
@@ -699,7 +699,7 @@ int BaseParameters<Owner>::GetOptionsCount()
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Âîçâðàùàåò êîëè÷åñòâî äîïîëíèòåëüíûõ ñâîéñòâ âçÿòûå èç äðóãèõ êëàññîâ ïàðàìåòðîâ
+/// Возвращает количество дополнительных свойств, взятых из других классов параметров
 template <class Owner>
 int BaseParameters<Owner>::GetOtherOptionsCount()
 {
@@ -733,7 +733,7 @@ void BaseParameters<Owner>::Init(int argc, char* argv[], bool isMPIInit)
     mOtherOptions[i] = 0;
   }
 
-  // Îïðåäåëÿåì åñòü ëè ïàðàìåòðû êîíñîëè
+  // Определяем, есть ли параметры в консоли
 
   if (argc > 0)
   {
@@ -746,20 +746,20 @@ void BaseParameters<Owner>::Init(int argc, char* argv[], bool isMPIInit)
   else
     mIsHaveArguments = true;
 
-  // Èíèöèàëèçàöèÿ áàçîâûõ ïàðàìåòðîâ ïî óìîë÷àíèþ
+  // Инициализация базовых параметров по умолчанию
   SetBaseDefaultParameters();
-  // Èíèöèàëèçàöèÿ ðàáî÷èõ ïàðàìåòðîâ
+  // Инициализация рабочих параметров
   SetDefaultParameters();
-  // Çàäàòü ðàçäåëèòåëü äëÿ ìàññèâîâ
+  // Задать разделитель для массивов
   SetSeparator();
 
-  // Îïðåäåëÿåì ïàðàìåòðû èç êîíñîëè
+  // Определяем параметры из консоли
   ReadParameters(mArgumentCount, mAargumentValue);
 
 
-  // Îïðåäåëÿåì ïàðàìåòðû èç ôàéëîâ
-  //ReadConfigFile();
-  // Ïðîâåðêà ïàðàìåòðîâ
+  // Определяем параметры из файлов
+  // ReadConfigFile();
+  // Проверка параметров
   CheckValue();
 
   if ((mIsHaveArguments == false) && (IsPrintHelpWithoutArguments == false))
@@ -815,7 +815,7 @@ BaseParameters<Owner>::BaseParameters(BaseParameters& _parameters) : CombinableB
     mOtherOptions[i] = 0;
   }
 
-  // Èíèöèàëèçàöèÿ áàçîâûõ ïàðàìåòðîâ ïî óìîë÷àíèþ
+  // Инициализация базовых параметров по умолчанию
   SetBaseDefaultParameters();
 
   for (int i = 0; i < mOptionsCount; i++)
@@ -838,7 +838,7 @@ BaseParameters<Owner>::~BaseParameters()
   mOptions = 0;
 }
 
-/// ßâëÿåòñÿ ëè êëàññ çàäà÷åé
+/// Является ли класс задачей
 template <class Owner>
 bool BaseParameters<Owner>::IsProblem()
 {

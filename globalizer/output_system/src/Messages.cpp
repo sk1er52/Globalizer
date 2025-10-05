@@ -23,16 +23,16 @@ int OutputMessage::streamCount = 0;
 int OutputMessage::ImportantMessageNumber = -1;
 bool OutputMessage::mIsPrintToConsole = true;
 
-/// Ãëîáàëüíàÿ ïåðåìåííàÿ äëÿ âûîäà èíôîðìàöèè íà ýêðàí, â debug ïå÷àòàåò â ëîã ôàéë
+/// Глобальная переменная для вывода информации на экран, в debug печатает в лог-файл
 OutputMessage printMessage;
 /**
-Ãëîáàëüíàÿ ïåðåìåííàÿ äëÿ âûîäà èíôîðìàöèè íà ýêðàí òîëüêî èç ïåðâîãî ïðîöåññà,
-â debug ïå÷àòàåò â ëîã ôàéë
+Глобальная переменная для вывода информации на экран только из первого процесса,
+в debug печатает в лог-файл
 */
 OutputMessage printMessageInFirstProcess(1);
 /**
-Ãëîáàëüíàÿ ïåðåìåííàÿ äëÿ âûîäà èíôîðìàöèè íà ýêðàí â êîðíå,
-â debug ïå÷àòàåò â ëîã ôàéë
+Глобальная переменная для вывода информации на экран в корне,
+в debug печатает в лог-файл
 */
 OutputMessage printMessageInRoot(true);
 

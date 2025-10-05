@@ -5,42 +5,62 @@
 //                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      TreeNode.h                                                  //
+//  File:      SearchInterval.cpp                                           //
 //                                                                         //
-//  Purpose:   Header file for search data classes                         //
+//  Purpose:   Source file for search interval classes                     //
 //                                                                         //
 //  Author(s): Sysoyev A., Barkalov K., Sovrasov V., Zaitsev A.            //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __TREE_NODE_H__
-#define __TREE_NODE_H__
-
 #include "SearchInterval.h"
-#include "SearchIntervalFactory.h"
+#include "TrialFactory.h"
 
-class SearchInterval;
-// ------------------------------------------------------------------------------------------------
-class TreeNode
+SearchInterval::SearchInterval()
 {
-public:
-    /// Интервал поиска
-    SearchInterval* pInterval;
+    LeftPoint = nullptr;
+    RightPoint = nullptr;
 
-    /// Высота дерева
-    unsigned char Height;
+    R = locR = 0.0;
+    ind = 0;
+    // Выделение памяти происходит в момент добавления в матрицу
+    K = 0;
+    delta = 0.0;
 
-    /// Левая ветвь дерева
-    TreeNode* pLeft;
-    /// Правая ветвь дерева
-    TreeNode* pRight;
-    /// Родительский узел
-    TreeNode* pParent;
+    queueElementa = nullptr;
+    treeNode = nullptr;
+}
 
-    TreeNode(SearchInterval& p);
+// ------------------------------------------------------------------------------------------------
+SearchInterval::SearchInterval(const SearchInterval& p)
+{
+    LeftPoint = p.LeftPoint;
+    RightPoint = p.RightPoint;
 
-    ~TreeNode();
-};
+    ind = p.ind;
+    K = p.K;
+    R = p.R;
+    locR = p.locR;
+    delta = p.delta;
 
-#endif
+    //МКО
+
+    queueElementa = p.queueElementa;
+    treeNode = p.treeNode;
+}
+
+// ------------------------------------------------------------------------------------------------
+SearchInterval::~SearchInterval()
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+void SearchInterval::CreatePoint()
+{
+    LeftPoint = TrialFactory::CreateTrial();
+    RightPoint = TrialFactory::CreateTrial();
+    RightPoint->SetX(1);
+}
+
+
 // - end of file ----------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -28,15 +28,6 @@ struct TreeNode;
 class SearchInterval : public QueueBaseData
 {
 public:
-
-  /// Метка интервала: обычный, образующий локальную область, образовный локальным методом
-  enum Status
-  {
-    usual,
-    local_area,
-    educational_local_method
-  };
-
   /// Левая точка интервала
   Trial* LeftPoint;
   /// Правая точка интервала
