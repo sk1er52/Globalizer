@@ -422,3 +422,14 @@ SolutionResult* Solver::GetSolutionResult()  /// best point
   //if (pTask->GetProcLevel() == 0)  printf("DD20_26! Proc=%d \n", parameters.GetProcRank());
   return result;
 }
+
+// ------------------------------------------------------------------------------------------------
+void Solver::SetPoint(std::vector<Trial*> points)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+std::vector<Trial*>& Solver::GetAllPoint()
+{
+    return std::vector<Trial*>();
+}

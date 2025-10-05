@@ -13,6 +13,8 @@ protected:
 
   /// Решатели для оптимизации по группам параметров
   std::vector< Solver*> solvers;
+  /// Решатель для объединения всех остальных Решателей
+  Solver* finalSolver;
   /// Размерости групп парамеров, по умолчанию по 1
   std::vector<int> dimensions;
   /// Решение задачи оптимизации
@@ -51,4 +53,9 @@ public:
 
 
   SolutionResult* GetSolutionResult();
+
+  /// Добавляет точки испытаний
+  virtual void SetPoint(std::vector<Trial*>& points);
+  /// Возврящает все имеющиеся точки испытаний
+  virtual std::vector<Trial*>& GetAllPoint();
 };

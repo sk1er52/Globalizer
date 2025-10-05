@@ -65,6 +65,8 @@ protected:
   /// Решатель используемый при ассинхронной схеме
   void AsyncCalculation();
 
+
+
 public:
   Solver(IProblem* problem);
 
@@ -83,6 +85,11 @@ public:
   void SetProblem(IProblem* problem);
   IProblem* GetProblem();
   SolutionResult* GetSolutionResult();
+
+  /// Добавляет точки испытаний
+  virtual void SetPoint(std::vector<Trial*>& points);
+  /// Возврящает все имеющиеся точки испытаний
+  virtual std::vector<Trial*>& GetAllPoint();
 };
 
 #endif //solver.h

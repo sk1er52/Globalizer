@@ -96,29 +96,35 @@ int SeparableOptimizationSolver::Solve()
     auto doLV = parameters.localVerificationType;
     parameters.localVerificationType = None;
     int startParameterNumber = 0;
+
+    std::vector<Trial*> points;
+
     for (int i = 0; i < solvers.size(); i++)
     {
-      Solver* soler = solvers[i];
+      Solver* solver = solvers[i];
       if (tasks[i] != nullptr)
         delete tasks[i];
       tasks[i] = dynamic_cast<SeparableOptimizationTask*>(TaskFactory::CreateTask(problem, 0));      
 
       tasks[i]->SetStartParameterNumber(startParameterNumber);
       parameters.Dimension = dimensions[i];
-      soler->Solve(tasks[i]);
+      solver->Solve(tasks[i]);
       startParameterNumber = startParameterNumber + parameters.Dimension;
       parameters.Dimension = originalDimension;
+      points.insert(points.end(), solver->GetAllPoint().begin(), solver->GetAllPoint().end());
     }
 
     parameters.localVerificationType = doLV;
-    Solver* soler = new Solver(problem);
+    Solver* finalSolver = new Solver(problem);
     parameters.MaxNumOfPoints = { 1 };
 
+    finalSolver->SetPoint(points);
 
+    finalSolver->Solve();
 
     if (solutionResult != nullptr)
       delete solutionResult;
-    solutionResult = soler->GetSolutionResult();
+    solutionResult = finalSolver->GetSolutionResult();
 
   }
   catch (const Exception& e)
@@ -165,4 +171,15 @@ int SeparableOptimizationSolver::Solve()
 SolutionResult* SeparableOptimizationSolver::GetSolutionResult()
 {
   return solutionResult;
+}
+
+// ------------------------------------------------------------------------------------------------
+void SeparableOptimizationSolver::SetPoint(std::vector<Trial*>& points)
+{
+}
+
+// ------------------------------------------------------------------------------------------------
+std::vector<Trial*>& SeparableOptimizationSolver::GetAllPoint()
+{
+  return std::vector<Trial*>();
 }
