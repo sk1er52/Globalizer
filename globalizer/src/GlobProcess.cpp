@@ -60,7 +60,7 @@ pData(&data), pTask(&task)
   Neighbours.resize(parameters.GetProcNum() - 1);
   for (int i = 0; i < parameters.GetProcNum() - 1; i++)
     Neighbours[i] = i + 1;
-
+  addPoints = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -617,7 +617,11 @@ void Process::BeginIterations()
 {
   IsOptimumFound = false;
   isPrintOptimEstimation = false;
+
   pMethod->FirstIteration();
+
+  if (addPoints != nullptr)
+    pMethod->InsertPoints(*addPoints);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -689,7 +693,7 @@ void Process::DoIteration()
     else
     {
       IsOptimumFound = true;
-      if (parameters.TypeCalculation == 8)
+      if (parameters.TypeCalculation == AsyncMPI)
         MPICalculationAsync::AsyncFinilize();  
       pMethod->FinalizeIteration();
     }
@@ -750,6 +754,12 @@ void Process::EndIterations()
     pMethod->PrintPoints(parameters.iterPointsSavePath);
   else
     pMethod->SavePoints();
+}
+
+// ------------------------------------------------------------------------------------------------
+void Process::InsertPoints(std::vector<Trial*>& points)
+{
+  addPoints = &points;
 }
 
 // - end of file ----------------------------------------------------------------------------------

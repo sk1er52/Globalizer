@@ -63,6 +63,8 @@ Solver::Solver(IProblem* problem)
   result = 0;
 
   isExternalTask = false;
+
+  addPoints = nullptr;
 }
 
 #ifdef _GLOBALIZER_BENCHMARKS
@@ -243,6 +245,8 @@ int Solver::Solve()
     {
       ClearData();
       CreateProcess();
+      if (addPoints != nullptr)
+        mProcess->InsertPoints(*addPoints);
       mProcess->Solve();
     }  
 
@@ -424,12 +428,14 @@ SolutionResult* Solver::GetSolutionResult()  /// best point
 }
 
 // ------------------------------------------------------------------------------------------------
-void Solver::SetPoint(std::vector<Trial*> points)
+void Solver::SetPoint(std::vector<Trial*>& points)
 {
+  addPoints = &points;
+
 }
 
 // ------------------------------------------------------------------------------------------------
 std::vector<Trial*>& Solver::GetAllPoint()
 {
-    return std::vector<Trial*>();
+  return pData->GetTrials();
 }

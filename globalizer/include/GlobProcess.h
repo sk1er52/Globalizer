@@ -84,6 +84,9 @@ protected:
   int GetProcLevel() { return pTask->GetProcLevel(); }
   ///Проверяет остановились ли соседи
   bool CheckIsStop(bool IsStop);
+
+  /// Точки которые будут добавлены после первой итерации
+  std::vector<Trial*>* addPoints;
 public:
   Process(SearchData& data, Task& task);
   virtual ~Process();
@@ -108,6 +111,13 @@ public:
   */
   virtual Trial* GetOptimEstimation() { return pMethod->GetOptimEstimation(); }
 
+
+  /**Добавляет испытания в поисковую информацию, при этом обновляя константу Гёльдера и
+  оценку оптимума
+
+  \param[in] points точки испытаний, которые будут добавлены
+  */
+  void InsertPoints(std::vector<Trial*>& points);
 };
 
 void ShowIterResults(Process *pProcess);

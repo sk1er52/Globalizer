@@ -64,8 +64,8 @@ protected:
   void MpiCalculation();
   /// Решатель используемый при ассинхронной схеме
   void AsyncCalculation();
-
-
+  /// Точки которые будут добавлены после первой итерации
+  std::vector<Trial*>* addPoints;
 
 public:
   Solver(IProblem* problem);

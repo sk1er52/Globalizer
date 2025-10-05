@@ -1,5 +1,5 @@
 #include "SeparableOptimizationTask.h"
-
+#include "Trial.h"
 // ------------------------------------------------------------------------------------------------
 SeparableOptimizationTask::SeparableOptimizationTask(IProblem* _problem, int _ProcLevel) : Task::Task(_problem, _ProcLevel)
 {
@@ -75,4 +75,13 @@ void SeparableOptimizationTask::CalculateFuncsInManyPoints(double* y, int fNumbe
 void SeparableOptimizationTask::SetStartParameterNumber(int _startParameterNumber)
 {
   startParameterNumber = _startParameterNumber;
+}
+
+// ------------------------------------------------------------------------------------------------
+void SeparableOptimizationTask::CopyPoint(double* y, Trial* point)
+{
+  for (int i = 0; i < parameters.Dimension; i++)
+  {
+    point->y[i] = y[i + startParameterNumber];
+  }
 }

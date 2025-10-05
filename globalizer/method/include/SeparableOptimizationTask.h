@@ -38,4 +38,12 @@ public:
   /// «адает начало блока переменных
   void SetStartParameterNumber(int _startParameterNumber);
 
+  /**
+  * \brief  опирует координаты точки из массива, согласно имеющимс€ правилам
+  * \param[in] y имеющисс€ координаты.
+  * \param[out] point точка назначени€.
+  * \return true, если значение допустимо, иначе false.
+  */
+  virtual void CopyPoint(double* y, Trial* point);
+
 };

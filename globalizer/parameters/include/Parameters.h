@@ -187,6 +187,9 @@ public:
   /// Начальная точка для решения задачи оптимизации
   TDoubles<Parameters> startPoint;
 
+  /// Значения функций в начальная точка для решения задачи оптимизации
+  TDoubles<Parameters> startPointValues;
+
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);
   /// Возвращает номер текущего процесса

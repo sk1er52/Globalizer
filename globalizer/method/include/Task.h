@@ -36,6 +36,8 @@
 #include "Exception.h"
 #include "BaseInterval.h"
 
+class Trial;
+
 // ------------------------------------------------------------------------------------------------
 
 /**
@@ -261,6 +263,14 @@ public:
   * \return true, если ProcLevel не равен 0, иначе false.
   */
   virtual bool IsLeaf();
+
+  /**
+* \brief Копирует координаты точки из массива, согласно имеющимся правилам
+* \param[in] y имеющисся координаты.
+* \param[out] point точка назначения.
+* \return true, если значение допустимо, иначе false.
+*/
+  virtual void CopyPoint(double* y, Trial* point);
 };
 
 #endif

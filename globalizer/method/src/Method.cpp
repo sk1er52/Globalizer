@@ -75,7 +75,7 @@ Method::Method(Task& _pTask, SearchData& _pData,
   {
     throw EXCEPTION("NumPoints parameter <= 0");
   }
-  
+
 
   iteration.IterationCount = 0;
 
@@ -84,10 +84,10 @@ Method::Method(Task& _pTask, SearchData& _pData,
   iteration.pCurTrials.resize(parameters.NumPoints);
 
   //===========================================================================================================================================
-  mu = new double [pTask.GetNumOfFunc()];
+  mu = new double[pTask.GetNumOfFunc()];
   for (int i = 0; i < pTask.GetNumOfFunc(); i++)
     mu[i] = 0;
-  Xmax = new double [pTask.GetNumOfFunc()];
+  Xmax = new double[pTask.GetNumOfFunc()];
   for (int i = 0; i < pTask.GetNumOfFunc(); i++)
     Xmax[i] = 0;
   //===========================================================================================================================================
@@ -126,7 +126,8 @@ Method::Method(Task& _pTask, SearchData& _pData,
 
 // ------------------------------------------------------------------------------------------------
 Method::~Method()
-{}
+{
+}
 
 
 
@@ -185,7 +186,7 @@ void Method::CalculateCurrentPoint(Trial& pCurTrialsj, SearchInterval* BestInter
   else
   {
     pCurTrialsj.SetX(0.5 * (BestIntervalsj->xl() + BestIntervalsj->xr()) -
-      (((BestIntervalsj->zr() - BestIntervalsj->zl()) > 0) ? 1 : -1)*
+      (((BestIntervalsj->zr() - BestIntervalsj->zl()) > 0) ? 1 : -1) *
       pow(fabs(BestIntervalsj->zr() - BestIntervalsj->zl()) /
         pData->M[BestIntervalsj->izl()], parameters.Dimension) / 2 / parameters.r);
   }
@@ -220,8 +221,8 @@ void Method::FirstIteration()
   AchievedAccuracy = 1.0;
   // И лучшую итерацию
 
-  SearchInterval** NewInterval = new SearchInterval*[1];
-    //SearchIntervalFactory::CreateSearchInterval();
+  SearchInterval** NewInterval = new SearchInterval * [1];
+  //SearchIntervalFactory::CreateSearchInterval();
   for (int e = 0; e < 1; e++)
   {
     NewInterval[e] = SearchIntervalFactory::CreateSearchInterval();
@@ -281,7 +282,7 @@ void Method::FirstIteration()
 
       }
     }
-      
+
   }
   //====================================================================
 
@@ -294,45 +295,97 @@ void Method::FirstIteration()
   // Равномерно ставим NumPoints точек c шагом h
   // А надо бы случайно...
   double h = 1.0 / (parameters.NumPoints + 1);
-  if (!parameters.isLoadFirstPointFromFile) // равномерно распределяем начальные точки
+  if (parameters.startPoint.GetIsChange()) //берем начальную точку из параметров
   {
-      for (int q = 0; q < parameters.NumPoints; q++)
-      {
 
-        if (parameters.TypeDistributionStartingPoints == Evenly)
-        {
-          int ind = q;
-          iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
+    std::vector<Trial*> newPoint(1);
 
-          pData->GetTrials().push_back(iteration.pCurTrials[ind]);
-          iteration.pCurTrials[ind]->SetX((q + 1) * h);
 
-          // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
-          CalculateImage(*iteration.pCurTrials[ind]);
-
-          iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
-          iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
-        }
-        else
-        {
-          int ind =  q;
-          iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
-          pData->GetTrials().push_back(iteration.pCurTrials[ind]);
-          
-          for (size_t iCNP = 0; iCNP < parameters.Dimension; iCNP++)
-          {
-            iteration.pCurTrials[ind]->y[iCNP] = pTask.GetA()[iCNP] + ((double(q) + 1.0) * h) * (pTask.GetB()[iCNP] - pTask.GetA()[iCNP]);
-          }
-
-          Extended genX(0.0);
-          evolvent.GetInverseImage(iteration.pCurTrials[ind]->y, genX);
-          iteration.pCurTrials[ind]->SetX(genX);
-
-          iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
-          iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
-        }
-      }
+    newPoint[0] = TrialFactory::CreateTrial();
     
+    pTask.CopyPoint(parameters.startPoint.GetData(), newPoint[0]);
+
+    if (parameters.startPointValues.GetIsChange())
+    {
+      for (int ifv = 0; ifv < parameters.startPointValues.GetSize(); ifv++)
+      {
+        newPoint[0]->FuncValues[ifv] = parameters.startPointValues[ifv];
+      }
+    }
+    else
+    {
+      InformationForCalculation inputlocal;
+      TResultForCalculation outputlocal;
+      inputlocal.Resize(1);
+      outputlocal.Resize(1);
+
+      inputlocal.trials[0] = newPoint[0];
+
+      calculation.Calculate(inputlocal, outputlocal);
+
+      for (int j = 0; j < pTask.GetNumOfFunc(); j++)
+      {
+        functionCalculationCount[j] = outputlocal.countCalcTrials[j];
+      }
+      UpdateOptimumEstimation(*(newPoint[0]));
+
+    }
+
+    newPoint[0]->K = 1;
+    newPoint[0]->index = 0;
+
+    Extended genX(0.0);
+    evolvent.GetInverseImage(newPoint[0]->y, genX);
+
+    newPoint[0]->SetX(genX);
+
+    pData->GetTrials().push_back(newPoint[0]);
+
+
+    this->InsertPoints(newPoint);
+
+    this->iteration.IterationCount += 1;
+    parameters.iterationNumber = iteration.IterationCount;
+  }
+  else if (!parameters.isLoadFirstPointFromFile) // равномерно распределяем начальные точки
+  {
+    for (int q = 0; q < parameters.NumPoints; q++)
+    {
+
+      if (parameters.TypeDistributionStartingPoints == Evenly)
+      {
+        int ind = q;
+        iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
+
+        pData->GetTrials().push_back(iteration.pCurTrials[ind]);
+        iteration.pCurTrials[ind]->SetX((q + 1) * h);
+
+        // Вычисляем образ точки итерации - образ записывается в начальные позиции массива y
+        CalculateImage(*iteration.pCurTrials[ind]);
+
+        iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
+        iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
+      }
+      else
+      {
+        int ind = q;
+        iteration.pCurTrials[ind] = TrialFactory::CreateTrial();
+        pData->GetTrials().push_back(iteration.pCurTrials[ind]);
+
+        for (size_t iCNP = 0; iCNP < parameters.Dimension; iCNP++)
+        {
+          iteration.pCurTrials[ind]->y[iCNP] = pTask.GetA()[iCNP] + ((double(q) + 1.0) * h) * (pTask.GetB()[iCNP] - pTask.GetA()[iCNP]);
+        }
+
+        Extended genX(0.0);
+        evolvent.GetInverseImage(iteration.pCurTrials[ind]->y, genX);
+        iteration.pCurTrials[ind]->SetX(genX);
+
+        iteration.pCurTrials[ind]->leftInterval = NewInterval[0];
+        iteration.pCurTrials[ind]->rightInterval = NewInterval[0];
+      }
+    }
+
   }
   else // читаем из файла FirstPointFilePath
   {
@@ -499,7 +552,7 @@ void Method::CalculateIterationPoints()
   {
 
     pData->GetBestIntervals(BestIntervals.data(), parameters.NumPoints);
-    
+
   }
   else
     pData->GetBestLocalIntervals(BestIntervals.data(), parameters.NumPoints);
@@ -611,7 +664,7 @@ bool Method::CheckStopCondition()
 
     case InLocalArea:
     {
-      double fm = parameters.Epsilon; 
+      double fm = parameters.Epsilon;
       if ((isSetInLocalMinimumInterval == true) || (AchievedAccuracy < fm))
         res = true;
     }
@@ -682,9 +735,9 @@ void Method::InsertLocalPoints(const std::vector<Trial*>& points, Task* task)
   for (size_t j = 0; j < points.size(); j++)
   {
     Trial* currentPoint = points[j];
-	Extended  x;
+    Extended  x;
     evolvent.GetInverseImage(&(currentPoint->y[0]), x);
-	currentPoint->SetX(x);
+    currentPoint->SetX(x);
     SearchInterval* CoveringInterval = pData->FindCoveringInterval(currentPoint);
 
     if (!CoveringInterval)
@@ -1029,7 +1082,7 @@ SearchInterval* Method::AddCurrentPoint(Trial& pCurTrialsj, SearchInterval* Best
 
   // Гельдеровская длина интервала
   NewInterval->delta = root(NewInterval->xr() - NewInterval->xl(), parameters.Dimension);
- 
+
   // Корректируем существующий интервал
   (BestIntervalsj)->RightPoint = NewInterval->LeftPoint;
 
@@ -1175,7 +1228,7 @@ void Method::FinalizeIteration()
   for (unsigned int i = 0; i < iteration.pCurTrials.size(); i++)
     iteration.pCurTrials[i] = 0;
 
-  if (parameters.TypeCalculation == AsyncMPI) 
+  if (parameters.TypeCalculation == AsyncMPI)
   {
     SetNumPoints(1);
     parameters.NumPoints = 1;
@@ -1264,7 +1317,7 @@ void Method::UpdateM(double newValue, int index, int boundaryStatus, SearchInter
     break;
   case 1:
     //LT
-    
+
     // Вычисление лямбды
 
     lambda = newValue;
@@ -1594,7 +1647,7 @@ int Method::GetNumberOfTrials()
 
   // Число итераций равно числу интервалов в таблице - 1
   return pData->GetCount() - 1;
-  
+
 }
 
 void Method::PrintSection()
@@ -1766,7 +1819,7 @@ void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
     Trial* temp = TrialFactory::CreateTrial(&points[i]);
     Extended x;
     evolvent.GetInverseImage(&(temp->y[pTask.GetProcLevel()]), x);
-	temp->SetX(x);
+    temp->SetX(x);
     temp->FuncValues[0] = pTask.CalculateFuncs(temp->y, 0);
     temp->TypeColor = 3;
     localPoints.push_back(temp);
@@ -1780,8 +1833,8 @@ void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
 // ------------------------------------------------------------------------------------------------
 void Method::LocalSearch()
 {
-  if ( ((parameters.localVerificationType == FinalStart && isStop) ||
-      (parameters.localVerificationType == UpdatedMinimum))
+  if (((parameters.localVerificationType == FinalStart && isStop) ||
+    (parameters.localVerificationType == UpdatedMinimum))
     && GetOptimEstimation()->index == pTask.GetNumOfFunc() - 1)
   {
 
@@ -1832,7 +1885,7 @@ void Method::LocalSearch()
     localMethod->SetEps(parameters.localVerificationEpsilon);
 
     localMethod->SetInitialStep(0.07 * initialStep);
- 
+
     localMethod->SetMaxTrials(parameters.localVerificationIteration);
     Trial point2 = localMethod->StartOptimization();
     Trial* newpoint = TrialFactory::CreateTrial(&point2);

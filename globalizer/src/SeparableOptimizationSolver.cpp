@@ -109,14 +109,31 @@ int SeparableOptimizationSolver::Solve()
       tasks[i]->SetStartParameterNumber(startParameterNumber);
       parameters.Dimension = dimensions[i];
       solver->Solve(tasks[i]);
+
+      auto solution = solver->GetSolutionResult();
+      for (int j = 0; j < dimensions[i]; j++)
+      {
+        parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+      }
+
+      parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
+      for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
+      {
+        parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+      }
+
       startParameterNumber = startParameterNumber + parameters.Dimension;
+
       parameters.Dimension = originalDimension;
+
       points.insert(points.end(), solver->GetAllPoint().begin(), solver->GetAllPoint().end());
+
+      Calculation::leafCalculation = 0;      
     }
 
     parameters.localVerificationType = doLV;
     Solver* finalSolver = new Solver(problem);
-    parameters.MaxNumOfPoints = { 1 };
+    parameters.MaxNumOfPoints[0] = 2;
 
     finalSolver->SetPoint(points);
 
