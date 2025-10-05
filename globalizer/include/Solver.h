@@ -39,6 +39,8 @@ protected:
 
   /// Общее описание задачи
   Task* pTask;
+  /// Задача пораждена в Solver или пришла извне
+  bool isExternalTask;
   /// База данных(поисковая информация)
   SearchData* pData;
 

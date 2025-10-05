@@ -76,9 +76,15 @@ SeparableOptimizationSolver::~SeparableOptimizationSolver()
   for (int i = 0; i < solvers.size(); i++)
   {
     if (solvers[i] != nullptr)
-      delete solvers[i];
+    {
+      auto solver = solvers[i];
+      delete solver;
+    }
     if (tasks[i] != nullptr)
-      delete tasks[i];
+    {
+      auto task = tasks[i];
+      delete task;
+    }
   }
 }
 
@@ -87,7 +93,8 @@ int SeparableOptimizationSolver::Solve()
 {
   try
   {
-
+    auto doLV = parameters.localVerificationType;
+    parameters.localVerificationType = None;
     int startParameterNumber = 0;
     for (int i = 0; i < solvers.size(); i++)
     {
@@ -102,9 +109,16 @@ int SeparableOptimizationSolver::Solve()
       startParameterNumber = startParameterNumber + parameters.Dimension;
       parameters.Dimension = originalDimension;
     }
+
+    parameters.localVerificationType = doLV;
+    Solver* soler = new Solver(problem);
+    parameters.MaxNumOfPoints = { 1 };
+
+
+
     if (solutionResult != nullptr)
       delete solutionResult;
-    solutionResult = solvers[solvers.size() - 1]->GetSolutionResult();
+    solutionResult = soler->GetSolutionResult();
 
   }
   catch (const Exception& e)
