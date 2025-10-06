@@ -98,7 +98,7 @@ int SeparableOptimizationSolver::Solve()
     int startParameterNumber = 0;
 
     std::vector<Trial*> points;
-
+    double bestVolue = MaxDouble;
     for (int i = 0; i < solvers.size(); i++)
     {
       parameters.Dimension = dimensions[i];
@@ -113,24 +113,34 @@ int SeparableOptimizationSolver::Solve()
       solver->Solve(tasks[i]);
 
       auto solution = solver->GetSolutionResult();
-      for (int j = 0; j < dimensions[i]; j++)
+      
+      if (solution->BestTrial->index == problem->GetNumberOfConstraints() && (_finite(solution->BestTrial->GetValue()) != 0))
       {
-        parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
-      }
+        if ( bestVolue >= solution->BestTrial->GetValue() )
+        {
+          bestVolue = solution->BestTrial->GetValue();
+          for (int j = 0; j < dimensions[i]; j++)
+          {
+            parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+          }
 
-      parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
-      for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
-      {
-        parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+          parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
+          for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
+          {
+            parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+          }
+        }
       }
-
       startParameterNumber = startParameterNumber + parameters.Dimension;
 
       parameters.Dimension = originalDimension;
 
       points.insert(points.end(), solver->GetAllPoint().begin(), solver->GetAllPoint().end());
 
-      Calculation::leafCalculation = 0;      
+      Calculation::leafCalculation = 0;  
+
+      print << "bestVolue =\t" << bestVolue << "\t Dimension " << i << "\n";
+      print << "best coordinate = \t" << parameters.startPoint.ToString() << "\n";
     }
 
     parameters.localVerificationType = doLV;

@@ -136,6 +136,18 @@ int main(int argc, char* argv[])
   else
     parameters.Dimension = problem->GetDimension();
 
+  std::vector<double> y(problem->GetDimension());
+  std::vector<std::string> u;
+  std::vector<double> values(problem->GetNumberOfFunctions());
+
+  problem->GetStartTrial(y, u, values);
+
+  parameters.startPoint.SetSize(problem->GetDimension());
+  for (int i = 0; i < problem->GetDimension(); i++)
+  {
+    parameters.startPoint[i] = y[i];
+  }
+
   bool isUseSeparableOptimizationSolver = true;
 
   if (!isUseSeparableOptimizationSolver)
