@@ -101,13 +101,15 @@ int SeparableOptimizationSolver::Solve()
 
     for (int i = 0; i < solvers.size(); i++)
     {
+      parameters.Dimension = dimensions[i];
+
       Solver* solver = solvers[i];
       if (tasks[i] != nullptr)
         delete tasks[i];
       tasks[i] = dynamic_cast<SeparableOptimizationTask*>(TaskFactory::CreateTask(problem, 0));      
 
       tasks[i]->SetStartParameterNumber(startParameterNumber);
-      parameters.Dimension = dimensions[i];
+
       solver->Solve(tasks[i]);
 
       auto solution = solver->GetSolutionResult();
