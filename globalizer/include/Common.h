@@ -24,7 +24,7 @@
 
 //const int MaxPathLength = 512
 const int MaxNumOfTaskLevels = 5;
-const int MaxNumOfFunc = 20;
+const int MaxNumOfFunc = MAX_NUMBER_OF_FUNCTION;
 const int MaxDim = MAX_TRIAL_DIMENSION;
 const int MaxNumOfGlobMinima = MAX_NUM_MIN;
 const int MaxM = 20;

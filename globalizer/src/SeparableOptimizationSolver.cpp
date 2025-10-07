@@ -147,7 +147,7 @@ int SeparableOptimizationSolver::Solve()
     Solver* finalSolver = new Solver(problem);
     parameters.MaxNumOfPoints[0] = 2;
 
-    finalSolver->SetPoint(points);
+    //finalSolver->SetPoint(points);
 
     finalSolver->Solve();
 

@@ -16,6 +16,7 @@ option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" ON)
 option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
+option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer" OFF)
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 
 
@@ -62,6 +63,15 @@ else()
 	message("false" ${GLOBALIZER_MAX_DIMENSION})
 	add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
 endif()
+
+if(${GLOBALIZER_MAX_Number_Of_Function})
+	message("true " ${GLOBALIZER_MAX_Number_Of_Function})
+	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=${GLOBALIZER_MAX_Number_Of_Function})
+else()
+	message("false" ${GLOBALIZER_MAX_Number_Of_Function})
+	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=20)
+endif()
+
 
 if (IS_GNU_COMPILER)
   include(cmake/GMPConfig.cmake)

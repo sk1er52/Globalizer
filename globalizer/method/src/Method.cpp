@@ -310,6 +310,10 @@ void Method::FirstIteration()
       for (int ifv = 0; ifv < parameters.startPointValues.GetSize(); ifv++)
       {
         newPoint[0]->FuncValues[ifv] = parameters.startPointValues[ifv];
+        if ((ifv == (pTask.GetNumOfFunc() - 1)) || (newPoint[0]->FuncValues[ifv] > 0))
+        {
+          newPoint[0]->index = ifv;
+        }
       }
     }
     else
@@ -332,7 +336,6 @@ void Method::FirstIteration()
     }
 
     newPoint[0]->K = 1;
-    newPoint[0]->index = 0;
 
     Extended genX(0.0);
     evolvent.GetInverseImage(newPoint[0]->y, genX);
@@ -931,7 +934,7 @@ double Method::CalculateLocalR(SearchInterval* p)
   {
     v = p->izl();
     value =
-      //p->R / (sqrt((p->zr() - pData->Z[v]) * (p->zl() - pData->Z[v])) / pData->M[v] + pow(1.5, -alfa));
+      //p->R / (sqrt((p->zr() - pData->Z[v]) * (p->zl() - pData->Z[v])) / pData->M[v] + pow(1.5, -alfa));   
       p->R / (sqrt((p->zr() - pData->Z[v]) * (p->zl() - pData->Z[v])) / pData->M[v] + pow(10, -alfa));
   }
   else if (p->izl() > p->izr())

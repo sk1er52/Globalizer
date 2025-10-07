@@ -13,6 +13,14 @@
 #define MAX_TRIAL_DIMENSION 200
 #endif
 
+/// Максимальная размерность
+#ifdef GLOBALIZER_MAX_Number_Of_Function
+#define MAX_NUMBER_OF_FUNCTION GLOBALIZER_MAX_Number_Of_Function
+#else
+#define MAX_NUMBER_OF_FUNCTION 20
+#endif
+
+
 // Максимальное количество глобальных минимумов
 #define MAX_NUM_MIN 20
 // Если константа определена то на GPU будет использоваться double иначе float
