@@ -53,28 +53,6 @@ int main(int argc, char* argv[])
 
   MPI_Init(&argc, &argv);
 
-#ifdef ONE_MPI_PROCESS_PER_NODE
-  int	mProcNum = -1;
-  int mProcRank = -1;
-
-  if (MPI_Comm_size(MPI_COMM_WORLD, &mProcNum) != MPI_SUCCESS)
-  {
-    throw ("Error in MPI_Comm_size call");
-  }
-  std::cout << "mProcNum = " << mProcNum << std::endl;
-  if (MPI_Comm_rank(MPI_COMM_WORLD, &mProcRank) != MPI_SUCCESS)
-  {
-    throw ("Error in MPI_Comm_rank call");
-  }
-  std::cout << "mProcRank = " << mProcRank << std::endl;
-
-  if (mProcRank != 0)
-  {
-    std::cout << "!!! mProcRank = " << mProcRank << "Exit !!!" << std::endl;
-    return 0;
-  }
-#endif
-
   parameters.Init(argc, argv, true);
   if (!parameters.IsStart())
   {
@@ -120,8 +98,6 @@ int main(int argc, char* argv[])
   }
 
 
-
-
 #ifdef _GLOBALIZER_BENCHMARKS
   GlobalOptimizationProblemManager manager;
   IGlobalOptimizationProblem* problem = 0;
@@ -136,62 +112,13 @@ int main(int argc, char* argv[])
   else
     parameters.Dimension = problem->GetDimension();
 
-  std::vector<double> y(problem->GetDimension());
-  std::vector<std::string> u;
-  std::vector<double> values(problem->GetNumberOfFunctions());
 
-  problem->GetStartTrial(y, u, values);
-
-  parameters.startPoint.SetSize(problem->GetDimension());
-  for (int i = 0; i < problem->GetDimension(); i++)
-  {
-    parameters.startPoint[i] = y[i];
-  }
-
-  bool isUseSeparableOptimizationSolver = true;
-
-  if (!isUseSeparableOptimizationSolver)
-  {
-    // Решатель
-    Solver solver(problem);
-    // Решаем задачу
-    if (solver.Solve() != SYSTEM_OK)
-      throw EXCEPTION("Error: solver.Solve crash!!!");
-  }
-  else
-  {
-    // Решатель
-    SeparableOptimizationSolver solver(problem);
-    // Решаем задачу
-    if (solver.Solve() != SYSTEM_OK)
-      throw EXCEPTION("Error: solver.Solve crash!!!");
-  }
-#else
-
-  parameters.Dimension = 2;
-
-  auto problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
-    std::vector<double>(parameters.Dimension, -2.2), // верхняя граница
-    std::vector<double>(parameters.Dimension, 1.8), // нижняя граница
-    std::vector<std::function<double(const double*)>>(1, [](const double* y)
-      {
-        double pi_ = 3.14159265358979323846;
-        double sum = 0.;
-        for (int j = 0; j < parameters.Dimension; j++)
-          sum += y[j] * y[j] - 10. * cos(2.0 * pi_ * y[j]) + 10.0;
-        return sum;
-      }), // критерий
-    true, // определен ли оптимум
-    0, // значение глобального оптимума
-    std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
-
-  );
-  problem->Initialize();
   // Решатель
   Solver solver(problem);
   // Решаем задачу
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
+
 
 #endif
 
