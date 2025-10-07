@@ -56,15 +56,14 @@ SeparableOptimizationSolver::SeparableOptimizationSolver(IProblem* _problem, std
   problem = _problem;
   SetDimentions(_dimentions);
   Construct();
+  finalSolver = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
 #ifdef _GLOBALIZER_BENCHMARKS
-SeparableOptimizationSolver::SeparableOptimizationSolver(IGlobalOptimizationProblem* _problem, std::vector<int> _dimentions)
+SeparableOptimizationSolver::SeparableOptimizationSolver(IGlobalOptimizationProblem* _problem, std::vector<int> _dimentions) 
+  : SeparableOptimizationSolver::SeparableOptimizationSolver(new GlobalizerBenchmarksProblem(_problem), _dimentions)
 {
-  problem = new GlobalizerBenchmarksProblem(_problem);
-  SetDimentions(_dimentions);
-  Construct();
 }
 #endif
 
@@ -114,20 +113,27 @@ int SeparableOptimizationSolver::Solve()
 
       auto solution = solver->GetSolutionResult();
       
-      if (solution->BestTrial->index == problem->GetNumberOfConstraints() && (_finite(solution->BestTrial->GetValue()) != 0))
+      if (solution->BestTrial->index == problem->GetNumberOfConstraints())
       {
-        if ( bestVolue >= solution->BestTrial->GetValue() )
+#ifdef WIN32
+        if (_finite(solution->BestTrial->GetValue()) != 0)
+#else
+        if (std::isfinite(solution->BestTrial->GetValue()) != 0)
+#endif
         {
-          bestVolue = solution->BestTrial->GetValue();
-          for (int j = 0; j < dimensions[i]; j++)
+          if (bestVolue >= solution->BestTrial->GetValue())
           {
-            parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
-          }
+            bestVolue = solution->BestTrial->GetValue();
+            for (int j = 0; j < dimensions[i]; j++)
+            {
+              parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+            }
 
-          parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
-          for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
-          {
-            parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+            parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
+            for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
+            {
+              parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+            }
           }
         }
       }
@@ -144,7 +150,13 @@ int SeparableOptimizationSolver::Solve()
     }
 
     parameters.localVerificationType = doLV;
-    Solver* finalSolver = new Solver(problem);
+    if (finalSolver == nullptr)
+      finalSolver = new Solver(problem);
+    else
+    {
+
+      finalSolver = new Solver(problem);
+    }
     parameters.MaxNumOfPoints[0] = 2;
 
     //finalSolver->SetPoint(points);
@@ -205,10 +217,11 @@ SolutionResult* SeparableOptimizationSolver::GetSolutionResult()
 // ------------------------------------------------------------------------------------------------
 void SeparableOptimizationSolver::SetPoint(std::vector<Trial*>& points)
 {
+  finalSolver->SetPoint(points);
 }
 
 // ------------------------------------------------------------------------------------------------
 std::vector<Trial*>& SeparableOptimizationSolver::GetAllPoint()
 {
-  return std::vector<Trial*>();
+  return finalSolver->GetAllPoint();
 }

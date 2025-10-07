@@ -28,7 +28,7 @@ protected:
   IProblem* problem;
 
   /// Задачть размерности
-  void SeparableOptimizationSolver::SetDimentions(std::vector<int> _dimentions);
+  void SetDimentions(std::vector<int> _dimentions);
 
   /// Создать начальную точку решения задач
   void CreateStartPoint();
