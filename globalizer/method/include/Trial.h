@@ -2,14 +2,14 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2015 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
 //  File:      Trial.h                                                     //
 //                                                                         //
 //  Purpose:   Header file for search data classes                         //
 //                                                                         //
-//  Author(s): Sysoyev A., Barkalov K., Sovrasov V.                        //
+//  Author(s): Lebedev I. Sysoyev A., Barkalov K., Sovrasov V.             //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 

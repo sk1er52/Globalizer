@@ -25,21 +25,19 @@
 // ------------------------------------------------------------------------------------------------
 void Solver::ClearData()
 {
-  //if (mProcess != 0)
-  //  delete mProcess;
-  if (pTask != 0)
+  if (pTask != 0 && isExternalTask == false)
   {
-
     delete pTask;
-    pTask = 0;
-
-    if (pData != 0)
-      delete pData;
-
-    pData = 0;
-
+    pTask = nullptr;
   }
-  mProcess = 0;
+
+  if (pData != 0)
+  {
+    delete pData;
+    pData = nullptr;
+  }
+
+  mProcess = nullptr;
 }
 
 #ifdef USE_PYTHON
@@ -63,20 +61,16 @@ Solver::Solver(IProblem* problem)
   pData = 0;
 
   result = 0;
+
+  isExternalTask = false;
+
+  addPoints = nullptr;
 }
 
 #ifdef _GLOBALIZER_BENCHMARKS
 // ------------------------------------------------------------------------------------------------
-Solver::Solver(IGlobalOptimizationProblem* problem)
+Solver::Solver(IGlobalOptimizationProblem* problem) : Solver::Solver(new GlobalizerBenchmarksProblem(problem))
 {
-  mProblem = new GlobalizerBenchmarksProblem(problem);
-
-  mProcess = 0;
-
-  pTask = 0;
-  pData = 0;
-
-  result = 0;
 }
 #endif
 
@@ -251,6 +245,8 @@ int Solver::Solve()
     {
       ClearData();
       CreateProcess();
+      if (addPoints != nullptr)
+        mProcess->InsertPoints(*addPoints);
       mProcess->Solve();
     }  
 
@@ -301,6 +297,7 @@ int Solver::Solve(Task* task)
   try
   {
     pTask = task;
+    isExternalTask = true;
 
     CreateProcess();
 
@@ -428,4 +425,17 @@ SolutionResult* Solver::GetSolutionResult()  /// best point
   result->TrialCount = mProcess->GetNumberOfTrials();
   //if (pTask->GetProcLevel() == 0)  printf("DD20_26! Proc=%d \n", parameters.GetProcRank());
   return result;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Solver::SetPoint(std::vector<Trial*>& points)
+{
+  addPoints = &points;
+
+}
+
+// ------------------------------------------------------------------------------------------------
+std::vector<Trial*>& Solver::GetAllPoint()
+{
+  return pData->GetTrials();
 }

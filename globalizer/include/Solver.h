@@ -16,6 +16,7 @@
 #include "Messages.h"
 #include "SolutionResult.h"
 #include "SolverInterface.h"
+#include "GlobalizerProblem.h"
 
 #ifdef _GLOBALIZER_BENCHMARKS
 #include "IGlobalOptimizationProblem.h"
@@ -25,16 +26,9 @@
 
 
 /**
-* Базовые классы для решения задач глобальной оптимизации
+ Базовые классы для решения задач глобальной оптимизации
 **/
-// ------------------------------------------------------------------------------------------------
 
-
-
-// ------------------------------------------------------------------------------------------------
-/**
-Базового класса
-*/
 class Solver : public ISolver
 {
 protected:
@@ -45,11 +39,11 @@ protected:
 
   /// Общее описание задачи
   Task* pTask;
+  /// Задача пораждена в Solver или пришла извне
+  bool isExternalTask;
   /// База данных(поисковая информация)
   SearchData* pData;
 
-  /// Дерева распараллеливания
-  //TParallelTree* parTree;
   /// Результат работы системы
   SolutionResult* result;
 
@@ -70,6 +64,8 @@ protected:
   void MpiCalculation();
   /// Решатель используемый при ассинхронной схеме
   void AsyncCalculation();
+  /// Точки которые будут добавлены после первой итерации
+  std::vector<Trial*>* addPoints;
 
 public:
   Solver(IProblem* problem);
@@ -89,6 +85,11 @@ public:
   void SetProblem(IProblem* problem);
   IProblem* GetProblem();
   SolutionResult* GetSolutionResult();
+
+  /// Добавляет точки испытаний
+  virtual void SetPoint(std::vector<Trial*>& points);
+  /// Возврящает все имеющиеся точки испытаний
+  virtual std::vector<Trial*>& GetAllPoint();
 };
 
 #endif //solver.h

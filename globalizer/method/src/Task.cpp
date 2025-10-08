@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -16,6 +16,7 @@
 #include "Exception.h"
 #include "Task.h"
 #include <cstring>
+#include "Trial.h"
 
 // ------------------------------------------------------------------------------------------------
 Task::Task(IProblem* _problem, int _ProcLevel)
@@ -35,6 +36,7 @@ Task::Task(IProblem* _problem, int _ProcLevel)
   isInit = true;
 }
 
+// ------------------------------------------------------------------------------------------------
 Task::Task()
 {
   NumOfFunc = 0;
@@ -63,6 +65,7 @@ Task* Task::Clone()
   return res;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Task::Init(IProblem * _problem, int _ProcLevel)
 {
   if ((parameters.Dimension <= 0) || (parameters.Dimension > MaxDim))
@@ -80,76 +83,91 @@ void Task::Init(IProblem * _problem, int _ProcLevel)
   isInit = true;
 }
 
+// ------------------------------------------------------------------------------------------------
 Task* Task::CloneWithNewData()
 {
   return Clone();
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetN() const
 {
   return parameters.Dimension;
 }
 
+// ------------------------------------------------------------------------------------------------
 const double* Task::GetA() const
 {
   return A;
 }
 
+// ------------------------------------------------------------------------------------------------
 const double* Task::GetB() const
 {
   return B;
 }
 
+// ------------------------------------------------------------------------------------------------
 double Task::GetOptimumValue() const
 {
   return OptimumValue;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Task::resetOptimumPoint()
 {
   pProblem->GetOptimumPoint(OptimumPoint);
 }
 
+// ------------------------------------------------------------------------------------------------
 const double* Task::GetOptimumPoint() const
 {
   return OptimumPoint;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool Task::GetIsOptimumValueDefined() const
 {
   return IsOptimumValueDefined;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool Task::GetIsOptimumPointDefined() const
 {
   return IsOptimumPointDefined;
 }
 
+// ------------------------------------------------------------------------------------------------
 IProblem* Task::getProblem()
 {
   return pProblem;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetNumOfFunc() const
 {
   return NumOfFunc;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Task::SetNumofFunc(int nf)
 {
   NumOfFunc = nf;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetProcLevel()
 {
   return ProcLevel;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetNumOfFuncAtProblem() const
 {
   return NumOfFunc;
 }
 
+// ------------------------------------------------------------------------------------------------
 double Task::CalculateFuncs(const double* y, int fNumber)
 {
   double multInLevel = parameters.functionSignMultiplier[GetProcLevel()];
@@ -157,6 +175,7 @@ double Task::CalculateFuncs(const double* y, int fNumber)
   return result;
 }
 
+// ------------------------------------------------------------------------------------------------
 void Task::CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values)
 {
   IGPUProblem* newProblem = dynamic_cast<IGPUProblem*>(pProblem);
@@ -166,6 +185,7 @@ void Task::CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, dou
   }
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetNumberOfDiscreteVariable()
 {
   IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
@@ -176,6 +196,7 @@ int Task::GetNumberOfDiscreteVariable()
   return 0;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetNumberOfValues(int discreteVariable)
 {
   IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
@@ -186,6 +207,7 @@ int Task::GetNumberOfValues(int discreteVariable)
   return -1;
 }
 
+// ------------------------------------------------------------------------------------------------
 int Task::GetAllDiscreteValues(int discreteVariable, double* values)
 {
   IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
@@ -196,6 +218,7 @@ int Task::GetAllDiscreteValues(int discreteVariable, double* values)
   return IProblem::ERROR;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool Task::IsPermissibleValue(double value, int discreteVariable)
 {
   IIntegerProgrammingProblem* newProblem = dynamic_cast<IIntegerProgrammingProblem*>(pProblem);
@@ -206,24 +229,35 @@ bool Task::IsPermissibleValue(double value, int discreteVariable)
   return false;
 }
 
+// ------------------------------------------------------------------------------------------------
 double* Task::getMin()
 {
   return NULL;
 }
 
+// ------------------------------------------------------------------------------------------------
 double* Task::getMax()
 {
   return NULL;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool Task::IsInit()
 {
   return isInit;
 }
 
+// ------------------------------------------------------------------------------------------------
 bool Task::IsLeaf()
 {
   return ProcLevel != 0;
+}
+
+// ------------------------------------------------------------------------------------------------
+void Task::CopyPoint(double* y, Trial* point)
+{
+  for (int i = 0; i < GetN(); i++)
+    point->y[i] = y[i];
 }
 
 // - end of file ----------------------------------------------------------------------------------

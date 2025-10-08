@@ -16,6 +16,7 @@ option(GLOBALIZER_USE_CUDA "Set ON to use CUDA" OFF)
 option(GLOBALIZER_BUILD_TESTS "Set ON to build tests" ON)
 option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
+option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer" OFF)
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 
 
@@ -62,6 +63,15 @@ else()
 	message("false" ${GLOBALIZER_MAX_DIMENSION})
 	add_definitions(-DGLOBALIZER_MAX_DIMENSION=10)
 endif()
+
+if(${GLOBALIZER_MAX_Number_Of_Function})
+	message("true " ${GLOBALIZER_MAX_Number_Of_Function})
+	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=${GLOBALIZER_MAX_Number_Of_Function})
+else()
+	message("false" ${GLOBALIZER_MAX_Number_Of_Function})
+	add_definitions(-DGLOBALIZER_MAX_Number_Of_Function=20)
+endif()
+
 
 if (IS_GNU_COMPILER)
   include(cmake/GMPConfig.cmake)
@@ -215,10 +225,6 @@ ${GLOBALIZER_BENCHMARKS_Interface_SOURCES}
 )
 list(REMOVE_ITEM ALL_SRC_FILES ${GLOBALIZER_COMMON_SRC_DIR}/Main.cpp)
 
-add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES})
-add_executable(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_EXAMPLES_SRC_DIR}/Main.cpp)
-
-
 if (${GLOBALIZER_PYTHON})
   find_package (Python COMPONENTS Interpreter Development NumPy)
 
@@ -247,15 +253,56 @@ else()
   
 endif()
 
-target_include_directories(${GLOBALIZER_PROJECT_NAME} PRIVATE ${GLOBALIZER_COMMON_SRC_DIR}
+add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES})
+
+file(GLOB main_list "${GLOBALIZER_EXAMPLES_SRC_DIR}/*.cpp")
+
+
+
+foreach(main_filename ${main_list})
+  # Get file name without extension
+  get_filename_component(sample ${main_filename} NAME_WE)
+  
+  
+  
+  set(GLOBALIZER_EXECUTABLE_NAME                 ${GLOBALIZER_PROJECT_NAME}${sample}${GLOBALIZER_EXECUTABLE_SUFFIX})
+  set(GLOBALIZER_EXECUTABLE_NAME_DEBUG           ${GLOBALIZER_EXECUTABLE_NAME}_${GLOBALIZER_DEBUG_SUFFIX})
+  set(GLOBALIZER_EXECUTABLE_NAME_RELEASE         ${GLOBALIZER_EXECUTABLE_NAME})
+  
+  message("Name: " ${GLOBALIZER_EXECUTABLE_NAME})
+
+  # Add and configure executable file to be produced
+  add_executable(${GLOBALIZER_EXECUTABLE_NAME} ${main_filename})
+  
+  target_include_directories(${GLOBALIZER_EXECUTABLE_NAME} PRIVATE ${GLOBALIZER_COMMON_SRC_DIR}
 												  PRIVATE ${Python_INCLUDE_DIRS} 
-												  PRIVATE ${Python_NumPy_INCLUDE_DIRS})
+												  PRIVATE ${Python_NumPy_INCLUDE_DIRS})												  
+  	
+  if (${IS_CLANG_COMPILER})	
+    target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
+  else()
+    target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})  
+  endif()
+
+  set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
+  set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
+  
+  if (IS_GNU_COMPILER)
+    set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
+  endif()
+
+endforeach()
+
+
+#add_executable(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_EXAMPLES_SRC_DIR}/Main.cpp)
+
+
+
 												  
 include_directories(${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
 
 	
 if (${IS_CLANG_COMPILER})	
-  target_link_libraries(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
@@ -263,7 +310,6 @@ if (${IS_CLANG_COMPILER})
     ${DISLIN_LIB}
 	OpenMP::OpenMP_CXX  )
 else()
-  target_link_libraries(${GLOBALIZER_PROJECT_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})
   target_link_libraries(${GLOBALIZER_LIB_NAME}
     ${GLOBALIZER_MPI_LIB}
     ${GLOBALIZER_MPFR_LIB}
@@ -279,8 +325,7 @@ message("MPI lib: " ${GLOBALIZER_LIB_NAME})
 set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_LIB_NAME_DEBUG})
 set_target_properties(${GLOBALIZER_LIB_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_LIB_NAME_RELEASE})
 
-set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
-set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
+
 
 message("Find OpenMP") 
 find_package(OpenMP)
@@ -295,7 +340,6 @@ endif()
 # add linker flags for GCC
 if (IS_GNU_COMPILER)
   target_compile_options(${GLOBALIZER_LIB_NAME} INTERFACE -march=native -fopenmp)
-  set_target_properties(${GLOBALIZER_PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
 endif()
 
 

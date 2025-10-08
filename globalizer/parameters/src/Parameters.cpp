@@ -132,6 +132,12 @@ void Parameters::SetDefaultParameters()
 
   InitOption(functionSignMultiplier, 1.0_1.0_1.0_1.0 , "-fsm", "The multiplier in front of the function that determines whether we minimize or maximize the function", 4);
 
+  InitOption(startPoint, MaxDouble, "-sp", "The starting point for solving the optimization problem", 0);
+  InitOption(startPointValues, MaxDouble, "-spv", "The values of the functions in the starting point for solving the optimization problem", 0);
+
+  
+  
+
   ProcRank.SetGetter(&Parameters::GetProcRank);
   ProcRank.SetIsHaveValue(false);
   //TInt<Parameters> ProcRank;

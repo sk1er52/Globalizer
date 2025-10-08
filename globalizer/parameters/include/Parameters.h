@@ -172,9 +172,7 @@ public:
   /// Тип локального уточнения: 0 - без него; 1 - минимаксное; 2 - адаптивное; 3 - адаптивно-минимаксное
   TELocalTuningType<Parameters> LocalTuningType;
   /// Параметр кси, используемый в локальном уточении
-  TDouble<Parameters> ltXi;
-
-  
+  TDouble<Parameters> ltXi;  
 
   /// Загружать начальныеточки из файла или распределять их равномерно
   TBool<Parameters> isLoadFirstPointFromFile;
@@ -185,6 +183,12 @@ public:
 
   /// Множитель перед функцие определяющий минимизируем или максимизируем функцию
   TDoubles<Parameters> functionSignMultiplier;
+
+  /// Начальная точка для решения задачи оптимизации
+  TDoubles<Parameters> startPoint;
+
+  /// Значения функций в начальная точка для решения задачи оптимизации
+  TDoubles<Parameters> startPointValues;
 
   /// Проверка правильности при изменение параметров
   virtual int CheckValueParameters(int index = 0);

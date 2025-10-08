@@ -25,6 +25,9 @@
 \details
 */
 
+#include <vector>
+#include "Trial.h"
+
 
 #ifndef __SOLVER_INTERFACE_H__
 #define __SOLVER_INTERFACE_H__
@@ -38,6 +41,10 @@ class ISolver
 public:
   /// Решить задачу
   virtual int Solve() = 0;
+  /// Добавляет точки испытаний
+  virtual void SetPoint(std::vector<Trial*>& points) = 0;
+  /// Возврящает все имеющиеся точки испытаний
+  virtual std::vector<Trial*>& GetAllPoint() = 0;
 };
 
 #endif
