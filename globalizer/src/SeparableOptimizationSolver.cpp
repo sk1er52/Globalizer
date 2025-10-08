@@ -1,4 +1,4 @@
-#include "SeparableOptimizationSolver.h"
+﻿#include "SeparableOptimizationSolver.h"
 #include "TaskFactory.h"
 
 // ------------------------------------------------------------------------------------------------

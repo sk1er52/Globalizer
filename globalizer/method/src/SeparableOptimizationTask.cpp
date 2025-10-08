@@ -1,4 +1,4 @@
-#include "SeparableOptimizationTask.h"
+﻿#include "SeparableOptimizationTask.h"
 #include "Trial.h"
 // ------------------------------------------------------------------------------------------------
 SeparableOptimizationTask::SeparableOptimizationTask(IProblem* _problem, int _ProcLevel) : Task::Task(_problem, _ProcLevel)

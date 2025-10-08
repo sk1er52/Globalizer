@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "Task.h"
 
@@ -6,7 +6,7 @@ class SeparableOptimizationTask : public Task
 {
 protected:
 
-  /// Начало блока переменных
+  /// РќР°С‡Р°Р»Рѕ Р±Р»РѕРєР° РїРµСЂРµРјРµРЅРЅС‹С…
   int startParameterNumber;
 
 
@@ -14,35 +14,35 @@ public:
   SeparableOptimizationTask(IProblem* _problem, int _ProcLevel);
   SeparableOptimizationTask();
 
-  /// Создает копию класса
+  /// РЎРѕР·РґР°РµС‚ РєРѕРїРёСЋ РєР»Р°СЃСЃР°
   virtual Task* Clone();
 
-  /// Возвращает левую границу области поиска
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ Р»РµРІСѓСЋ РіСЂР°РЅРёС†Сѓ РѕР±Р»Р°СЃС‚Рё РїРѕРёСЃРєР°
   virtual const double* GetA() const;
-  /// Возвращает правую границу области поиска
+  /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂР°РІСѓСЋ РіСЂР°РЅРёС†Сѓ РѕР±Р»Р°СЃС‚Рё РїРѕРёСЃРєР°
   virtual const double* GetB() const;
 
   /**
- Возвращает априори известные координаты точки глобального минимума
- Перед первым вызовом нужно вызвать resetOptimumPoint()
+ Р’РѕР·РІСЂР°С‰Р°РµС‚ Р°РїСЂРёРѕСЂРё РёР·РІРµСЃС‚РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РјРёРЅРёРјСѓРјР°
+ РџРµСЂРµРґ РїРµСЂРІС‹Рј РІС‹Р·РѕРІРѕРј РЅСѓР¶РЅРѕ РІС‹Р·РІР°С‚СЊ resetOptimumPoint()
  */
   virtual const double* GetOptimumPoint() const;
-  /// Вычисляет значение функции с номером fNumber в точке y
+  /// Р’С‹С‡РёСЃР»СЏРµС‚ Р·РЅР°С‡РµРЅРёРµ С„СѓРЅРєС†РёРё СЃ РЅРѕРјРµСЂРѕРј fNumber РІ С‚РѕС‡РєРµ y
   virtual double CalculateFuncs(const double* y, int fNumber);
   /**
-  Вычисляет numPoints значений функции с номером fNumber, в координатах y в массив values
-  Работает только если задача является наследником IGPUProblem
+  Р’С‹С‡РёСЃР»СЏРµС‚ numPoints Р·РЅР°С‡РµРЅРёР№ С„СѓРЅРєС†РёРё СЃ РЅРѕРјРµСЂРѕРј fNumber, РІ РєРѕРѕСЂРґРёРЅР°С‚Р°С… y РІ РјР°СЃСЃРёРІ values
+  Р Р°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РµСЃР»Рё Р·Р°РґР°С‡Р° СЏРІР»СЏРµС‚СЃСЏ РЅР°СЃР»РµРґРЅРёРєРѕРј IGPUProblem
   */
   virtual void CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values);
 
-  /// Задает начало блока переменных
+  /// Р—Р°РґР°РµС‚ РЅР°С‡Р°Р»Рѕ Р±Р»РѕРєР° РїРµСЂРµРјРµРЅРЅС‹С…
   void SetStartParameterNumber(int _startParameterNumber);
 
   /**
-  * \brief Копирует координаты точки из массива, согласно имеющимся правилам
-  * \param[in] y имеющисся координаты.
-  * \param[out] point точка назначения.
-  * \return true, если значение допустимо, иначе false.
+  * \brief РљРѕРїРёСЂСѓРµС‚ РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё РёР· РјР°СЃСЃРёРІР°, СЃРѕРіР»Р°СЃРЅРѕ РёРјРµСЋС‰РёРјСЃСЏ РїСЂР°РІРёР»Р°Рј
+  * \param[in] y РёРјРµСЋС‰РёСЃСЃСЏ РєРѕРѕСЂРґРёРЅР°С‚С‹.
+  * \param[out] point С‚РѕС‡РєР° РЅР°Р·РЅР°С‡РµРЅРёСЏ.
+  * \return true, РµСЃР»Рё Р·РЅР°С‡РµРЅРёРµ РґРѕРїСѓСЃС‚РёРјРѕ, РёРЅР°С‡Рµ false.
   */
   virtual void CopyPoint(double* y, Trial* point);
 
