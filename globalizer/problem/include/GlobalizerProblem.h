@@ -10,7 +10,10 @@ class ProblemFromFunctionPointers : public Problem<ProblemFromFunctionPointers>
 #undef OWNER_NAME
 #define OWNER_NAME ProblemFromFunctionPointers
 protected:
-  std::vector<std::function<double(const double*)>> function;
+  std::vector<std::function<double(const double*)>> functionsOfPriblem;
+  std::function<double(const double*, int)> allFunction;
+  bool isUseAllFunction;
+
   double optimumValue = 0;
   std::vector<double> optimumCoordinate;
   std::vector<double> lowerBounds;
@@ -31,11 +34,45 @@ public:
     this->mLeftBorder = -1.0;
     this->mRightBorder = 1.0;
     this->mNumberOfCriterions = 1;
-    function = function_;
+    isUseAllFunction = false;
+    functionsOfPriblem = function_;    
     lowerBounds = lower_;
     upperBounds = upper_;
     isSetOptimum = isSetOptimum_;
     this->mNumberOfConstraints = function_.size() - this->mNumberOfCriterions;
+
+    if (isSetOptimum)
+    {
+      optimumValue = optimumValue_;
+      if (optimumCoordinate_ != nullptr)
+      {
+        optimumCoordinate.resize(dimention);
+        for (int i = 0; i < dimention; i++)
+          optimumCoordinate[i] = optimumCoordinate_[i];
+      }
+    }
+
+  }
+
+  // ------------------------------------------------------------------------------------------------
+  ProblemFromFunctionPointers(int dimention, std::vector<double> lower_, std::vector<double> upper_,
+    std::function<double(const double*, int)> function_, int functionCount_,
+    bool isSetOptimum_ = false, double optimumValue_ = 0, double* optimumCoordinate_ = nullptr)
+  {
+    this->mDim = dimention;
+    this->mOwner = this;
+    this->mMinDimension = 1;
+    this->mMaxDimension = 50;
+    this->mNumberOfConstraints = 0;
+    this->mLeftBorder = -1.0;
+    this->mRightBorder = 1.0;
+    this->mNumberOfCriterions = 1;
+    isUseAllFunction = true;
+    allFunction = function_;
+    lowerBounds = lower_;
+    upperBounds = upper_;
+    isSetOptimum = isSetOptimum_;
+    this->mNumberOfConstraints = functionCount_ - this->mNumberOfCriterions;
 
     if (isSetOptimum)
     {
@@ -96,9 +133,16 @@ public:
 
   virtual double CalculateFunctionals(const double* x, int fNumber)
   {
-    if (fNumber >= function.size())
-      throw EXCEPTION("Error function number");
-    return function[fNumber](x);
+    if (isUseAllFunction)
+    {
+      return allFunction(x, fNumber);
+    }
+    else
+    {
+      if (fNumber >= functionsOfPriblem.size())
+        throw EXCEPTION("Error function number");
+      return functionsOfPriblem[fNumber](x);
+    }
   }
 
 };
