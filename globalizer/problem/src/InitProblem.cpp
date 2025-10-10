@@ -65,4 +65,30 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
   }
   return 0;
 }
+
+#ifdef _GLOBALIZER_BENCHMARKS
+// ------------------------------------------------------------------------------------------------
+int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem)
+{
+  std::string libPath = parameters.libPath;
+  if (problemManager.LoadProblemLibrary(libPath) != GlobalOptimizationProblemManager::OK_)
+  {
+    //сообщение об ошибке печатает manager
+    return 1;
+  }
+
+  IGlobalOptimizationProblem* baseProblem = problemManager.GetProblem();
+
+  if (parameters.Dimension.GetIsChange())
+    baseProblem->SetDimension(parameters.Dimension);
+  else
+    parameters.Dimension = baseProblem->GetDimension();
+
+  baseProblem->Initialize();
+
+  problem = baseProblem;
+  return 0;
+}
+#endif // _GLOBALIZER_BENCHMARKS
+
 // - end of file ----------------------------------------------------------------------------------

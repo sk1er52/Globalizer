@@ -101,17 +101,11 @@ int main(int argc, char* argv[])
 #ifdef _GLOBALIZER_BENCHMARKS
   GlobalOptimizationProblemManager manager;
   IGlobalOptimizationProblem* problem = 0;
-  if (InitGlobalOptimizationProblem(manager, problem, parameters.libPath))
+  if (InitProblemGlobalizerBenchmarks(manager, problem))
   {
     print << "Error during problem initialization\n";
     return 0;
   }
-
-  if (parameters.Dimension.GetIsChange())
-    problem->SetDimension(parameters.Dimension);
-  else
-    parameters.Dimension = problem->GetDimension();
-
 
   // Решатель
   Solver solver(problem);
