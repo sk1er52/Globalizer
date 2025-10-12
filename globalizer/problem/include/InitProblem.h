@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -21,7 +21,13 @@
 #include "Problem.h"
 
 int InitProblem(ProblemManager& problemManager, IProblem*& problem,
-                int argc, char* argv[], bool isMPIInit = false);
+  int argc, char* argv[], bool isMPIInit = false);
+
+#ifdef _GLOBALIZER_BENCHMARKS
+#include "IGlobalOptimizationProblem.h"
+#include "GlobalOptimizationProblemManager.h"
+int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem);
+#endif // _GLOBALIZER_BENCHMARKS
 
 #endif //__INIT_PROBLEM_H__
 // - end of file ----------------------------------------------------------------------------------

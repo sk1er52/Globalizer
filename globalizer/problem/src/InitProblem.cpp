@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+ï»¿/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -20,7 +20,7 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
 {
   if (problemManager.LoadProblemLibrary(parameters.libPath) != ProblemManager::OK_)
   {
-    //ñîîáùåíèå îá îøèáêå ïå÷àòàåò manager
+    //ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ Ð¾Ð± Ð¾ÑˆÐ¸Ð±ÐºÐµ Ð¿ÐµÑ‡Ð°Ñ‚Ð°ÐµÑ‚ manager
     return 1;
   }
 
@@ -38,14 +38,14 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
 
     if (parameters.Dimension.GetIsChange())
     {
-      //âîîáùå, âûçîâ SetDimension ëó÷øå óáðàòü è ïîëó÷àòü ðàçìåðíîñòü èç êîíôèãóðàöèîííîãî ôàéëà äëÿ âñåõ çàäà÷, ãäå îíà íå ôèêñèðîâàíà
+      //Ð²Ð¾Ð¾Ð±Ñ‰Ðµ, Ð²Ñ‹Ð·Ð¾Ð² SetDimension Ð»ÑƒÑ‡ÑˆÐµ ÑƒÐ±Ñ€Ð°Ñ‚ÑŒ Ð¸ Ð¿Ð¾Ð»ÑƒÑ‡Ð°Ñ‚ÑŒ Ñ€Ð°Ð·Ð¼ÐµÑ€Ð½Ð¾ÑÑ‚ÑŒ Ð¸Ð· ÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð°Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ð³Ð¾ Ñ„Ð°Ð¹Ð»Ð° Ð´Ð»Ñ Ð²ÑÐµÑ… Ð·Ð°Ð´Ð°Ñ‡, Ð³Ð´Ðµ Ð¾Ð½Ð° Ð½Ðµ Ñ„Ð¸ÐºÑÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð°
       if (problem->SetDimension(parameters.Dimension) != ProblemManager::OK_)
       {
         printf("Unsupported problem dimension!\n");
         return 1;
       }
     }
-    //ðàçìåðíîñòü çàäà÷è èç êîíôèãóðàöèîííîãî ôàéëà èìååò ïðèîðèòåò íàä çíà÷åíèåì èç êîìàíäíîé ñòðîêè
+    //Ñ€Ð°Ð·Ð¼ÐµÑ€Ð½Ð¾ÑÑ‚ÑŒ Ð·Ð°Ð´Ð°Ñ‡Ð¸ Ð¸Ð· ÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð°Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ð³Ð¾ Ñ„Ð°Ð¹Ð»Ð° Ð¸Ð¼ÐµÐµÑ‚ Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚ Ð½Ð°Ð´ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸ÐµÐ¼ Ð¸Ð· ÐºÐ¾Ð¼Ð°Ð½Ð´Ð½Ð¾Ð¹ ÑÑ‚Ñ€Ð¾ÐºÐ¸
     parameters.Dimension = problem->GetDimension();
   }
   else
@@ -65,4 +65,30 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
   }
   return 0;
 }
+
+#ifdef _GLOBALIZER_BENCHMARKS
+// ------------------------------------------------------------------------------------------------
+int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemManager, IGlobalOptimizationProblem*& problem)
+{
+  std::string libPath = parameters.libPath;
+  if (problemManager.LoadProblemLibrary(libPath) != GlobalOptimizationProblemManager::OK_)
+  {
+    //ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ Ð¾Ð± Ð¾ÑˆÐ¸Ð±ÐºÐµ Ð¿ÐµÑ‡Ð°Ñ‚Ð°ÐµÑ‚ manager
+    return 1;
+  }
+
+  IGlobalOptimizationProblem* baseProblem = problemManager.GetProblem();
+
+  if (parameters.Dimension.GetIsChange())
+    baseProblem->SetDimension(parameters.Dimension);
+  else
+    parameters.Dimension = baseProblem->GetDimension();
+
+  baseProblem->Initialize();
+
+  problem = baseProblem;
+  return 0;
+}
+#endif // _GLOBALIZER_BENCHMARKS
+
 // - end of file ----------------------------------------------------------------------------------
