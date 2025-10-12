@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+п»ї/////////////////////////////////////////////////////////////////////////////
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
@@ -20,7 +20,7 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
 {
   if (problemManager.LoadProblemLibrary(parameters.libPath) != ProblemManager::OK_)
   {
-    //сообщение об ошибке печатает manager
+    //СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ РїРµС‡Р°С‚Р°РµС‚ manager
     return 1;
   }
 
@@ -38,14 +38,14 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
 
     if (parameters.Dimension.GetIsChange())
     {
-      //вообще, вызов SetDimension лучше убрать и получать размерность из конфигурационного файла для всех задач, где она не фиксирована
+      //РІРѕРѕР±С‰Рµ, РІС‹Р·РѕРІ SetDimension Р»СѓС‡С€Рµ СѓР±СЂР°С‚СЊ Рё РїРѕР»СѓС‡Р°С‚СЊ СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ РёР· РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРѕРіРѕ С„Р°Р№Р»Р° РґР»СЏ РІСЃРµС… Р·Р°РґР°С‡, РіРґРµ РѕРЅР° РЅРµ С„РёРєСЃРёСЂРѕРІР°РЅР°
       if (problem->SetDimension(parameters.Dimension) != ProblemManager::OK_)
       {
         printf("Unsupported problem dimension!\n");
         return 1;
       }
     }
-    //размерность задачи из конфигурационного файла имеет приоритет над значением из командной строки
+    //СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ Р·Р°РґР°С‡Рё РёР· РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРѕРіРѕ С„Р°Р№Р»Р° РёРјРµРµС‚ РїСЂРёРѕСЂРёС‚РµС‚ РЅР°Рґ Р·РЅР°С‡РµРЅРёРµРј РёР· РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё
     parameters.Dimension = problem->GetDimension();
   }
   else
@@ -73,7 +73,7 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
   std::string libPath = parameters.libPath;
   if (problemManager.LoadProblemLibrary(libPath) != GlobalOptimizationProblemManager::OK_)
   {
-    //сообщение об ошибке печатает manager
+    //СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ РїРµС‡Р°С‚Р°РµС‚ manager
     return 1;
   }
 
