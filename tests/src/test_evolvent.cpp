@@ -290,3 +290,50 @@ TEST_F(EvolventTest, throws_when_get_image_with_too_large_x)
   Evolvent evolvent(N, m);
   ASSERT_ANY_THROW(evolvent.GetImage(Extended(2), _y));
 }
+
+/**
+ * Проверить, что метод #SetBounds корректно устанавливает границы A и B.
+ */
+TEST_F(EvolventTest, set_bounds_works_correctly) {
+  const int N = 2;
+  double A_test[] = { 0.0, 1.0 };
+  double B_test[] = { 2.0, 3.0 };
+  Evolvent ev(N, 5);
+  ev.SetBounds(A_test, B_test);
+
+  ASSERT_EQ(ev.getA()[0], 0.0);
+  ASSERT_EQ(ev.getB()[0], 2.0);
+  ASSERT_EQ(ev.getA()[1], 1.0);
+  ASSERT_EQ(ev.getB()[1], 3.0);
+}
+
+/**
+ * Проверить, что #GetPreimages возвращает корректный x[0]
+ */
+TEST_F(EvolventTest, get_preimages_returns_correct_x) {
+  const int N = 2, m = 5;
+  double y[N] = { 0.0, 0.0 };
+  Extended x[1];
+  Evolvent ev(N, m);
+
+  for (int i = 0; i < N; i++) {
+      A[i] = -0.5;
+      B[i] = 0.5;
+    }
+  ev.SetBounds(A, B);
+
+  ev.GetPreimages(y, x);
+  EXPECT_DOUBLE_EQ(x[0].toDouble(), 0.5);
+}
+
+/**
+ * Проверить, что метод возвращает -1
+ */
+TEST_F(EvolventTest, zero_constraint_calc_returns_negative_one) {
+  const int N = 3, m = 5;
+  double y[] = { 0.1, 0.2, 0.3 };
+  Evolvent ev(N, m);
+
+  double result = ev.ZeroConstraintCalc(y, 0);
+  EXPECT_EQ(result, -1);
+}

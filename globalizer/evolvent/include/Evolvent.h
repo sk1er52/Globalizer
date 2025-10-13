@@ -13,6 +13,19 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+
+/**
+\file evolvent.h
+
+\authors Баркалов К., Сысоев А.
+\date 2015-2016
+\copyright ННГУ им. Н.И. Лобачевского
+
+\brief Объявление класса #Evolvent
+
+\details Объявление класса #Evolvent и сопутствующих типов данных
+*/
+
 #ifndef __EVOLVENT_H__
 #define __EVOLVENT_H__
 
@@ -21,45 +34,103 @@
 #include <vector>
 
 // ------------------------------------------------------------------------------------------------
+
+/**
+\brief Класс, реализующий отображение между гиперкубом и гиперинтервалом
+
+Класс #Evolvent предоставляет средства для преобразования координат между
+гиперкубом [-1/2, 1/2]^N и гиперинтервалом D.
+*/
 class Evolvent
 {
 protected:
-  int      m;             // accuracy of decomposition of hypercube
-  int      N;             // dimension
-  double   A[MaxDim];     // left and
-  double   B[MaxDim];     // right bounds of search area
+  /// Точность разложения гиперкуба
+  int      m;
+  /// Размерность задачи
+  int      N;
+  /// Левые границы поисковой области
+  double   A[MaxDim];
+  /// Правые границы поисковой области
+  double   B[MaxDim];
+  /// Точка из гиперкуба [-1/2, 1/2]^N
+  double* y;
 
-  double*  y;             // y point from hypercube [-1/2, 1/2]^N
-
-  const Extended extNull; // = 0.0; //Extended(0.0);
-  const Extended extOne;  // = 1.0; //Extended(1.0);
-  const Extended extHalf; // = 0.5; //Extended(0.5);
+  /// Extended(0.0)
+  const Extended extNull;
+  /// = Extended(1.0)
+  const Extended extOne;
+  /// = Extended(0.5)
+  const Extended extHalf;
   Extended nexpExtended;
 
-//  void CalculateNumbr(Extended* s, int* u, int* v, int* l);
-  void CalculateNumbr(Extended *s, long long *u, long long *v, long long *l);
-//  void CalculateNode(Extended is, int n, int* u, int* v, int* l);
-  void CalculateNode(Extended is, int n, long long *u, long long *v, long long *l);
-  void transform_P_to_D(); // transformation from hypercube P to hyperinterval D
-  void transform_D_to_P(); // transformation from hyperinterval D to hypercube P
+
+  void CalculateNumbr(Extended* s, long long* u, long long* v, long long* l);
+
+  /// вычисление вспомогательного центра u(s) и соответствующих ему v(s) и l(s)
+  void CalculateNode(Extended is, int n, long long* u, long long* v, long long* l);
+  /// Преобразование из гиперкуба P в гиперинтервал D
+  void transform_P_to_D();
+  /// Преобразование из гиперинтервала D в гиперкуб P
+  void transform_D_to_P();
+  /// Получить точку y по x
   double* GetYOnX(const Extended& _x);
+  /// Получить x по точке y
   Extended GetXOnY();
+
 public:
+
+  /**
+  \brief Конструктор класса #Evolvent
+  */
   Evolvent(int _N = 2, int _m = 10);
+
+  /**
+  \brief Конструктор копирования
+  */
   Evolvent(const Evolvent& evolvent);
+
+  /// Деструктор класса #Evolvent
   virtual ~Evolvent();
+
+  /**
+  \brief Возвращает левые границы поисковой области (A)
+  */
+  const double* getA() const { return A; }
+
+  /**
+  \brief Возвращает правые границы поисковой области (B)
+  */
+  const double* getB() const { return B; }
+
+  /**
+  \brief Установка границ поисковой области
+  */
   void SetBounds(const double* _A, const double* _B);
-  //x-->y
+
+  /**
+  \brief Преобразование x в y (x -> y)
+  */
   virtual void GetImage(const Extended& x, double* _y, int EvolventNum = 0);
-  //y-->x
+
+  /**
+  \brief Преобразование y в x (y -> x)
+  */
   void GetInverseImage(double* _y, Extended& x);
-  //y-->x
+
+  /**
+  \brief Преобразование y в x (y -> x)
+  */
   virtual void GetPreimages(double* _y, Extended* x);
+
+  /**
+  \brief Оператор присваивания
+  */
   Evolvent& operator=(const Evolvent& evolvent);
 
-  /// Вычисляет функцию существования точки в развертки EvolventNum для y, <0 - существует
-  virtual double ZeroConstraintCalc(const double* _y, int EvolventNum = 0);
-
+  /**
+  \brief Вычисляет функцию существования точки в развертки EvolventNum для y, <0 - существует
+  */
+ virtual double ZeroConstraintCalc(const double* _y, int EvolventNum = 0);
 };
 
 #endif
