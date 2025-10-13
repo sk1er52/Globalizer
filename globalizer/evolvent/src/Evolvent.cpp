@@ -14,6 +14,18 @@
 /////////////////////////////////////////////////////////////////////////////
 #pragma warning(disable:4996) 
 
+/**
+\file evolvent.cpp
+
+\authors Баркалов К., Сысоев А.
+\date 2015-2016
+\copyright ННГУ им. Н.И. Лобачевского
+
+\brief Реализация класса #Evolvent
+
+\details Реализация методов класса #Evolvent
+*/
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -102,11 +114,9 @@ void Evolvent::SetBounds(const double* _A, const double* _B)
 }
 
 // ----------------------------------------------------------------------------
-//void evolvent::CalculateNumbr(Extended* s, int* u, int* v, int* l)
 void Evolvent::CalculateNumbr(Extended *s, long long *u, long long *v, long long *l)
 // calculate s(u)=is,l(u)=l,v(u)=iv by u=iu
 {
-//  int i, k1, k2, l1;
   long long i, k1, k2, l1;
   Extended is, iff;
 
@@ -148,12 +158,9 @@ void Evolvent::CalculateNumbr(Extended *s, long long *u, long long *v, long long
 }
 
 // ----------------------------------------------------------------------------
-//void evolvent::CalculateNode(Extended is, int n, int *u, int *v, int *l)
 void Evolvent::CalculateNode(Extended is, int n, long long *u, long long *v, long long *l)
-// вычисление вспомогательного центра u(s) и соответствующих ему v(s) и l(s)
-// calculate u=u[s], v=v[s], l=l[s] by is=s
 {
-//  int n1, i, j, k1, k2, iq;
+  // calculate u=u[s], v=v[s], l=l[s] by is=s
   long long n1, i, j, k1, k2, iq;
   Extended iff;
 
@@ -220,7 +227,6 @@ void Evolvent::CalculateNode(Extended is, int n, long long *u, long long *v, lon
 // ------------------------------------------------------------------------------------------------
 void Evolvent::transform_P_to_D()
 {
-  //if (N == 1) return;
   // transformation from hypercube P to hyperinterval D
   for (int i = 0; i < N; i++)
     y[i] = y[i] * (B[i] - A[i]) + (A[i] + B[i]) / 2;
@@ -229,7 +235,6 @@ void Evolvent::transform_P_to_D()
 // ----------------------------------------------------------------------------
 void Evolvent::transform_D_to_P()
 {
-  //if (N == 1) return;
   // transformation from hyperinterval D to hypercube P
   for (int i = 0; i < N; i++)
     y[i] = (y[i] - (A[i] + B[i]) / 2) / (B[i] - A[i]);
@@ -244,18 +249,13 @@ double* Evolvent::GetYOnX(const Extended& _x)
     return y;
   }
 
-  //int iu[MaxDim];
-  //int iv[MaxDim];
   long long iu[MaxDim]{};
   long long iv[MaxDim]{};
-  //int l;
   long long l;
   Extended d;
   int mn;
   double r;
-//  int iw[MaxDim];
   long long iw[MaxDim]{};
-  //int it, i, j;
   long long it, i, j;
   Extended is;
 
@@ -279,7 +279,6 @@ double* Evolvent::GetYOnX(const Extended& _x)
     {
       //Код из старой версии - уточнить работоспособность при N > 32
       d *= nexpExtended;
-      //is = (int)d.toDouble();
       is = (long long)d.toDouble();
       d -= is;
     }
@@ -309,7 +308,6 @@ double* Evolvent::GetYOnX(const Extended& _x)
 //-----------------------------------------------------------------------------
 Extended Evolvent::GetXOnY()
 {
-  //int u[MaxDim], v[MaxDim];
   long long u[MaxDim]{}, v[MaxDim]{};
   Extended x, r1;
   if (N == 1)
@@ -319,11 +317,8 @@ Extended Evolvent::GetXOnY()
   }
 
   double  r;
-  //int w[MaxDim];
   long long w[MaxDim]{};
-  //int l;
   long long l;
-  //int i, j, it;
   long long i, j, it;
   Extended is;
 
@@ -383,6 +378,7 @@ void Evolvent::GetImage(const Extended& x, double* _y, int EvolventNum)
   memcpy(_y, y, N * sizeof(double));
 }
 
+//----------------------------------------------------------------------------
 void Evolvent::GetInverseImage(double* _y, Extended& x)
 {
   // y ---> x
@@ -401,7 +397,6 @@ void Evolvent::GetPreimages(double* _y, Extended* x)
 }
 
 // ------------------------------------------------------------------------------------------------
-/// Вычисляет функцию существования точки в развертки EvolventNum для y, <0 - существует
 double Evolvent::ZeroConstraintCalc(const double* _y, int EvolventNum)
 {
   return -1;
