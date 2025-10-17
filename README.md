@@ -35,7 +35,7 @@ git clone https://github.com/OptimLLab/Globalizer.git
 cd Globalizer/
 mkdir build
 cd build
-cmake -DGLOBALIZER_USE_MPI=OFF -DGLOBALIZER_USE_MP=OFF -DGLOBALIZER_USE_CUDA=OFF -DGLOBALIZER_BUILD_TESTS=OFF ..
+cmake ..
 cmake --build ../build --config Release
 ../_bin/GlobalizerSimpleMain.exe
 ```
@@ -65,7 +65,7 @@ conda install lightning
 conda install scikit-learn
 git submodule init
 git submodule update
-cmake -DGLOBALIZER_USE_MPI=OFF -DGLOBALIZER_USE_MP=OFF -DGLOBALIZER_USE_CUDA=OFF -DGLOBALIZER_BUILD_TESTS=OFF -DGLOBALIZER_BUILD_PROBLEMS=ON -DBUILD_ALL_TASK=ON ..
+cmake -DGLOBALIZER_BUILD_PROBLEMS=ON -DBUILD_ALL_TASK=ON ..
 cmake --build ../build --config Release
 cd ../_bin/
 GlobalizerSampleMain.exe -libPath rastrigin.dll -N 4
