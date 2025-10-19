@@ -18,6 +18,7 @@ option(GLOBALIZER_CMAKE_VERBOSE "Set ON to show debug messages in CMake" ON)
 option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
 option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer" OFF)
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
+option(GLOBALIZER_USE_DOXYGEN "Set ON to build documentation" OFF)
 
 
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
@@ -52,8 +53,9 @@ endif()
 
 include(cmake/globalizer_utils.cmake)
 include(cmake/globalizer_mpi.cmake)
-#include(cmake/globalizer_lib.cmake)
-include(cmake/globalizer_doxygen.cmake)
+if (GLOBALIZER_USE_DOXYGEN)
+  include(cmake/globalizer_doxygen.cmake)
+endif()
 GLOBALIZER_initialize()
 
 if(${GLOBALIZER_MAX_DIMENSION})
@@ -100,8 +102,9 @@ if(NOT (CMAKE_BUILD_TYPE IN_LIST CMAKE_CONFIGURATION_TYPES))
   message(STATUS "Unknown build type has been changed to " ${CMAKE_BUILD_TYPE})
 endif()
 
-
-init_doxygen()
+if (GLOBALIZER_USE_DOXYGEN)
+  init_doxygen()
+endif()  
 setup_mpi(GLOBALIZER_USE_MPI GLOBALIZER_MPI_LIB GLOBALIZER_MPI_INCLUDES)
 
 foreach(includeFolder ${GLOBALIZER_MPI_INCLUDES})
@@ -263,33 +266,34 @@ foreach(main_filename ${main_list})
   # Get file name without extension
   get_filename_component(sample ${main_filename} NAME_WE)
   
-  
-  
-  set(GLOBALIZER_EXECUTABLE_NAME                 ${GLOBALIZER_PROJECT_NAME}${sample}${GLOBALIZER_EXECUTABLE_SUFFIX})
-  set(GLOBALIZER_EXECUTABLE_NAME_DEBUG           ${GLOBALIZER_EXECUTABLE_NAME}_${GLOBALIZER_DEBUG_SUFFIX})
-  set(GLOBALIZER_EXECUTABLE_NAME_RELEASE         ${GLOBALIZER_EXECUTABLE_NAME})
-  
-  message("Name: " ${GLOBALIZER_EXECUTABLE_NAME})
-
-  # Add and configure executable file to be produced
-  add_executable(${GLOBALIZER_EXECUTABLE_NAME} ${main_filename})
-  
-  target_include_directories(${GLOBALIZER_EXECUTABLE_NAME} PRIVATE ${GLOBALIZER_COMMON_SRC_DIR}
-												  PRIVATE ${Python_INCLUDE_DIRS} 
-												  PRIVATE ${Python_NumPy_INCLUDE_DIRS})												  
-  	
-  if (${IS_CLANG_COMPILER})	
-    target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
-  else()
-    target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})  
+  if(GLOBALIZER_BUILD_PROBLEMS OR  (sample STREQUAL "SimpleMain"))  
+    set(GLOBALIZER_EXECUTABLE_NAME                 ${GLOBALIZER_PROJECT_NAME}${sample}${GLOBALIZER_EXECUTABLE_SUFFIX})
+    set(GLOBALIZER_EXECUTABLE_NAME_DEBUG           ${GLOBALIZER_EXECUTABLE_NAME}_${GLOBALIZER_DEBUG_SUFFIX})
+    set(GLOBALIZER_EXECUTABLE_NAME_RELEASE         ${GLOBALIZER_EXECUTABLE_NAME})
+    
+    message("Name: " ${GLOBALIZER_EXECUTABLE_NAME})
+    
+    # Add and configure executable file to be produced
+    add_executable(${GLOBALIZER_EXECUTABLE_NAME} ${main_filename})
+    
+    target_include_directories(${GLOBALIZER_EXECUTABLE_NAME} PRIVATE ${GLOBALIZER_COMMON_SRC_DIR}
+	  											  PRIVATE ${Python_INCLUDE_DIRS} 
+	  											  PRIVATE ${Python_NumPy_INCLUDE_DIRS})												  
+    	
+    if (${IS_CLANG_COMPILER})	
+      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES} OpenMP::OpenMP_CXX  )
+    else()
+      target_link_libraries(${GLOBALIZER_EXECUTABLE_NAME} ${GLOBALIZER_LIB_NAME} ${Python_LIBRARIES})  
+    endif()
+    
+    set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
+    set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
+    
+    if (IS_GNU_COMPILER)
+      set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
+    endif()
   endif()
 
-  set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_DEBUG ${GLOBALIZER_EXECUTABLE_NAME_DEBUG})
-  set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES OUTPUT_NAME_RELEASE ${GLOBALIZER_EXECUTABLE_NAME_RELEASE})
-  
-  if (IS_GNU_COMPILER)
-    set_target_properties(${GLOBALIZER_EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed -ldl -fopenmp")
-  endif()
 
 endforeach()
 
@@ -365,6 +369,8 @@ if (IS_MICROSOFT_COMPILER)
   #set_property(TARGET pugixml PROPERTY FOLDER "3rd-party")
   if(${GLOBALIZER_BUILD_TESTS})
     set_property(TARGET gtest gmock gmock_main gtest_main mpi_stub PROPERTY FOLDER "3rd-party")
+  else()
+    set_property(TARGET mpi_stub PROPERTY FOLDER "3rd-party")
   endif()
 
 

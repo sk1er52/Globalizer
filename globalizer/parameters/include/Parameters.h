@@ -40,7 +40,7 @@
 
 
 
-
+/// Параметры системы оптимизации
 class Parameters : public BaseParameters<Parameters>
 {
 #undef OWNER_NAME
@@ -77,49 +77,63 @@ public:
   int iterationNumber;
 
   //Параметры командной строки
-  TInt<Parameters> NumPoints; // число точек, порождаемых методом на 1 итерации
-  TInt<Parameters> StepPrintMessages; //
+
+  /// число точек, порождаемых методом на 1 итерации
+  TInt<Parameters> NumPoints; 
+  TInt<Parameters> StepPrintMessages; 
   /// Через какое количество итераций сохранять точки
   TInt<Parameters> StepSavePoint; 
   TETypeMethod<Parameters> TypeMethod;
   TETypeCalculation<Parameters> TypeCalculation;
-  TETypeProcess<Parameters> TypeProcess; //
+  TETypeProcess<Parameters> TypeProcess; 
   TInt<Parameters> NumThread;
-  TInt<Parameters> SizeInBlock; //размер CUDA блока
+  ///размер CUDA блока
+  TInt<Parameters> SizeInBlock; 
   /// Печатать ли отчетет в файл
   TBool<Parameters> IsPrintFile;
   /// Файл для печати результата, если "000" то не печатаем
   TString<Parameters> ResulLog; 
-  TInt<Parameters> Dimension; //размерность исходной задачи
-  TDouble<Parameters> r; // надежность метода (> 1)
+  ///размерность исходной задачи
+  TInt<Parameters> Dimension; 
+  /// надежность метода (> 1)
+  TDouble<Parameters> r; 
   ///Добавка при динамичеки изменяемом r, r = r + rDynamic / (Iteration ^ (1/N))
   TDouble<Parameters> rDynamic;
-  TDouble<Parameters> rEps; //параметр eps-резервирования
-  TDouble<Parameters> Epsilon; //единая точность
-  TString<Parameters> Comment; //Коментарий к эксперименту
+  ///параметр eps-резервирования
+  TDouble<Parameters> rEps; 
+  ///единая точность
+  TDouble<Parameters> Epsilon; 
+  ///Коментарий к эксперименту
+  TString<Parameters> Comment; 
 
   TDoubles<Parameters> M_constant;
-  TInt<Parameters> m; // плотность построения развертки (точность 1/2^m по к-те)
-  TInt<Parameters> deviceCount; //кол-во используемых ускорителей
-  TEMapType<Parameters> MapType; // тип развертки (сдвиговая, вращаемая)
-  TInt<Parameters> DebugAsyncCalculation; // Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
+  /// плотность построения развертки (точность 1/2^m по к-те)
+  TInt<Parameters> m; 
+  ///кол-во используемых ускорителей
+  TInt<Parameters> deviceCount; 
+  /// тип развертки (сдвиговая, вращаемая)
+  TEMapType<Parameters> MapType; 
+  /// Флаг для проверки работы асинхронной схемы, если не 0, то вычисления проводятся в строго заданном порядке
+  TInt<Parameters> DebugAsyncCalculation; 
 
-   /// Печатать ли информацию о сечении в многошаговой схеме
+  /// Печатать ли информацию о сечении в многошаговой схеме
   TBool<Parameters> IsPrintSectionPoint;
 
-  TInts<Parameters> MaxNumOfPoints; // максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
+  /// максимальное число итераций для процессов на каждом уровне //  размер - NumOfProcLevels{100, 100, 100, 100};// // параметры метода
+  TInts<Parameters> MaxNumOfPoints; 
   TFlag<Parameters> HELP;
   TFlag<Parameters> IsPlot;
   TInt<Parameters> PlotGridSize;
   /// Число испытаний за итерацию будет вычисляться на каждой итерации в методе CalculateNumPoint()
   TFlag<Parameters> IsCalculateNumPoint;
-  TBool<Parameters> IsSetDevice; //Назначать каждому процессу свое устройство (ускоритель)
+  ///Назначать каждому процессу свое устройство (ускоритель)
+  TBool<Parameters> IsSetDevice; 
   ///Индекс используемого устройства (ускорителей), если -1 используется первые deviceCount устройств
   TInt<Parameters> deviceIndex;
 
   TInt<Parameters> ProcRank;
-
-  TELocalMethodScheme<Parameters> localVerificationType; //cпособ использования локального метода(только для синхронного типа процесса)
+  ///cпособ использования локального метода(только для синхронного типа процесса)
+  TELocalMethodScheme<Parameters> localVerificationType; 
 
   /// Количество итераций локального метода
   TInt<Parameters> localVerificationIteration;
@@ -128,24 +142,36 @@ public:
   /// Количество точек точек параллельно вычисляемых локальным методом
   TInt<Parameters> localVerificationNumPoint;
 
-  TInt<Parameters> localMix; //параметр смешивания в локально-глобальном алгоритме
-  TDouble<Parameters> localAlpha; //степень локальной адаптации в локально-глобальном алгоритме
-  TInts<Parameters> calculationsArray; //Распределение типов вычислений по
-  TESeparableMethodType<Parameters> sepS;  //флаг сепарабельного поиска на первой итерации
-  TBool<Parameters> rndS;  //флаг случайного поиска на первой итерации
-  TString<Parameters> libPath;  //путь к библиотеке с задачей
-  TString<Parameters> libConfigPath; //путь к библиотеке с задачей
+  ///параметр смешивания в локально-глобальном алгоритме
+  TInt<Parameters> localMix; 
+  ///степень локальной адаптации в локально-глобальном алгоритме
+  TDouble<Parameters> localAlpha;
+  ///Распределение типов вычислений по
+  TInts<Parameters> calculationsArray; 
+  ///флаг сепарабельного поиска на первой итерации
+  TESeparableMethodType<Parameters> sepS;  
+  ///флаг случайного поиска на первой итерации
+  TBool<Parameters> rndS;  
+  ///путь к библиотеке с задачей
+  TString<Parameters> libPath;  
+  ///путь конфигарационному файлу задачи
+  TString<Parameters> libConfigPath; 
   /// тип критерия остановки
   TEStopCondition<Parameters> stopCondition; 
   /// Критерий применим только к верхнему уровню или к любому (для адаптивной схемы)
   TBool<Parameters> isStopByAnyLevel;
-  TString<Parameters> iterPointsSavePath; //путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
-  TFlag<Parameters> printAdvancedInfo; //флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума
-  TFlag<Parameters> disablePrintParameters; //флаг, выключающий печать параметров при запуске системы
-  TString<Parameters> logFileNamePrefix; //префикс в имени лог-файла
+  ///путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
+  TString<Parameters> iterPointsSavePath; 
+  ///флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума
+  TFlag<Parameters> printAdvancedInfo; 
+  ///флаг, выключающий печать параметров при запуске системы
+  TFlag<Parameters> disablePrintParameters; 
+  ///префикс в имени лог-файла
+  TString<Parameters> logFileNamePrefix; 
 
   TETypeSolver<Parameters> TypeSolver;
-  TInts<Parameters> DimInTask; // размерности каждой из подзадач в режиме сепарабильного или сикуенсального поиска
+  /// размерности каждой из подзадач в режиме сепарабильного или сикуенсального поиска
+  TInts<Parameters> DimInTask;
 
   /// Размер блока, отправляемого в MPI другим процессам
   TInt<Parameters> mpiBlockSize;

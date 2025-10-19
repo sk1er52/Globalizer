@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Solver.h"
-#include "SeparableOptimizationTask.h"
+#include "HDTask.h"
 
 
 /**
- Базовый класс для сепарабельной оптимизации
+ Базовый класс для решателя задач большой размерности
 **/
-class SeparableOptimizationSolver : public ISolver
+class HDSolver : public ISolver
 {
 protected:
 
@@ -22,7 +22,7 @@ protected:
   /// Размерность исходной задачи
   int originalDimension;
   /// Задачи для оптимизации по группам параметров
-  std::vector <SeparableOptimizationTask*> tasks;
+  std::vector <HDTask*> tasks;
 
   /// задача оптимизации
   IProblem* problem;
@@ -37,15 +37,15 @@ protected:
   void Construct();
 
 public:
-  SeparableOptimizationSolver(IProblem* problem, std::vector<int> _dimentions = {});
+  HDSolver(IProblem* problem, std::vector<int> _dimentions = {});
 
 #ifdef _GLOBALIZER_BENCHMARKS
 
-  SeparableOptimizationSolver(IGlobalOptimizationProblem* problem, std::vector<int> _dimentions = {});
+  HDSolver(IGlobalOptimizationProblem* problem, std::vector<int> _dimentions = {});
 
 #endif
 
-  virtual ~SeparableOptimizationSolver();
+  virtual ~HDSolver();
 
   /// Решение задачи по умолчанию
   virtual int Solve();

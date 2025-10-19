@@ -32,7 +32,7 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
     problem->SetConfigPath(parameters.libConfigPath);
     if (problem->Initialize() != ProblemManager::OK_)
     {
-      printf("Error during problem initialization\n");
+      std::cout << "Error during problem initialization\n";
       return 1;
     }
 
@@ -41,7 +41,7 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
       //вообще, вызов SetDimension лучше убрать и получать размерность из конфигурационного файла для всех задач, где она не фиксирована
       if (problem->SetDimension(parameters.Dimension) != ProblemManager::OK_)
       {
-        printf("Unsupported problem dimension!\n");
+        std::cout << "Unsupported problem dimension!\n";
         return 1;
       }
     }
@@ -54,7 +54,7 @@ int InitProblem(ProblemManager& problemManager, IProblem*& problem,
     newProblem->SetInitParam(argc, argv, isMPIInit);
     if (problem->Initialize() != ProblemManager::OK_)
     {
-      printf("Error during problem initialization\n");
+      std::cout << "Error during problem initialization\n";
       return 1;
     }
 

@@ -24,7 +24,7 @@ public:
   // ------------------------------------------------------------------------------------------------
   ProblemFromFunctionPointers(int dimention, std::vector<double> lower_, std::vector<double> upper_,
     std::vector<std::function<double(const double*)>> function_,
-    bool isSetOptimum_ = false, double optimumValue_ = 0, double* optimumCoordinate_ = nullptr)
+    bool isSetOptimum_ = false, double optimumValue_ = 0, std::vector<double> optimumCoordinate_ = {})
   {
     this->mDim = dimention;
     this->mOwner = this;
@@ -44,7 +44,7 @@ public:
     if (isSetOptimum)
     {
       optimumValue = optimumValue_;
-      if (optimumCoordinate_ != nullptr)
+      if (optimumCoordinate_.size() != 0)
       {
         optimumCoordinate.resize(dimention);
         for (int i = 0; i < dimention; i++)
@@ -57,7 +57,7 @@ public:
   // ------------------------------------------------------------------------------------------------
   ProblemFromFunctionPointers(int dimention, std::vector<double> lower_, std::vector<double> upper_,
     std::function<double(const double*, int)> function_, int functionCount_,
-    bool isSetOptimum_ = false, double optimumValue_ = 0, double* optimumCoordinate_ = nullptr)
+    bool isSetOptimum_ = false, double optimumValue_ = 0, std::vector<double> optimumCoordinate_ = {})
   {
     this->mDim = dimention;
     this->mOwner = this;
@@ -77,7 +77,7 @@ public:
     if (isSetOptimum)
     {
       optimumValue = optimumValue_;
-      if (optimumCoordinate_ != nullptr)
+      if (optimumCoordinate_.size() != 0)
       {
         optimumCoordinate.resize(dimention);
         for (int i = 0; i < dimention; i++)

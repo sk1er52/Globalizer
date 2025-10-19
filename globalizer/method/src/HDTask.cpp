@@ -1,24 +1,24 @@
-﻿#include "SeparableOptimizationTask.h"
+﻿#include "HDTask.h"
 #include "Trial.h"
 // ------------------------------------------------------------------------------------------------
-SeparableOptimizationTask::SeparableOptimizationTask(IProblem* _problem, int _ProcLevel) : Task::Task(_problem, _ProcLevel)
+HDTask::HDTask(IProblem* _problem, int _ProcLevel) : Task::Task(_problem, _ProcLevel)
 {
   startParameterNumber = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
-SeparableOptimizationTask::SeparableOptimizationTask() : Task::Task()
+HDTask::HDTask() : Task::Task()
 {
   startParameterNumber = 0;
 }
 
-Task* SeparableOptimizationTask::Clone()
+Task* HDTask::Clone()
 {
-  SeparableOptimizationTask* res = 0;
+  HDTask* res = 0;
   if (isInit)
-    res = new SeparableOptimizationTask(pProblem, ProcLevel);
+    res = new HDTask(pProblem, ProcLevel);
   else
-    res = new SeparableOptimizationTask();
+    res = new HDTask();
 
   res->startParameterNumber = startParameterNumber;
   res->isInit = isInit;
@@ -26,25 +26,25 @@ Task* SeparableOptimizationTask::Clone()
 }
 
 // ------------------------------------------------------------------------------------------------
-const double* SeparableOptimizationTask::GetA() const
+const double* HDTask::GetA() const
 { 
   return &(A[startParameterNumber]);
 }
 
 // ------------------------------------------------------------------------------------------------
-const double* SeparableOptimizationTask::GetB() const
+const double* HDTask::GetB() const
 {
   return &(B[startParameterNumber]);
 }
 
 // ------------------------------------------------------------------------------------------------
-const double* SeparableOptimizationTask::GetOptimumPoint() const
+const double* HDTask::GetOptimumPoint() const
 { 
   return &(OptimumPoint[startParameterNumber]);
 }
 
 // ------------------------------------------------------------------------------------------------
-double SeparableOptimizationTask::CalculateFuncs(const double* y, int fNumber)
+double HDTask::CalculateFuncs(const double* y, int fNumber)
 {
   double* point = new double[parameters.startPoint.GetSize()];
   for (int i = 0; i < parameters.startPoint.GetSize(); i++)
@@ -61,7 +61,7 @@ double SeparableOptimizationTask::CalculateFuncs(const double* y, int fNumber)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationTask::CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values)
+void HDTask::CalculateFuncsInManyPoints(double* y, int fNumber, int numPoints, double* values)
 {
   throw "Not implemented";
   //IGPUProblem* newProblem = dynamic_cast<IGPUProblem*>(pProblem);
@@ -72,13 +72,13 @@ void SeparableOptimizationTask::CalculateFuncsInManyPoints(double* y, int fNumbe
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationTask::SetStartParameterNumber(int _startParameterNumber)
+void HDTask::SetStartParameterNumber(int _startParameterNumber)
 {
   startParameterNumber = _startParameterNumber;
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationTask::CopyPoint(double* y, Trial* point)
+void HDTask::CopyPoint(double* y, Trial* point)
 {
   for (int i = 0; i < parameters.Dimension; i++)
   {

@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <omp.h>
+#include "iostream"
 
 
 #ifdef WIN32
@@ -58,7 +59,7 @@ void Parameters::SetDefaultParameters()
   
   InitOption(Dimension, -1, "-N", "Dimension", 1);
   
-  InitOption(r, 2.3, "-r", "r", 1);
+  InitOption(r, 4.0, "-r", "r", 1);
   
   InitOption(rDynamic, 0, "-rd", "Additive when dynamics change r, r = r + rDynamic / (Iteration ^ (1 / N))", 1);
   InitOption(rEps, 0.01, "-rE", "eps-reserv", 1);
@@ -77,7 +78,7 @@ void Parameters::SetDefaultParameters()
   InitOption(DebugAsyncCalculation, 0, "-dac", "Helps debug in async calculation", 1); // Должен существовать файл: ../_build/async.txt
   InitOption(IsPrintSectionPoint, false, "-IsPSP", "Whether to print section information in a Block Scheme", 1);
 
-  InitOption(MaxNumOfPoints, 7000000_2_2_2, "-MaxNP", "MaxNumOfPoints", 4);
+  InitOption(MaxNumOfPoints, 7000000, "-MaxNP", "MaxNumOfPoints", 1);
   
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
@@ -209,17 +210,17 @@ void Parameters::PrintParameters()
 #ifndef USE_OneAPI
 
   //Печать параметров командной строки
-  printf("\nNeed MPI processes - %d\n", mNeedMPIProcessorCount);
+  std::cout << "\nNeed MPI processes - " << mNeedMPIProcessorCount << "\n";
 #pragma omp parallel
   {
     if (omp_get_thread_num() == 0)
-      printf("\nOMP Thread Num - %d\n", omp_get_num_threads());
+      std::cout << "\nOMP Thread Num - " << omp_get_num_threads() << "\n";
   }
 #endif
 
   if (!disablePrintParameters)
     BaseParameters<Parameters>::PrintParameters();
-  printf("\n\n");
+  std::cout << "\n" << std::endl;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -296,12 +297,11 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
   if (mProcRank == 0)
 
 #ifdef CUDA_VALUE_DOUBLE_PRECISION
-    printf("\nDOUBLE PRECISION\n");
+    std::cout << "\nDOUBLE PRECISION\n";
 #else
-    printf("\nSINGLE PRECISION\n");
+    std::cout << "\nSINGLE PRECISION\n";
 #endif //CUDA_VALUE_DOUBLE_PRECISION
 
-  //printf("ProcRank=%d\n", mProcRank);
   if (IsSetDevice)
     SetDeviceIndex();
 
@@ -401,7 +401,7 @@ void Parameters::SetDeviceIndex()
   size++;
 #endif
 
-  printf("%s\tProcRank=%d\tProcNum=%d\n", CompName, mProcRank, mProcNum);
+  std::cout << CompName << "\tProcRank=" << mProcRank << "\tProcNum=" << mProcNum << "\n";
   int err = 0;
   //printf( "\n\n");
   if (mProcRank == 0)
@@ -472,7 +472,7 @@ void Parameters::SetDeviceIndex()
     int deviceIndex_ = -1;
     MPI_Recv(&deviceIndex_, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
 
-    printf("%s\tProcRank = %d\tdeviceIndex = %d\n", CompName, GetProcRank(), deviceIndex_);
+    std::cout << CompName << "\tProcRank = " << GetProcRank() << "\tdeviceIndex = " << deviceIndex_ << "\n";
 
     deviceIndex = deviceIndex_; //is it an error?
   }

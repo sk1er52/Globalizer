@@ -2,7 +2,7 @@
 
 #include "Task.h"
 
-class SeparableOptimizationTask : public Task
+class HDTask : public Task
 {
 protected:
 
@@ -11,8 +11,8 @@ protected:
 
 
 public:
-  SeparableOptimizationTask(IProblem* _problem, int _ProcLevel);
-  SeparableOptimizationTask();
+  HDTask(IProblem* _problem, int _ProcLevel);
+  HDTask();
 
   /// Создает копию класса
   virtual Task* Clone();

@@ -2,30 +2,20 @@
 //                                                                         //
 //             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
 //                                                                         //
-//                       Copyright (c) 2015 by UNN.                        //
+//                       Copyright (c) 2025 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      Main.cpp                                                    //
+//  File:      SimpleMain.cpp                                              //
 //                                                                         //
 //  Purpose:   Console version of Globalizer system                        //
 //                                                                         //
-//  Author(s): Sysoyev A., Barkalov K.                                     //
+//  Author(s): Lebedev I., Barkalov K.,                                    //
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 
-#include "Solver.h"
-#include "GlobalizerProblem.h"
 
-#include <algorithm>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <cmath>
-#include <iostream>
+#include "Globalizer.h"
 
 enum ProblemName { RASTRIGIN, STRONGINC3_LAMBDA_EXPRESSION, STRONGINC3_FUNCTION_POINTER};
 
@@ -62,12 +52,8 @@ double StronginC3Functionals(const double* y, int fNumber)
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-  parameters.Init(argc, argv, true);
 
-  // Инициализация системы вывода и печати ошибок
-  OutputMessage::Init(true, parameters.logFileNamePrefix, parameters.GetProcNum(),
-    parameters.GetProcRank());
-
+  GlobalizerInitialization(argc, argv);
 
   parameters.Dimension = 2;
   ProblemName problemName = STRONGINC3_FUNCTION_POINTER;
@@ -88,12 +74,11 @@ int main(int argc, char* argv[])
         }), // критерий
       true, // определен ли оптимум
       0, // значение глобального оптимума
-      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+      std::vector<double>(parameters.Dimension, 0) // координаты глобального минимума
     );
   }
   else if (problemName == STRONGINC3_LAMBDA_EXPRESSION)
   {
-    parameters.r = 4;
     problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
       {0.0, -1.0}, // нижняя граница
       {4.0, 3.0}, // верхняя граница
@@ -109,21 +94,17 @@ int main(int argc, char* argv[])
         } // ограничение 2
         }), 
       true, // определен ли оптимум
-      0, // значение глобального оптимума
-      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+      -1.489444, // значение глобального оптимума
+      { 0.941176,  0.941176 } // координаты глобального минимума
     );
   }
   else if (problemName == STRONGINC3_FUNCTION_POINTER)
   {
-    parameters.r = 4;
     problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
       { 0.0, -1.0 }, // нижняя граница
       { 4.0, 3.0 }, // верхняя граница
       StronginC3Functionals, // задача
-      4, // количество функций (3 ограничения + 1 критерий)
-      true, // определен ли оптимум
-      0, // значение глобального оптимума
-      std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+      4 // количество функций (3 ограничения + 1 критерий)      
     );
   }
 

@@ -44,7 +44,7 @@ protected:
               }), // критерий
           true, // определен ли оптимум
           0, // значение глобального оптимума
-          std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+          std::vector<double>(parameters.Dimension, 0) // координаты глобального минимума
 
       );
       parameters.Dimension = 5;

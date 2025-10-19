@@ -1,8 +1,8 @@
-﻿#include "SeparableOptimizationSolver.h"
+﻿#include "HDSolver.h"
 #include "TaskFactory.h"
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationSolver::SetDimentions(std::vector<int> _dimentions)
+void HDSolver::SetDimentions(std::vector<int> _dimentions)
 {
   if (_dimentions.size() == 0)
   {
@@ -17,7 +17,7 @@ void SeparableOptimizationSolver::SetDimentions(std::vector<int> _dimentions)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationSolver::CreateStartPoint()
+void HDSolver::CreateStartPoint()
 {
   if (parameters.startPoint.GetIsChange() == false)
   {
@@ -33,7 +33,7 @@ void SeparableOptimizationSolver::CreateStartPoint()
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationSolver::Construct()
+void HDSolver::Construct()
 {
   solvers.resize(dimensions.size());
   tasks.resize(dimensions.size());
@@ -51,7 +51,7 @@ void SeparableOptimizationSolver::Construct()
 
 
 // ------------------------------------------------------------------------------------------------
-SeparableOptimizationSolver::SeparableOptimizationSolver(IProblem* _problem, std::vector<int> _dimentions)
+HDSolver::HDSolver(IProblem* _problem, std::vector<int> _dimentions)
 {
   problem = _problem;
   SetDimentions(_dimentions);
@@ -61,14 +61,14 @@ SeparableOptimizationSolver::SeparableOptimizationSolver(IProblem* _problem, std
 
 // ------------------------------------------------------------------------------------------------
 #ifdef _GLOBALIZER_BENCHMARKS
-SeparableOptimizationSolver::SeparableOptimizationSolver(IGlobalOptimizationProblem* _problem, std::vector<int> _dimentions) 
-  : SeparableOptimizationSolver::SeparableOptimizationSolver(new GlobalizerBenchmarksProblem(_problem), _dimentions)
+HDSolver::HDSolver(IGlobalOptimizationProblem* _problem, std::vector<int> _dimentions) 
+  : HDSolver::HDSolver(new GlobalizerBenchmarksProblem(_problem), _dimentions)
 {
 }
 #endif
 
 // ------------------------------------------------------------------------------------------------
-SeparableOptimizationSolver::~SeparableOptimizationSolver()
+HDSolver::~HDSolver()
 {
   if (solutionResult == nullptr)
     delete solutionResult;
@@ -88,7 +88,7 @@ SeparableOptimizationSolver::~SeparableOptimizationSolver()
 }
 
 // ------------------------------------------------------------------------------------------------
-int SeparableOptimizationSolver::Solve()
+int HDSolver::Solve()
 {
   try
   {
@@ -105,7 +105,7 @@ int SeparableOptimizationSolver::Solve()
       Solver* solver = solvers[i];
       if (tasks[i] != nullptr)
         delete tasks[i];
-      tasks[i] = dynamic_cast<SeparableOptimizationTask*>(TaskFactory::CreateTask(problem, 0));      
+      tasks[i] = dynamic_cast<HDTask*>(TaskFactory::CreateTask(problem, 0));      
 
       tasks[i]->SetStartParameterNumber(startParameterNumber);
 
@@ -209,19 +209,19 @@ int SeparableOptimizationSolver::Solve()
 }
 
 // ------------------------------------------------------------------------------------------------
-SolutionResult* SeparableOptimizationSolver::GetSolutionResult()
+SolutionResult* HDSolver::GetSolutionResult()
 {
   return solutionResult;
 }
 
 // ------------------------------------------------------------------------------------------------
-void SeparableOptimizationSolver::SetPoint(std::vector<Trial*>& points)
+void HDSolver::SetPoint(std::vector<Trial*>& points)
 {
   finalSolver->SetPoint(points);
 }
 
 // ------------------------------------------------------------------------------------------------
-std::vector<Trial*>& SeparableOptimizationSolver::GetAllPoint()
+std::vector<Trial*>& HDSolver::GetAllPoint()
 {
   return finalSolver->GetAllPoint();
 }
