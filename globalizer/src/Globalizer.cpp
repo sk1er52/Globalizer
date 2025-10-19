@@ -16,7 +16,8 @@ void GlobalizerInitialization(int argc, char* argv[], bool isMPIInit,
     std::cout << "\n\n" << std::endl;
   }
 
-  MPI_Init(&argc, &argv);
+  if (isMPIInit)
+    MPI_Init(&argc, &argv);
 
   // Инициализация параметров
   parameters.Init(argc, argv, true);

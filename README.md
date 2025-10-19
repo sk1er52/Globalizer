@@ -45,19 +45,7 @@ cmake --build ../build --config Release
 
 ```\examples\SimpleMain.cpp
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include "Solver.h"
-#include "GlobalizerProblem.h"
-
-#include <algorithm>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <cmath>
-#include <iostream>
+#include "Globalizer.h"
 
 double StronginC3Functionals(const double* y, int fNumber)
 {
@@ -92,25 +80,16 @@ double StronginC3Functionals(const double* y, int fNumber)
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-  parameters.Init(argc, argv, true);
+  GlobalizerInitialization(argc, argv);
 
-  // Инициализация системы вывода и печати ошибок
-  OutputMessage::Init(true, parameters.logFileNamePrefix, parameters.GetProcNum(),
-    parameters.GetProcRank());
-
-  IProblem* problem = nullptr;
-  
   parameters.Dimension = 2;
-  problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
+  IProblem* problem = new ProblemFromFunctionPointers(parameters.Dimension, // размерность задачи
     { 0.0, -1.0 }, // нижняя граница
     { 4.0, 3.0 }, // верхняя граница
     StronginC3Functionals, // задача
-    4, // количество функций (3 ограничения + 1 критерий)
-    true, // определен ли оптимум
-    0, // значение глобального оптимума
-    std::vector<double>(parameters.Dimension, 0).data() // координаты глобального минимума
+    4 // количество функций (3 ограничения + 1 критерий)
   );
-  
+
   problem->Initialize();
 
   // Решатель
@@ -119,6 +98,8 @@ int main(int argc, char* argv[])
   // Решаем задачу
   if (solver.Solve() != SYSTEM_OK)
     throw EXCEPTION("Error: solver.Solve crash!!!");
+
+  delete problem;
 
   return 0;
 }
