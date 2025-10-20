@@ -715,7 +715,7 @@ void Method::CalculateFunctionals()
 
   for (int j = 0; j < pTask.GetNumOfFunc(); j++)
   {
-    functionCalculationCount[j] = outputSet.countCalcTrials[j];
+    functionCalculationCount[j] += outputSet.countCalcTrials[j];
   }
 
 }
@@ -874,13 +874,16 @@ double Method::CalculateGlobalR(SearchInterval* p)
   {
     if (parameters.GetProcRank() == 3)
     {
-      printf("Bad Interval\tProcRank=%d\n", parameters.GetProcRank());
-      value = 0;
+      print << "Bad Interval\tProcRank=" << parameters.GetProcRank() << "\n";
 
-      printf("iteration.IterationCount  = %d\n", iteration.IterationCount);
-      printf("NewInterval! xl() = %lf xr() = %lf izl() = %d izr() = %d zl() = %lf zr() = %lf R = %lf\n",
-        p->xl().toDouble(), p->xr().toDouble(), p->izl(), p->izr(), p->zl(), p->zr(), p->R
-      );
+      value = 0;
+      print << "iteration.IterationCount = " << iteration.IterationCount << "\n";
+      
+      print << "NewInterval! xl() = " << p->xl().toDouble() << " xr() = " 
+        << p->xr().toDouble() << " izl() = " << p->izl() << " izr() = " 
+        << p->izr() << " zl() = " << p->zl() << " zr() = " << p->zr() 
+        << " R = " << p->R << "\n";
+      
       printf("Z[%d] = %lf M = %lf alfa = %lf\n", v, pData->Z[v], pData->Z[v], alfa);
       printf("val = %lf\n", value);
 

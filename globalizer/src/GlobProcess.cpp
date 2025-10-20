@@ -97,14 +97,14 @@ void Process::Solve()
     {
       if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages))
       {
-        printf("process 0, iteration %d\t point count = %d\n", pMethod->GetIterationCount(), pData->GetCount());
+        print << "process 0, iteration " << pMethod->GetIterationCount() << "\t point count = " << pData->GetCount() << "\n";
         Trial* p = (pMethod->GetOptimEstimation());
         if (p->index >= 0)
         {
-          printf("  Cur min = %lf \n", p->FuncValues[p->index]);
+          print << "  Cur min = " << p->FuncValues[p->index] << " \n";
           for (int i = 0; i < pTask->GetN(); i++)
           {
-            printf("  Cur x[%d] = %lf \n", i, p->y[i]);
+            print << "  Cur x[" << i << "] = " << p->y[i] <<" \n";
           }
         }
       }
@@ -142,7 +142,7 @@ void Process::Solve()
 
   if (!pTask->IsLeaf() && isPrintOptimEstimation)
   {
-    printf("\n");
+    print << "\n";
     PrintOptimEstimationToFile(OptimEstimation);
     PrintOptimEstimationToConsole(OptimEstimation);
     PrintResultToFile(OptimEstimation);
@@ -198,8 +198,6 @@ void Process::PrintOptimEstimationToFile(Trial OptimEstimation)
     fprintf(pf, "Solve time = %f \n\n\n", duration);
 
     fclose(pf);
-
-
   }
 }
 
@@ -213,29 +211,29 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
   double* allOptimumPoints = new double[MAX_TRIAL_DIMENSION*MAX_NUM_MIN];
   double* allPointDifference = new double[MAX_NUM_MIN];
 
-  printf("ProcLevel = %d\n", pTask->GetProcLevel());
-  printf("Iteration = %d \n", pMethod->GetIterationCount());
-  printf("Point = %d \n", pMethod->GetIterationCount() * parameters.NumPoints);
+  print << "ProcLevel = " << pTask->GetProcLevel() << "\n";
+  print << "Iteration = " << pMethod->GetIterationCount() << " \n";
+  print << "Point = " << pMethod->GetIterationCount() * parameters.NumPoints << " \n";
 
-  printf("min = %lf \n", OptimEstimation.FuncValues[OptimEstimation.index]);
+  print << "min = " << OptimEstimation.FuncValues[OptimEstimation.index] << " \n";
   for (int i = 0; i < pTask->GetN(); i++)
   {
-    printf("x[%d] = %lf \n", i, OptimEstimation.y[i]);
+    print << "x[" << i << "] = " << OptimEstimation.y[i] << " \n";
   }
 
-  printf("\n");
-  printf("constants = ");
+  print << "\n";
+  print << "constants = ";
   for (int i = 0; i < pTask->GetN(); i++)
   {
-    printf("%lf,_", OptimEstimation.y[i]);
+    print << OptimEstimation.y[i] << ",_";
   }
 
-  printf("\n");
+  print << "\n";
 
   if (pTask->GetIsOptimumValueDefined())
   {
     ValueDifference = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
-    printf("\nValue difference  = %lf \n", ValueDifference);
+    print << "\nValue difference  = " << ValueDifference << " \n";
   }
 
   if (pTask->GetIsOptimumPointDefined())
@@ -262,19 +260,13 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
         }
       }
     }
-    printf("Coordinates max difference = %lf \n", PointDifference);
+    print << "Coordinates max difference = " << PointDifference << " \n";
   }
-
-  //if (pTask->GetIsOptimumPointDefined() || pTask->GetIsOptimumValueDefined())
-  //{
-  //  printf("Global optimum %s\n", (PointDifference < parameters.Epsilon ||
-  //                                 ValueDifference < parameters.Epsilon) ? "FOUND!" : "NOT FOUND" );
-  //}
 
 
   bool res = false;
 
-  switch (1)
+  switch (parameters.stopCondition)
   {
   case Accuracy:
     if (pMethod->GetAchievedAccuracy() < parameters.Epsilon)
@@ -283,7 +275,6 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
   case OptimumVicinity:
     {
       res = true;
-      //numOfOptima = ;
       if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) == IProblem::UNDEFINED)
       {
         for (int i = 0; i < parameters.Dimension; i++)
@@ -345,92 +336,20 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
   }
   delete[] allOptimumPoints;
 
-  printf("Global optimum %s\n", (res) ? "FOUND!" : "NOT FOUND");
+  print << "Global optimum " << ((res) ? "FOUND!" : "NOT FOUND") <<"\n";
 
-//  /************************************************/
-//
-//  std::string fileName;
-//  if (parameters.TypeCalculation != OMP) {
-//    fileName = "seria_full_result.txt";
-//
-//    std::ofstream vmdelet_out;                    //создаем поток 
-//    vmdelet_out.open(fileName, std::ios::app);  // открываем файл для записи в конец
-//
-//    if (parameters.TypeCalculation != OMP) {
-//      vmdelet_out << "Global: " << parameters.DimInTaskLevel[0] << "\nLocal: " << parameters.DimInTaskLevel[1] << "\n";
-//
-//      vmdelet_out << "Permutations vector: ";
-//      for (auto const& element : TaskFactory::permutations) {
-//        vmdelet_out << element << " ";
-//      }
-//      vmdelet_out << "\n\n";
-//    }
-//
-//    vmdelet_out << "Min: " << OptimEstimation.FuncValues[OptimEstimation.index] << " [ ";
-//    for (int i = 0; i < pTask->GetN(); i++)
-//    {
-//      vmdelet_out << OptimEstimation.y[i] << " ";
-//    }
-//    vmdelet_out << "]\nREAL Min: " << pTask->GetOptimumValue() << " [ ";
-//    for (int i = 0; i < pTask->GetN(); i++)
-//    {
-//      vmdelet_out << pTask->GetOptimumPoint()[i] << " ";
-//    }
-//    vmdelet_out << "]\n";
-//
-//    vmdelet_out << "Coordinates max difference: " << PointDifference << "\n";
-//    ValueDifference = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
-//    vmdelet_out << "Value difference: " << ValueDifference << "\n";
-//
-//    vmdelet_out << "Iteration: " << pMethod->GetIterationCount() << "\n";
-//    vmdelet_out << "Point: " << pMethod->GetIterationCount() * parameters.NumPoints << "\n";
-//
-//    vmdelet_out << "Global optimum " << ((res) ? "FOUND!" : "NOT FOUND") << "\n-------------------------------------\n";
-//    vmdelet_out.close();                          // закрываем файл
-//  }
-//  /************************************************/
-//
   NumberOfTrials = pMethod->GetNumberOfTrials();
   pMethod->PrintSection();
 
-  printf("\nNumberOfTrials = %d\n", NumberOfTrials);
+  print << "\nNumberOfTrials = " << NumberOfTrials << "\n";
   for (int i = 0; i < pTask->GetNumOfFunc(); i++)
-    printf("Number of calculations function %d of = %d\n", i,
-    pMethod->GetFunctionCalculationCount()[i]);
+    print << "Number of calculations function " << i << " of = " << pMethod->GetFunctionCalculationCount()[i] << "\n";
 
-  printf("\nLocalPointCount = %d\n", pMethod->GetLocalPointCount());
-  printf("\nNumberLocalMethodtStart = %d\n", pMethod->GetNumberLocalMethodtStart());
-  //if (parameters.printAdvancedInfo)
-  //{
-  //  printf("\n");
-  //  for (int i = 0; i < pTask->GetNumOfFunc(); i++)
-  //    printf("M estimation for function %d = %f\n", i, pMethod->GetM()[i]);
-  //  printf("\nOptimum index: %i\n\n", OptimEstimation.index);
-  //  for (int i = 0; i <= OptimEstimation.index; i++)
-  //    printf("Function %d value in estimated optimum: %f\n", i, OptimEstimation.FuncValues[i]);
-  //}
-  printf("\nSolve time = %lf\n\n\n", duration);
-//
-//
-//  if (parameters.TypeCalculation != OMP) {
-//    fileName = "seria_table_result.txt";
-//
-//    std::ofstream statOut;                    //создаем поток 
-//    statOut.open(fileName, std::ios::app);  // открываем файл для записи в конец
-//
-//    statOut << ((res) ? "FOUND" : "NOT_FOUND") << " "
-//      << pMethod->GetIterationCount() << " "
-//      << NumberOfTrials << " "
-//      << pMethod->GetLocalPointCount() << " "
-//      << duration << " "
-//      << parameters.DimInTaskLevel[0] << " ";
-//    for (int ii = 0; ii < parameters.DimInTaskLevel[0]; ii++) {
-//       statOut << TaskFactory::permutations[ii] + 1 << "_";
-//    }
-//    statOut << "\n";
-//
-//    statOut.close();                          // закрываем файл
-//  }
+  print << "\nLocalPointCount = " << pMethod->GetLocalPointCount() << "\n";
+  print << "\nNumberLocalMethodtStart = " << pMethod->GetNumberLocalMethodtStart() << "\n";
+
+  print << "\nSolve time = " << duration << "\n\n\n";
+
 }
 
 
@@ -504,13 +423,6 @@ void Process::PrintResultToFile(Trial OptimEstimation)
       fprintf(pf, "Coordinates max difference = %lf \n", PointDifference);
     }
 
-    //if (pTask->GetIsOptimumPointDefined() || pTask->GetIsOptimumValueDefined())
-    //{
-    //  fprintf(pf, "Global optimum %s\n", (PointDifference < parameters.Epsilon ||
-    //                                 ValueDifference < parameters.Epsilon) ? "FOUND!" : "NOT FOUND" );
-    //}
-
-
     bool res = false;
 
     switch (1)
@@ -522,7 +434,6 @@ void Process::PrintResultToFile(Trial OptimEstimation)
     case OptimumVicinity:
     {
       res = true;
-      //numOfOptima = ;
       if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) == IProblem::UNDEFINED)
       {
         for (int i = 0; i < parameters.Dimension; i++)
@@ -597,15 +508,6 @@ void Process::PrintResultToFile(Trial OptimEstimation)
 
     fprintf(pf, "\nLocalPointCount = %d\n", pMethod->GetLocalPointCount());
     fprintf(pf, "\nNumberLocalMethodtStart = %d\n", pMethod->GetNumberLocalMethodtStart());
-    //if (parameters.printAdvancedInfo)
-    //{
-    //  fprintf(pf, "\n");
-    //  for (int i = 0; i < pTask->GetNumOfFunc(); i++)
-    //    fprintf(pf, "M estimation for function %d = %f\n", i, pMethod->GetM()[i]);
-    //  fprintf(pf, "\nOptimum index: %i\n\n", OptimEstimation.index);
-    //  for (int i = 0; i <= OptimEstimation.index; i++)
-    //    fprintf(pf, "Function %d value in estimated optimum: %f\n", i, OptimEstimation.FuncValues[i]);
-    //}
     fprintf(pf, "\nSolve time = %lf\n\n\n", duration);
     fclose(pf);
   }
@@ -628,8 +530,6 @@ void Process::BeginIterations()
 void Process::DoIteration()
 {
   bool IsStop;
-
-  ////if (parameters.GetProcRank() == 0) printf("AA1! %d\n", parameters.GetProcRank());
 
   //  проверяем критерий остановки
   IsStop = pMethod->CheckStopCondition();
@@ -668,24 +568,10 @@ void Process::DoIteration()
       {
         functionCalculationCount[j] += pMethod->GetFunctionCalculationCount()[j];
       }
-      ////if (parameters.GetProcRank() == 0) printf("AA9! %d\n", parameters.GetProcRank());
       //Провести оценку оптимума нужно до обновления данных,  т.к. в этой функции может быть поднят флаг recalc
       pMethod->EstimateOptimum();
       //Все случаи поднятия флага recalc обработаны, можно обновлять базу
-      ////if (parameters.GetProcRank() == 0) printf("AA10! %d\n", parameters.GetProcRank());
       pMethod->RenewSearchData();
-      //на первой итерации проводим сепарабельную оптимизацию
-      //if (pMethod->GetNumberOfTrials() == 1)
-      //{
-      //  if (parameters.sepS)
-      //    pMethod->SeparableSearch();
-      //  if (parameters.rndS)
-      //    pMethod->RandomSearh();
-      //}
-      ////if (parameters.GetProcRank() == 0)     printf("AA20! %d\n", parameters.GetProcRank());
-      //if ((parameters.localVerificationType == IntegratedOnePoint ||
-      //  parameters.localVerificationType == IntegratedManyPoints) && isNewOptimumFound)
-      //  pMethod->LocalSearch();
 
       pMethod->FinalizeIteration();
 

@@ -365,12 +365,8 @@ int Solver::CreateProcess()
   }
   /// Создаём данные для поисковой информации
 
-  {
-    //delete pData;
-    //pData = new SearchData(_problem->GetNumberOfFunctions());
-    //int qSize = max((int)pow(2.0, (int)(log((double)parameters.MaxNumOfPoints[pTask->GetProcLevel()])
-    //  / log(2.0) - 2)) - 1, 1023);
-    //pData->ResizeQueue(qSize);
+
+
 
     if (pData == 0)
     {
@@ -383,7 +379,7 @@ int Solver::CreateProcess()
     {
       pData->Clear();
     }
-  }
+  
   // Инициализируем числа с расширенной точностью
   InitAutoPrecision();
 
@@ -411,19 +407,12 @@ IProblem* Solver::GetProblem()
 // ------------------------------------------------------------------------------------------------
 SolutionResult* Solver::GetSolutionResult()  /// best point
 {
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_21! Proc=%d \n", parameters.GetProcRank());
   if (result != 0)
     delete result;
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_22! Proc=%d \n", parameters.GetProcRank());
   result = new SolutionResult();
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_23! Proc=%d \n", parameters.GetProcRank());
   result->BestTrial = mProcess->GetOptimEstimation();
-  //result->BestTrial->FuncValues = mProcess-> 
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_24! Proc=%d \n", parameters.GetProcRank());
   result->IterationCount = mProcess->GetIterationCount();
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_25! Proc=%d \n", parameters.GetProcRank());
   result->TrialCount = mProcess->GetNumberOfTrials();
-  //if (pTask->GetProcLevel() == 0)  printf("DD20_26! Proc=%d \n", parameters.GetProcRank());
   return result;
 }
 
