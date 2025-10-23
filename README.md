@@ -5,7 +5,7 @@
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-green)](LICENSE)
 [![python: 3.11](https://img.shields.io/badge/python-3.11-44cc12?style=flat-square&logo=python)](https://www.python.org/downloads/release/python-3110/)
 [![C++](https://img.shields.io/badge/C++-17-44cc12?style=flat-square&logo=c%2B%2B)](https://isocpp.org/)
-[![docs: ](https://readthedocs.org/projects/ebonite/badge/?style=flat-square)](https://Globalizer.readthedocs.io/ru/latest/)
+[![docs: ](https://readthedocs.org/projects/ebonite/badge/?style=flat-square)](https://globalizer-documentation.readthedocs.io/en/latest/)
 [![build:](https://github.com/UNN-ITMM-Software/iOpt/actions/workflows/python-app.yml/badge.svg)](https://github.com/OptimLLab/Globalizer/actions)
 
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
 # **Документация**
 
-Подробное описание API фреймворка Globalizer доступно в разделе [Read the Docs](https://Globalizer.readthedocs.io/ru/latest/).
+Подробное описание API фреймворка Globalizer доступно в разделе [Read the Docs](https://globalizer-documentation.readthedocs.io/en/latest/).
 
 # **Поддержка**
 
