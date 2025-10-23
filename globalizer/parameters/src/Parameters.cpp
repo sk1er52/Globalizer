@@ -293,7 +293,7 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
   if ((mIsPrintHelp) || (HELP))
     if (mProcRank == 0)
       PrintHelp();
-
+/*
   if (mProcRank == 0)
 
 #ifdef CUDA_VALUE_DOUBLE_PRECISION
@@ -301,6 +301,7 @@ void Parameters::Init(int argc, char* argv[], bool isMPIInit)
 #else
     std::cout << "\nSINGLE PRECISION\n";
 #endif //CUDA_VALUE_DOUBLE_PRECISION
+*/
 
   if (IsSetDevice)
     SetDeviceIndex();
