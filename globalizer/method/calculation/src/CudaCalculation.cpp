@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      cuda_calculation.cpp                                        //
+//  File:      CudaCalculation.cpp                                         //
 //                                                                         //
 //  Purpose:   Source file for CUDA calculation class                      //
 //                                                                         //
@@ -15,10 +15,12 @@
 
 #include "CudaCalculation.h"
 
+// ------------------------------------------------------------------------------------------------
 
 void CUDACalculation::StartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
+  // Перераспределение памяти под буферы, если необходимо
   int newCoordinatesSize = inputSet.trials.size() * parameters.Dimension;
   if (newCoordinatesSize > coordinatesSize)
   {
@@ -33,15 +35,17 @@ void CUDACalculation::StartCalculate(InformationForCalculation& inputSet,
     FuncValues = new double [FuncValuesSize];
   }
 
+  // Копирование координат из массива испытаний в непрерывный буфер
   for (unsigned i = 0; i < inputSet.trials.size(); i++)
   {
     for (int k = 0; k < parameters.Dimension; k++)
       coordinates[i * parameters.Dimension + k] = inputSet.trials[i]->y[k];
   }
 
+  // Вызов метода задачи, который должен содержать CUDA-вычисления
   pTask->CalculateFuncsInManyPoints(coordinates, 0, int(inputSet.trials.size()), FuncValues);
-  //pTask->CalculateFuncsInManyPoints(coordinates, pTask->GetNumOfFunc(), int(inputSet.trials.size()), FuncValues);
 
+  // Копирование результатов из буфера обратно в объекты Trial
   for (unsigned i = 0; i < inputSet.trials.size(); i++)
   {
     outputSet.trials[i] = inputSet.trials[i];
@@ -50,7 +54,7 @@ void CUDACalculation::StartCalculate(InformationForCalculation& inputSet,
     outputSet.trials[i]->index = 0;
   }
 
-
+  // Подсчет количества вычислений
   for (unsigned int i = 0; i < inputSet.trials.size(); i++)
   {
     for (int j = 0; j <= outputSet.trials[i]->index; j++)
@@ -77,12 +81,12 @@ void CUDACalculation::Calculate(InformationForCalculation& inputSet,
 
   }
 
-  /// Запускать вычисления как только пришли данные
+  // Запускать вычисления как только пришли данные
   if (isStartComputingAway)
   {
     StartCalculate(inputSet, outputSet);
   }
-  else//собрать данные в один блок, и потом вычислить все сразу
+  else // Собрать данные в один блок, и потом вычислить все сразу
   {
     if (countCalculation > 0)
     {

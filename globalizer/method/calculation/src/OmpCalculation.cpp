@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      omp_calculation.cpp                                         //
+//  File:      OmpCalculation.cpp                                          //
 //                                                                         //
 //  Purpose:   Source file for OpenMP calculation class                    //
 //                                                                         //
@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
+
+// ------------------------------------------------------------------------------------------------
 
 void OMPCalculation::StartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
@@ -44,7 +46,6 @@ void OMPCalculation::StartCalculate(InformationForCalculation& inputSet,
         if (!std::isfinite(trail->FuncValues[fNumber]))
 #endif
         {
-          //throw EXCEPTION("Infinite trail->FuncValues[fNumber]!");
           trail->index = -2;
           std::cout << " CalculateFuncs Error!!!\n";
         }
@@ -71,6 +72,7 @@ void OMPCalculation::StartCalculate(InformationForCalculation& inputSet,
 }
 
 // ------------------------------------------------------------------------------------------------
+
 void OMPCalculation::Calculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
@@ -89,12 +91,12 @@ void OMPCalculation::Calculate(InformationForCalculation& inputSet,
 
   }
 
-  /// Запускать вычисления как только пришли данные
+  // Запускать вычисления как только пришли данные
   if (isStartComputingAway)
   {
     StartCalculate(inputSet, outputSet);
   }
-  else//собрать данные в один блок, и потом вычислить все сразу
+  else // Собрать данные в один блок, и потом вычислить все сразу
   {
     if (countCalculation > 0)
     {

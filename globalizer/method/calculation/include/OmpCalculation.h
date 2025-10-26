@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      omp_calculation.h                                           //
+//  File:      OmpCalculation.h                                            //
 //                                                                         //
 //  Purpose:   Header file for OpenMP calculation class                    //
 //                                                                         //
@@ -13,42 +13,52 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * \file OmpCalculation.h
+ *
+ * \authors Лебедев И.
+ * \date 2015
+ * \copyright ННГУ им. Н.И. Лобачевского
+ *
+ * \brief Объявление класса #OMPCalculation для вычислений с помощью OpenMP
+ */
+
 #ifndef __OMP_CALCULATION_H__
 #define __OMP_CALCULATION_H__
 
 #include "Calculation.h"
 
+ /**
+  * \brief Реализация вычислителя с использованием технологии OpenMP.
+  *
+  * Позволяет распараллеливать вычисления на несколько потоков
+  * в рамках одного процесса.
+  */
 class OMPCalculation : public Calculation
 {
 protected:
-
-  /// Проверяем что индекс в допустимом диапозоне, иначе перераспределяем память
-  //void CheckSize(int _indexPoint);
-
-  /// 1 - если значение функции было вычислено
-  //int* calc;
-
+  /**
+   * \brief Внутренний метод, запускающий процесс вычислений.
+   * \param[in] inputSet Входные данные.
+   * \param[out] outputSet Выходные данные.
+   */
   void StartCalculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
 
 public:
+  /**
+   * \brief Конструктор.
+   * \param _pTask Ссылка на объект задачи.
+   */
   OMPCalculation(Task& _pTask) : Calculation(_pTask)
   {
-    //calc = 0;
   }
 
-  // 0 - Инициализирует массивы
-  //virtual void Init(int _numPoint, int _N, int _numFunc);
-
-  // 1 - Задает координаты точки испытания
-  //virtual void SetCoordinate(int _indexPoint, double* _coordinates, bool isCalculate = true);
-
-  // Вычисляет функции (ограничения и критерий) и индекс невыполненного ограничения по координатам
+  /**
+   * \brief Выполняет вычисления для набора испытаний с использованием OpenMP.
+   * \param[in] inputSet Входные данные.
+   * \param[out] outputSet Выходные данные.
+   */
   virtual void Calculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
-
-  // 3 - Возвращает вычисленные значения функций
-  //virtual void GetFuncValue(int _indexPoint, double* _funcVal, int& index);
-
-  //virtual void Clean();
 };
 
 #endif

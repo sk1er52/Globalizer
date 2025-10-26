@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      method_factory.cpp                                          //
+//  File:      CalculationFactory.cpp                                      //
 //                                                                         //
 //  Purpose:   Source file for method factory class                        //
 //                                                                         //
@@ -26,32 +26,8 @@ Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, Evolvent* evol
 {
   Calculation* calculation = 0;
 
-  //if (parameters.calculationsArray.GetIsChange())
-  //{
-  //  if (parameters.calculationsArray[parameters.GetProcRank()] != -1)
-  //  {
-  //    printf("\nprocRank = %d\n", parameters.GetProcRank());
-  //    char buf[256] = { 0 };
-  //    sprintf(buf, "%d", parameters.calculationsArray[parameters.GetProcRank()]);
-  //    parameters.SetVal("TypeCalculation", buf);
-  //    parameters.PrintParameter("TypeCalculation");
-
-  //    if (parameters.TypeCalculation == OMP)
-  //      calculation = new OMPCalculation(_pTask);
-  //    //else if (parameters.TypeCalculation == CUDA)
-  //    //  calculation = new CUDACalculation(_parameters, _pTask);
-  //    //else if (parameters.TypeCalculation == PHI)
-  //    //  calculation = new TPHICalculation(_parameters, _pTask);
-  //    if (parameters.TypeCalculation == BlockScheme)
-  //      calculation = new TBlockSchemeCalculation(_pTask);
-  //  }
-  //}
-  if (_pTask.IsLeaf()) //Если в листе
+  if (_pTask.IsLeaf())
   {
-    //else if (parameters.TypeCalculation == PHI)
-    //  calculation = new TPHICalculation(_parameters, _pTask);
-
-        // Выбор между OMP иCUDA
     if ((parameters.TypeCalculation == OMP) || (parameters.TypeCalculation == MPI_calc && parameters.GetProcNum() == 1))
     {
       if (Calculation::leafCalculation == 0)
@@ -122,9 +98,8 @@ Calculation* CalculationFactory::CreateCalculation2(Task& _pTask, Evolvent* evol
         calculation = Calculation::leafCalculation;
       }
     }
-    //calculation = new OMPCalculation(_pTask);
 
-    if (_pTask.GetProcLevel() == 0) //и одновременно в корне (если только корень)
+    if (_pTask.GetProcLevel() == 0)
     {
 
     }
@@ -140,9 +115,8 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, Evolvent* evolv
 {
   Calculation* calculation = 0;
 
-  if (!_pTask.IsLeaf()) //Если в листе
-  {    
-    // Выбор между OMP иCUDA
+  if (!_pTask.IsLeaf())
+  {
     if ((parameters.TypeCalculation == OMP))
     {
       if (Calculation::leafCalculation == 0)
@@ -213,10 +187,7 @@ Calculation* CalculationFactory::CreateCalculation(Task& _pTask, Evolvent* evolv
         calculation = Calculation::leafCalculation;
       }
     }
-
   }
-
-
   return calculation;
 }
 
@@ -224,10 +195,8 @@ Calculation* CalculationFactory::CreateNewCalculation(Task& _pTask, Evolvent* ev
 {
   Calculation* calculation = 0;
 
-  if (_pTask.IsLeaf()) //Åñëè â ëèñòå
-  {    
-
-    // Âûáîð ìåæäó OMP èCUDA
+  if (_pTask.IsLeaf())
+  {
     if ((parameters.TypeCalculation == OMP))
     {
       calculation = new OMPCalculation(_pTask);

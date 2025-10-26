@@ -1,14 +1,29 @@
+/////////////////////////////////////////////////////////////////////////////
+//                                                                         //
+//             LOBACHEVSKY STATE UNIVERSITY OF NIZHNY NOVGOROD             //
+//                                                                         //
+//                       Copyright (c) 2015 by UNN.                        //
+//                          All Rights Reserved.                           //
+//                                                                         //
+//  File:      Calculation.cpp                                             //
+//                                                                         //
+//  Purpose:   Source file for calculation base class                      //
+//                                                                         //
+//  Author(s): Lebedev I.                                                  //
+//                                                                         //
+/////////////////////////////////////////////////////////////////////////////
+
 #include "Calculation.h"
 
+// Инициализация статических членов класса
 int Calculation::countCalculation = 0;
-
 Calculation* Calculation::leafCalculation = 0;
 Calculation* Calculation::firstCalculation = 0;
-
 bool Calculation::isStartComputingAway = true;
 TResultForCalculation Calculation::resultCalculation;
 InformationForCalculation Calculation::inputCalculation;
 
+// ------------------------------------------------------------------------------------------------
 
 Calculation::Calculation(Task& _pTask) : pTask(&_pTask)
 {  }

@@ -5,7 +5,7 @@
 //                       Copyright (c) 2021 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      mpi_calculation.cpp                                         //
+//  File:      MPICalculationAsync.cpp                                     //
 //                                                                         //
 //  Purpose:   Source file for Async MPI calculation class                 //
 //                                                                         //
@@ -19,15 +19,15 @@
 #include <string.h>
 #include <cstring>
 
-
-
 #include "TaskFactory.h"
 #include "TrialFactory.h"
 
+// ------------------------------------------------------------------------------------------------
+
 void MPICalculationAsync::AsyncFinilize()
 {
-  /// Íåîáõîäèìî ñîáðàòü äàííûå ñî âñåõ, êðîìå òîé òî÷êè, êîòîðàÿ ïîñëåäíåé ïðèñëàëà îòâåò 
-  /// (îíà íàøëà îòâåò çàäà÷è -> åé íå îòïðàâèëè íà âû÷èñëåíèå íîâóþ òî÷êó)
+  // Необходимо собрать данные со всех процессов, кроме того, который
+  // последним прислал ответ, так как он уже свободен.
   MPI_Status status;
   Trial OptimEstimation;
   int Child;
@@ -49,24 +49,26 @@ void MPICalculationAsync::AsyncFinilize()
 }
 
 // ------------------------------------------------------------------------------------------------
+
 void MPICalculationAsync::RecieveCalculatedFunctional()
 {
   MPI_Status status;
   int index;
   int i;
 
-  /// Ïðèíèìàåì èíäåêñ òî÷êè
+  // Принимаем индекс точки
   MPI_Recv(&index, 1, MPI_INT, MPI_ANY_SOURCE, TagChildSolved, MPI_COMM_WORLD, &status);
-  ChildNumRecv = status.MPI_SOURCE; // MPI-íîìåð ïðîöåññà
+  ChildNumRecv = status.MPI_SOURCE; // MPI-ранг ответившего процесса
 
-  ///Çàïîìèíàåì èíäåêñ â âåêòîðå ãäå òåïåðü õðàíèòñÿ âû÷èñëåííîå çíà÷åíèå
+  // Запоминаем внутренний индекс процесса
   ChildNum = ChildNumRecv - 1;
   vecTrials[ChildNum]->index = index;
-  /// Ïðèíèìàåì òî÷êó
+  // Принимаем координаты точки
   MPI_Recv(vecTrials[ChildNum]->y, parameters.Dimension, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
-  /// Ïðèíèìàåì çíà÷åíèÿ ôóíêöèîíàëîâ
+  // Принимаем значения функционалов
   MPI_Recv(vecTrials[ChildNum]->FuncValues, MaxNumOfFunc, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD, &status);
 
+  // Определяем итоговый индекс
   int fNumber = 0;
   vecTrials[ChildNum]->index = -1;
   while ((vecTrials[ChildNum]->index == -1) && (fNumber < pTask->GetNumOfFunc()))
@@ -80,6 +82,7 @@ void MPICalculationAsync::RecieveCalculatedFunctional()
 }
 
 // ------------------------------------------------------------------------------------------------
+
 void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
@@ -90,14 +93,14 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
   for (unsigned int i = 0; i < parameters.NumPoints; i++)
   {
     int isFinish = 0;
-    ///Îòïðàâëÿåì â Solver ôëàã, ÷òî ìû ðàáîòàåì
+    // Отправляем флаг, что есть работа
     MPI_Send(&isFinish, 1, MPI_INT, i + 1, TagChildSolved, MPI_COMM_WORLD);
 
     vecTrials.push_back(inputSet.trials[i]);
     Trial* trail = inputSet.trials[i];
     trail->index = 0;
     vecTrials[i]->index = 0;
-    ///Îòïðàâëÿåì êîîðäèíàòó y
+    // Отправляем координаты y
     MPI_Send(trail->y, parameters.Dimension, MPI_DOUBLE, i + 1, TagChildSolved, MPI_COMM_WORLD);
   }
 
@@ -111,13 +114,10 @@ void MPICalculationAsync::FirstStartCalculate(InformationForCalculation& inputSe
 
 
 // ------------------------------------------------------------------------------------------------
+
 void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Îòäàåì òî÷êó ñâîáîäíîìó
-  ///Æäåì êîãäà ïðèøëþò ñëåäóþùóþ
-  ///È òàê ïîêà íå ðåøèì
-
   int isFinish = 0;
   if (ChildNumRecv < 1 || ChildNumRecv >= parameters.GetProcNum()) {
     std::cout << "Error with CHILDNUMRECV!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
@@ -131,9 +131,7 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 
   MPI_Send(&isFinish, 1, MPI_INT, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD);
 
-  ///Çàïèñûâàåì â òó æå ÿ÷åéêó âåêòîðà íîâóþ òî÷êó, êîòîðóþ òåïåðü íàäî âû÷èñëèòü
   vecTrials[ChildNum] = inputSet.trials[0];
-
 
   MPI_Send(vecTrials[ChildNum]->y, parameters.Dimension, MPI_DOUBLE, ChildNumRecv, TagChildSolved, MPI_COMM_WORLD);
 
@@ -147,11 +145,10 @@ void MPICalculationAsync::StartCalculate(InformationForCalculation& inputSet,
 
 
 // ------------------------------------------------------------------------------------------------
+
 void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
   TResultForCalculation& outputSet)
 {
-  ///Êîãäà íàì ïðèñëàëè âû÷èñëåííóþ òî÷êó, ìû äîñòàåì íóæíóþ òî÷êó èç âåêòîðà, âñòàâëÿåì âû÷èñëåííîå çíà÷åíèå ôóíêöèè è çàïèñûâàåì åå â outputSet
-
   if (inputSet.trials.size() > 0)
   {
     outputSet.trials.clear();
@@ -166,8 +163,6 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
       outputSet.countCalcTrials[i] = 0;
 
   }
-
-  /// Çàïóñêàòü âû÷èñëåíèÿ êàê òîëüêî ïðèøëè äàííûå
   if (isStartComputingAway)
   {
     if (isFirst) {
@@ -184,7 +179,7 @@ void MPICalculationAsync::Calculate(InformationForCalculation& inputSet,
       StartCalculate(inputSet, outputSet);
     }
   }
-  else///ñîáðàòü äàííûå â îäèí áëîê, è ïîòîì âû÷èñëèòü âñå ñðàçó
+  else
   {
     if (countCalculation > 0)
     {
