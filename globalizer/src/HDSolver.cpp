@@ -112,6 +112,27 @@ int HDSolver::Solve()
       solver->Solve(tasks[i]);
 
       auto solution = solver->GetSolutionResult();
+
+      std::vector<Trial*>& curPoints = solver->GetAllPoint();
+      std::vector <double> curY(dimensions[i]);
+      for (Trial* point : curPoints)
+      {
+        for (int k = 0; k < dimensions[i]; k++)
+        {
+          curY[k] = point->y[k];
+        }
+        for (int j = 0; j < originalDimension; j++)
+        {
+          point->y[j] = parameters.startPoint[j];
+        }
+        for (int j = 0; j < dimensions[i]; j++)
+        {
+          point->y[j + startParameterNumber] = curY[j];
+        }
+      }
+
+      points.insert(points.end(), curPoints.begin(), curPoints.end());
+
       
       if (solution->BestTrial->index == problem->GetNumberOfConstraints())
       {
@@ -137,11 +158,14 @@ int HDSolver::Solve()
           }
         }
       }
+
+
+
       startParameterNumber = startParameterNumber + parameters.Dimension;
 
       parameters.Dimension = originalDimension;
 
-      points.insert(points.end(), solver->GetAllPoint().begin(), solver->GetAllPoint().end());
+
 
       Calculation::leafCalculation = 0;  
 
@@ -159,7 +183,7 @@ int HDSolver::Solve()
     }
     parameters.MaxNumOfPoints[0] = 2;
 
-    //finalSolver->SetPoint(points);
+    finalSolver->SetPoint(points);
 
     finalSolver->Solve();
 

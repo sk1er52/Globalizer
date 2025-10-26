@@ -805,6 +805,12 @@ void Method::InsertPoints(const std::vector<Trial*>& points)
   {
     Trial* currentPoint = points[j];
     Extended  x;
+
+    for (int j = 0; j < currentPoint->index; j++)
+    {
+      functionCalculationCount[j] += 1;
+    }
+
     evolvent.GetInverseImage(currentPoint->y, x);
     currentPoint->SetX(x);
     SearchInterval* CoveringInterval = pData->FindCoveringInterval(currentPoint);
