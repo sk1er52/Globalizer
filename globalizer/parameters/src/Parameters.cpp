@@ -84,7 +84,7 @@ void Parameters::SetDefaultParameters()
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
 
   InitOption(localVerificationType, None, "-doLV", "Enables or disables starting local method after the global one finished", 1);
-  InitOption(TypeLocalMethod, LeastSquareMethod, "-tlm", "Type Local Method, 0-Huck-Jivs, 1 - Qvadric, 2 - Gold", 1);
+  InitOption(TypeLocalMethod, HookeJeeves, "-tlm", "Type Local Method, 0-Huck-Jivs, 1 - Qvadric, 2 - Gold", 1);
   InitOption(localVerificationIteration, 10000, "-lvi", "Number of local method iterations", 1);
   InitOption(localVerificationEpsilon, 0.0001, "-lve", "Local Method Accuracy", 1);
   InitOption(localVerificationNumPoint, -1, "-lvnp", "local Verification NumPoint", 1);
