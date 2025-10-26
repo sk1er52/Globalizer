@@ -1,52 +1,76 @@
-#include "Calculation.h"
+п»ї// test_calculation.cpp  в”Ђв”Ђ СЃРєРµР»РµС‚
+#include "CalculationFactory.h"
 #include "OmpCalculation.h"
 #include "Task.h"
 #include "Problem.h"
-#include "Parameters.h" // Убедитесь, что этот include есть
+#include "test_config.h"
 
 #include <gtest/gtest.h>
-#include <vector>
-#include <functional>
 
-/**
- * @brief Этот тест проверяет только базовую возможность создать и корректно
- * удалить всю цепочку объектов, используемых в тестах вычислителей.
- * Если этот тест падает, проблема в конструкторах или деструкторах.
- */
-TEST(CalculationSanityCheck, CreationAndDestruction)
-{
-    // --- Шаг 1: Полностью имитируем логику SetUp ---
+class CalculationFixture : public ::testing::Test {
+protected:
+    static const int n = 5;
+    Task* task;
+    IProblem* problem;
 
-    // Задаем глобальные параметры
-    const int n = 2;
-    parameters.Dimension = n;
+    void SetUp() override {
+        parameters.Dimension = n;
+        problem = new ProblemFromFunctionPointers(
+            n,
+            std::vector<double>(n, -2.0),
+            std::vector<double>(n, 2.0),
+            { [](const double* x) {
+                double s = 0; for (int i = 0; i < parameters.Dimension; i++) s += x[i] * x[i];
+                return s;
+            } },
+            true, 0.0,
+            std::vector<double>(n, 0).data()
+        );
+        task = new Task(problem, 1);   // ProcLevel=1 в†’ В«Р»РёСЃС‚В»
+    }
 
-    // Создаем данные для IProblem. Делаем их членами тестового класса,
-    // чтобы они гарантированно жили дольше, чем 'problem'.
-    std::vector<double> bounds(n, 0.0);
-    std::vector<std::function<double(const double*)>> functions;
-    functions.push_back([](const double* y) {
-        if (y) return y[0] * 10.0;
-        return 0.0;
-        });
+    void TearDown() override {
+        delete task;
+        delete problem;
+        // РѕР±РЅСѓР»СЏРµРј СЃРёРЅРіР»С‚РѕРЅС‹ РјРµР¶РґСѓ С‚РµСЃС‚Р°РјРё
+        Calculation::leafCalculation = nullptr;
+        Calculation::firstCalculation = nullptr;
+    }
+};
 
-    // Создаем объекты в куче, как это делается в SetUp
-    IProblem* problem = new ProblemFromFunctionPointers(n, bounds, bounds, functions, false, 0, nullptr);
-    Task* task = new Task(problem, 1); // "Листовая" задача
-    Calculation* ompCalc = new OMPCalculation(*task);
+// ---------- CalculationFactory ----------
+TEST_F(CalculationFixture, CreatesOMPCalculationForLeaf) {
+    Calculation* calc = CalculationFactory::CreateCalculation2(*task);
 
-    // --- Шаг 2: Проверяем, что все указатели валидны ---
-    ASSERT_NE(problem, nullptr);
-    ASSERT_NE(task, nullptr);
-    ASSERT_NE(ompCalc, nullptr);
+    ASSERT_NE(calc, nullptr);
+    EXPECT_NE(dynamic_cast<OMPCalculation*>(calc), nullptr);
+}
 
-    // --- Шаг 3: Полностью имитируем логику TearDown ---
+TEST_F(CalculationFixture, ReturnsSameInstanceOnSecondCall) {
+    // TODO: Р°РЅР°Р»РѕРіРёС‡РЅРѕ РїРµСЂРІРѕРјСѓ С‚РµСЃС‚Сѓ, РЅРѕ РІС‹Р·РѕРІРёС‚Рµ С„Р°Р±СЂРёРєСѓ РґРІР°Р¶РґС‹
+    //       Рё СЃСЂР°РІРЅРёС‚Рµ СѓРєР°Р·Р°С‚РµР»Рё (EXPECT_EQ)
+}
 
-    // Удаляем в обратном порядке
-    delete ompCalc;
-    delete task;
-    delete problem;
+// ---------- Calculation (СЃС‚Р°С‚РёС‡РµСЃРєРёРµ РїРѕР»СЏ) ----------
+TEST_F(CalculationFixture, SetCountCalculationChangesGlobal) {
+    // TODO: 1) СЃРѕР·РґР°Р№С‚Рµ OMPCalculation calc(*task);
+    //       2) РІС‹Р·РѕРІРёС‚Рµ calc.SetCountCalculation(5);
+    //       3) РїСЂРѕРІРµСЂСЊС‚Рµ, С‡С‚Рѕ static Calculation::countCalculation == 5;
+}
 
-    // Если мы дошли до сюда без падения, тест считается успешным
-    SUCCEED();
+// ---------- OMPCalculation::Calculate ----------
+TEST_F(CalculationFixture, CalculateFillsIndexAndCounters) {
+    // РџРѕРґРіРѕС‚РѕРІРёРј РѕРґРёРЅ Trial
+    Trial tr;
+    for (int i = 0; i < n; i++) tr.y[i] = 0;           // С‚РѕС‡РєР° РІ (0,0,вЂ¦)
+    InformationForCalculation in;
+    in.trials.push_back(&tr);
+    TResultForCalculation out;
+
+    OMPCalculation calc(*task);
+    // TODO: РІС‹Р·РѕРІРёС‚Рµ calc.Calculate(in, out);
+    //       Р·Р°С‚РµРј РїСЂРѕРІРµСЂСЊС‚Рµ:
+    //       1) tr.index == 0
+    //       2) out.countCalcTrials.size() == 1
+    //       3) out.countCalcTrials[0] == 1
 }

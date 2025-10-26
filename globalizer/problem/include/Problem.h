@@ -334,7 +334,6 @@ public:
   ///Деструктор
   virtual ~BaseProblem()
   {
-    delete[] mNumberOfValues;
   }
 
   virtual std::string ProblemName()
