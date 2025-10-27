@@ -4,3 +4,6 @@
 [submodule "third_party/Problems"]
 	path = third_party/Problems
 	url = https://github.com/OptimLLab/Globalizer_Benchmarks.git
+[submodule "third_party/GCGen"]
+	path = third_party/GCGen
+	url = https://github.com/OptimLLab/GCGen.git
