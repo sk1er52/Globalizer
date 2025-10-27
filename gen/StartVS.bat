@@ -30,7 +30,7 @@ call conda install -p "%ROOT_DIR%build_64\Globalizer_env" lightning -y
 call conda install -p "%ROOT_DIR%build_64\Globalizer_env" scikit-learn -y
 
 echo [4/5] CMake Configuration...
-call cmake -G "Visual Studio 17 2022" -DGLOBALIZER_BUILD_PROBLEMS=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 ..
+call cmake -G "Visual Studio 17 2022" -DGLOBALIZER_BUILD_PROBLEMS=ON -DGLOBALIZER_BUILD_GCGEN=ON -DBUILD_ALL_TASK=ON -DGLOBALIZER_MAX_DIMENSION=130 -DGLOBALIZER_MAX_Number_Of_Function=70 -DGLOBALIZER_BUILD_TESTS=ON ..
 
 if %errorlevel% neq 0 goto error
 
