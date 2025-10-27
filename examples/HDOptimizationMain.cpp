@@ -39,14 +39,15 @@ int main(int argc, char* argv[])
   std::vector<std::string> u;
   std::vector<double> values(problem->GetNumberOfFunctions());
 
-  problem->GetStartTrial(y, u, values);
-
-  parameters.startPoint.SetSize(problem->GetDimension());
-  for (int i = 0; i < problem->GetDimension(); i++)
+  int err = problem->GetStartTrial(y, u, values);
+  if (err == IGlobalOptimizationProblem::PROBLEM_OK)
   {
-    parameters.startPoint[i] = y[i];
+    parameters.startPoint.SetSize(problem->GetDimension());
+    for (int i = 0; i < problem->GetDimension(); i++)
+    {
+      parameters.startPoint[i] = y[i];
+    }
   }
-
 
   // Решатель
   HDSolver solver(problem);
