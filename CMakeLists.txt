@@ -19,6 +19,7 @@ option(GLOBALIZER_MAX_DIMENSION "Set MAX DIMENSION Globalizer" OFF)
 option(GLOBALIZER_MAX_Number_Of_Function "Set MAX Number Of Function Globalizer" OFF)
 option(GLOBALIZER_BUILD_PROBLEMS "Set ON to build problems" OFF)
 option(GLOBALIZER_USE_DOXYGEN "Set ON to build documentation" OFF)
+option(GLOBALIZER_BUILD_GCGEN "Set ON to build GCGen" OFF)
 
 
 option(GLOBALIZER_ONE_MPI_PROCESS_PER_NODE "ONE PROCESS PER NODE" OFF)
@@ -204,6 +205,13 @@ if(${GLOBALIZER_BUILD_PROBLEMS})
   file(GLOB GLOBALIZER_BENCHMARKS_Interface_SOURCES ${GLOBALIZER_BENCHMARKS_Interface}/src/*.c ${GLOBALIZER_BENCHMARKS_Interface}/src/*.cpp)
   add_definitions(-D_GLOBALIZER_BENCHMARKS)		
   include_directories(${GLOBALIZER_BENCHMARKS_Interface}/include/)
+endif()
+
+# add GCGen
+if(${GLOBALIZER_BUILD_GCGEN})
+  add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/GCGen)
+  include_directories(${PROJECT_SOURCE_DIR}/third_party/GCGen/src/)
+  include_directories(${PROJECT_SOURCE_DIR}/third_party/GCGen/sample_src/)
 endif()
 
 # build main library and executable
