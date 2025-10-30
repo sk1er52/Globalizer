@@ -95,7 +95,7 @@ void Process::Solve()
 
     if (!pTask->IsLeaf())
     {
-      if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages))
+      if (!(pMethod->GetIterationCount() % parameters.StepPrintMessages) && parameters.isPrintResultToConsole)
       {
         print << "process 0, iteration " << pMethod->GetIterationCount() << "\t point count = " << pData->GetCount() << "\n";
         Trial* p = (pMethod->GetOptimEstimation());
@@ -142,7 +142,7 @@ void Process::Solve()
 
   if (!pTask->IsLeaf() && isPrintOptimEstimation)
   {
-    print << "\n";
+    //print << "\n";
     PrintOptimEstimationToFile(OptimEstimation);
     PrintOptimEstimationToConsole(OptimEstimation);
     PrintResultToFile(OptimEstimation);
@@ -204,77 +204,85 @@ void Process::PrintOptimEstimationToFile(Trial OptimEstimation)
 // ------------------------------------------------------------------------------------------------
 void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
 {
-  int NumberOfTrials;
-  double ValueDifference = HUGE_VAL;
-  double PointDifference = HUGE_VAL;
-  int numOfOptima = 1;
-  double* allOptimumPoints = new double[MAX_TRIAL_DIMENSION*MAX_NUM_MIN];
-  double* allPointDifference = new double[MAX_NUM_MIN];
-
-//  print << "ProcLevel = " << pTask->GetProcLevel() << "\n";
-  print << "Iterations = " << pMethod->GetIterationCount() << " \n";
-  print << "Points = " << pMethod->GetIterationCount() * parameters.NumPoints << " \n\n";
-
-  print << "Minimum value = " << OptimEstimation.FuncValues[OptimEstimation.index] << " \n";
-  for (int i = 0; i < pTask->GetN(); i++)
+  if (parameters.isPrintResultToConsole)
   {
-    print << "x[" << i << "] = " << OptimEstimation.y[i] << " \n";
-  }
-  /*
-  print << "\n";
-  print << "constants = ";
-  for (int i = 0; i < pTask->GetN(); i++)
-  {
-    print << OptimEstimation.y[i] << ",_";
-  }
-  */
-  print << "\n";
+    int NumberOfTrials;
+    double ValueDifference = HUGE_VAL;
+    double PointDifference = HUGE_VAL;
+    int numOfOptima = 1;
+    double* allOptimumPoints = new double[MAX_TRIAL_DIMENSION * MAX_NUM_MIN];
+    double* allPointDifference = new double[MAX_NUM_MIN];
 
-  if (pTask->GetIsOptimumValueDefined())
-  {
-    ValueDifference = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
-    print << "\nValue difference  = " << ValueDifference << " \n";
-  }
-
-  if (pTask->GetIsOptimumPointDefined())
-  {
-    PointDifference = 0.0;
-    for (int i = 0; i < pTask->GetN(); i++)
+    //  print << "ProcLevel = " << pTask->GetProcLevel() << "\n";
+    print << "Iterations = " << pMethod->GetIterationCount() << " \n";
+    //print << "Points = " << pMethod->GetIterationCount() * parameters.NumPoints << " \n\n";
+    if (OptimEstimation.index >= pTask->getProblem()->GetNumberOfConstraints())
     {
-      PointDifference = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] - pTask->GetOptimumPoint()[i]), PointDifference);
-    }
-    if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) != IProblem::UNDEFINED)
-    {
-      PointDifference = 0.0;
-      for (int j = 0; j < numOfOptima; j++)
+      print << "Minimum value = " << OptimEstimation.FuncValues[OptimEstimation.index] << " \n";
+      for (int i = 0; i < pTask->GetN(); i++)
       {
-        allPointDifference[j] = 0.0;
-        for (int i = 0; i < pTask->GetN(); i++)
-        {
-          allPointDifference[j] = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] -
-            allOptimumPoints[j*pTask->GetN() + i]), allPointDifference[j]);
-        }
-        if ((allPointDifference[j] < PointDifference) || (j == 0))
-        {
-          PointDifference = allPointDifference[j];
-        }
+        print << "x[" << i << "] = " << OptimEstimation.y[i] << " \n";
       }
     }
-    print << "Coordinates max difference = " << PointDifference << " \n";
-  }
+    else
+    {
+      print << "No solution has been found in the acceptable range.\n";
+    }
+    /*
+    print << "\n";
+    print << "constants = ";
+    for (int i = 0; i < pTask->GetN(); i++)
+    {
+      print << OptimEstimation.y[i] << ",_";
+    }
+    */
+    print << "\n";
+
+    if (pTask->GetIsOptimumValueDefined())
+    {
+      ValueDifference = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
+      print << "\nValue difference  = " << ValueDifference << " \n";
+    }
+
+    if (pTask->GetIsOptimumPointDefined())
+    {
+      PointDifference = 0.0;
+      for (int i = 0; i < pTask->GetN(); i++)
+      {
+        PointDifference = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] - pTask->GetOptimumPoint()[i]), PointDifference);
+      }
+      if (pTask->getProblem()->GetAllOptimumPoint(allOptimumPoints, numOfOptima) != IProblem::UNDEFINED)
+      {
+        PointDifference = 0.0;
+        for (int j = 0; j < numOfOptima; j++)
+        {
+          allPointDifference[j] = 0.0;
+          for (int i = 0; i < pTask->GetN(); i++)
+          {
+            allPointDifference[j] = GLOBALIZER_MAX(fabs(OptimEstimation.y[i] -
+              allOptimumPoints[j * pTask->GetN() + i]), allPointDifference[j]);
+          }
+          if ((allPointDifference[j] < PointDifference) || (j == 0))
+          {
+            PointDifference = allPointDifference[j];
+          }
+        }
+      }
+      print << "Coordinates max difference = " << PointDifference << " \n";
+    }
 
 
-  bool res = false;
-  double AchievedAccuracy = 0.0;
+    bool res = false;
+    double AchievedAccuracy = 0.0;
 
-  switch (parameters.stopCondition)
-  {
-  case Accuracy:
-    if (pMethod->GetAchievedAccuracy() < parameters.Epsilon)
-      res = true;
-    AchievedAccuracy = pMethod->GetAchievedAccuracy();
-    break;
-  case OptimumVicinity:
+    switch (parameters.stopCondition)
+    {
+    case Accuracy:
+      if (pMethod->GetAchievedAccuracy() < parameters.Epsilon)
+        res = true;
+      AchievedAccuracy = pMethod->GetAchievedAccuracy();
+      break;
+    case OptimumVicinity:
     {
       res = true;
       AchievedAccuracy = parameters.Epsilon;
@@ -298,7 +306,7 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
         {
           for (int i = 0; i < parameters.Dimension; i++)
           {
-            double fabsx = fabs(OptimEstimation.y[i] - allOptimumPoints[parameters.Dimension*j + i]);
+            double fabsx = fabs(OptimEstimation.y[i] - allOptimumPoints[parameters.Dimension * j + i]);
             double fm = parameters.Epsilon * (pTask->GetB()[i] - pTask->GetA()[i]);
             if (fabsx > fm)
             {
@@ -319,7 +327,7 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
       }
     }
     break;
-  case OptimumVicinity2:
+    case OptimumVicinity2:
     {
       res = true;
       AchievedAccuracy = parameters.Epsilon;
@@ -334,31 +342,36 @@ void Process::PrintOptimEstimationToConsole(Trial OptimEstimation)
       }
     }
     break;
-  case OptimumValue:
-    if (OptimEstimation.index == pTask->GetNumOfFunc() - 1 &&
-      OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue() <
-      parameters.Epsilon)
-      res = true;
-    AchievedAccuracy = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
-    break;
+    case OptimumValue:
+      if (OptimEstimation.index == pTask->GetNumOfFunc() - 1 &&
+        OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue() <
+        parameters.Epsilon)
+        res = true;
+      AchievedAccuracy = OptimEstimation.FuncValues[OptimEstimation.index] - pTask->GetOptimumValue();
+      break;
+    }
+    delete[] allOptimumPoints;
+
+    print << "Accuracy = " << AchievedAccuracy << "\n";
+
+    //  print << "Global optimum " << ((res) ? "FOUND!" : "NOT FOUND") <<"\n";
+
+    NumberOfTrials = pMethod->GetNumberOfTrials();
+    pMethod->PrintSection();
+
+    //print << "\nTrials = " << NumberOfTrials << "\n";
+    for (int i = 0; i < pTask->GetNumOfFunc(); i++)
+    {
+      if (i < pTask->getProblem()->GetNumberOfConstraints())
+        print << "\tConstraint\t\t" << i << "\tcalculations =\t" << pMethod->GetFunctionCalculationCount()[i] << "\n";
+      else
+        print << "\tObjective function\t" << i << "\tcalculations =\t" << pMethod->GetFunctionCalculationCount()[i] << "\n";
+    }
+    //  print << "\nLocalPointCount = " << pMethod->GetLocalPointCount() << "\n";
+    //  print << "\nNumberLocalMethodtStart = " << pMethod->GetNumberLocalMethodtStart() << "\n";
+
+    print << "\nSolve time = " << duration << "\n\n\n";
   }
-  delete[] allOptimumPoints;
-
-  print << "Accuracy = " << AchievedAccuracy << "\n";
-
-//  print << "Global optimum " << ((res) ? "FOUND!" : "NOT FOUND") <<"\n";
-
-  NumberOfTrials = pMethod->GetNumberOfTrials();
-  pMethod->PrintSection();
-
-  print << "\nTrials = " << NumberOfTrials << "\n";
-  for (int i = 0; i < pTask->GetNumOfFunc(); i++)
-    print << "Function " << i << " calculations = " << pMethod->GetFunctionCalculationCount()[i] << "\n";
-
-//  print << "\nLocalPointCount = " << pMethod->GetLocalPointCount() << "\n";
-//  print << "\nNumberLocalMethodtStart = " << pMethod->GetNumberLocalMethodtStart() << "\n";
-
-  print << "\nSolve time = " << duration << "\n\n\n";
 
 }
 

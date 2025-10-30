@@ -80,16 +80,26 @@ public:
   virtual int Solve();
   /// Решение подзадачи с указанными параметрами
   virtual int Solve(Task* task);
+
   virtual ~Solver();
 
+  /// Задает задачу для решения
   void SetProblem(IProblem* problem);
+
+  /// Возвращает решаемую задачу
   IProblem* GetProblem();
+
+  /// Возвращает полученное решение
   SolutionResult* GetSolutionResult();
 
   /// Добавляет точки испытаний
   virtual void SetPoint(std::vector<Trial*>& points);
+
   /// Возврящает все имеющиеся точки испытаний
   virtual std::vector<Trial*>& GetAllPoint();
+
+  /// Возвращает задачу решателя
+  Task* GetTask();
 };
 
 #endif //solver.h

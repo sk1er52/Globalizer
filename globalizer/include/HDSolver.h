@@ -27,6 +27,9 @@ protected:
   /// задача оптимизации
   IProblem* problem;
 
+  /// альтернативная стартовая точка на случай если не удалось улучшить решение
+  std::vector<double> alternativeStartingPoint;
+
   /// Задачть размерности
   void SetDimentions(std::vector<int> _dimentions);
 
@@ -35,6 +38,13 @@ protected:
 
   /// заполняет основные поля класса
   void Construct();
+
+  /// Добавляет вычесленные точки в общий массив с точками
+  void AddPoint(Solver* solver, int i, std::vector<Trial*>& points, int startParameterNumber);
+
+  /// Обновляет стартовую точку
+  void UpdateStartPoint(SolutionResult* solution, double& bestValue, int curDimensions,
+    int startParameterNumber, std::vector<Trial*>& points, HDTask* curTask);
 
 public:
   HDSolver(IProblem* problem, std::vector<int> _dimentions = {});

@@ -24,29 +24,10 @@ int main(int argc, char* argv[])
 #ifdef _GLOBALIZER_BENCHMARKS
   GlobalOptimizationProblemManager manager;
   IGlobalOptimizationProblem* problem = 0;
-  if (InitGlobalOptimizationProblem(manager, problem, parameters.libPath))
+  if (InitProblemGlobalizerBenchmarks(manager, problem))
   {
     print << "Error during problem initialization\n";
     return 0;
-  }
-
-  if (parameters.Dimension.GetIsChange())
-    problem->SetDimension(parameters.Dimension);
-  else
-    parameters.Dimension = problem->GetDimension();
-
-  std::vector<double> y(problem->GetDimension());
-  std::vector<std::string> u;
-  std::vector<double> values(problem->GetNumberOfFunctions());
-
-  int err = problem->GetStartTrial(y, u, values);
-  if (err == IGlobalOptimizationProblem::PROBLEM_OK)
-  {
-    parameters.startPoint.SetSize(problem->GetDimension());
-    for (int i = 0; i < problem->GetDimension(); i++)
-    {
-      parameters.startPoint[i] = y[i];
-    }
   }
 
   // Решатель

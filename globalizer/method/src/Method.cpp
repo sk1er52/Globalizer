@@ -833,6 +833,7 @@ void Method::InsertPoints(const std::vector<Trial*>& points)
       CalculateM(p);
       CalculateM(CoveringInterval);
     }
+    this->iteration.IterationCount++;
   }
 }
 

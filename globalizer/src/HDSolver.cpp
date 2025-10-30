@@ -45,7 +45,7 @@ void HDSolver::Construct()
   solutionResult = nullptr;
   originalDimension = parameters.Dimension;
   CreateStartPoint();
-  parameters.TypeSolver = SeparableSearch;
+  parameters.TypeSolver = HDSearch;
 }
 
 
@@ -88,108 +88,157 @@ HDSolver::~HDSolver()
 }
 
 // ------------------------------------------------------------------------------------------------
+void HDSolver::AddPoint(Solver* solver, int curDimensions, std::vector<Trial*>& points, int startParameterNumber)
+{
+  std::vector<Trial*>& curPoints = solver->GetAllPoint();
+  std::vector <double> curY(curDimensions);
+  for (Trial* point : curPoints)
+  {
+    for (int k = 0; k < curDimensions; k++)
+    {
+      curY[k] = point->y[k];
+    }
+    for (int j = 0; j < originalDimension; j++)
+    {
+      point->y[j] = parameters.startPoint[j];
+    }
+    for (int j = 0; j < curDimensions; j++)
+    {
+      point->y[j + startParameterNumber] = curY[j];
+    }
+
+    points.push_back(point->Clone());
+  }
+
+  //points.insert(points.end(), curPoints.begin(), curPoints.end());
+}
+
+// ------------------------------------------------------------------------------------------------
+void HDSolver::UpdateStartPoint(SolutionResult* solution, double& bestValue, int curDimensions, 
+  int startParameterNumber, std::vector<Trial*>& points, HDTask* curTask)
+{
+  if (solution->BestTrial->index == problem->GetNumberOfConstraints())
+  {
+#ifdef WIN32
+    if (_finite(solution->BestTrial->GetValue()) != 0)
+#else
+    if (std::isfinite(solution->BestTrial->GetValue()) != 0)
+#endif
+    {
+      if (bestValue > solution->BestTrial->GetValue())
+      {
+        bestValue = solution->BestTrial->GetValue();
+        for (int j = 0; j < curDimensions; j++)
+        {
+          parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+        }
+
+        parameters.startPointValues.SetSize(curTask->GetNumOfFunc());
+        for (int j = 0; j < curTask->GetNumOfFunc(); j++)
+        {
+          parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
+        }
+
+        print << "\t Iteration " << points.size() << "\t" << "bestValue =\t" << bestValue << "\n";
+
+      }
+    }
+  }
+
+  for (int j = 0; j < curDimensions; j++)
+  {
+    if (j + startParameterNumber < alternativeStartingPoint.size())
+      alternativeStartingPoint[j + startParameterNumber] = solution->BestTrial->y[j];
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
 int HDSolver::Solve()
 {
   try
   {
     auto doLV = parameters.localVerificationType;
-    parameters.localVerificationType = None;
-    int startParameterNumber = 0;
+    auto isPrint = parameters.isPrintResultToConsole;
+
+
+    auto mnp = parameters.MaxNumOfPoints[0];
+    int iterationCount = parameters.HDSolverIterationCount;
+    
+    alternativeStartingPoint.resize(originalDimension);
 
     std::vector<Trial*> points;
-    double bestVolue = MaxDouble;
-    for (int i = 0; i < solvers.size(); i++)
+    double bestValue = MaxDouble;
+    for (int iteration = 0; iteration < iterationCount; iteration++)
     {
-      parameters.Dimension = dimensions[i];
+      parameters.localVerificationType = None;
+      parameters.isPrintResultToConsole = false;
+      int startParameterNumber = 0;
 
-      Solver* solver = solvers[i];
-      if (tasks[i] != nullptr)
-        delete tasks[i];
-      tasks[i] = dynamic_cast<HDTask*>(TaskFactory::CreateTask(problem, 0));      
-
-      tasks[i]->SetStartParameterNumber(startParameterNumber);
-
-      solver->Solve(tasks[i]);
-
-      auto solution = solver->GetSolutionResult();
-
-      std::vector<Trial*>& curPoints = solver->GetAllPoint();
-      std::vector <double> curY(dimensions[i]);
-      for (Trial* point : curPoints)
+      for (int i = 0; i < solvers.size(); i++)
       {
-        for (int k = 0; k < dimensions[i]; k++)
-        {
-          curY[k] = point->y[k];
-        }
+        parameters.Dimension = dimensions[i];
+
+        Solver* solver = solvers[i];
+        if (tasks[i] != nullptr)
+          delete tasks[i];
+        tasks[i] = dynamic_cast<HDTask*>(TaskFactory::CreateTask(problem, 0));
+
+        tasks[i]->SetStartParameterNumber(startParameterNumber);
+
+        solver->Solve(tasks[i]);
+
+        auto solution = solver->GetSolutionResult();
+
+        AddPoint(solver, dimensions[i], points, startParameterNumber);
+
+        UpdateStartPoint(solution, bestValue, dimensions[i], startParameterNumber, points, tasks[i]);
+
+        startParameterNumber = startParameterNumber + parameters.Dimension;
+
+        parameters.Dimension = originalDimension;
+
+        Calculation::leafCalculation = 0;
+      }
+      if (iteration == iterationCount - 1)
+      {
+        parameters.localVerificationType = doLV;
+        parameters.isPrintResultToConsole = isPrint;
+      }
+
+      if (finalSolver == nullptr)
+        finalSolver = new Solver(problem);
+      else
+      {
+
+        finalSolver = new Solver(problem);
+      }
+      //parameters.MaxNumOfPoints[0] = 2;
+
+      parameters.MaxNumOfPoints[0] = parameters.MaxNumOfPoints[0] + points.size();
+
+      finalSolver->SetPoint(points);
+
+      finalSolver->Solve();      
+
+      if (solutionResult != nullptr)
+        delete solutionResult;
+      solutionResult = finalSolver->GetSolutionResult();
+
+      AddPoint(finalSolver, originalDimension, points, 0);
+
+      UpdateStartPoint(solutionResult, bestValue, originalDimension, startParameterNumber, points, dynamic_cast<HDTask*>(finalSolver->GetTask()));
+
+      parameters.MaxNumOfPoints[0] = mnp ;
+
+      if (bestValue == MaxDouble)
+      {
         for (int j = 0; j < originalDimension; j++)
         {
-          point->y[j] = parameters.startPoint[j];
-        }
-        for (int j = 0; j < dimensions[i]; j++)
-        {
-          point->y[j + startParameterNumber] = curY[j];
+          parameters.startPoint[j] = alternativeStartingPoint[j];
         }
       }
-
-      points.insert(points.end(), curPoints.begin(), curPoints.end());
-
-      
-      if (solution->BestTrial->index == problem->GetNumberOfConstraints())
-      {
-#ifdef WIN32
-        if (_finite(solution->BestTrial->GetValue()) != 0)
-#else
-        if (std::isfinite(solution->BestTrial->GetValue()) != 0)
-#endif
-        {
-          if (bestVolue >= solution->BestTrial->GetValue())
-          {
-            bestVolue = solution->BestTrial->GetValue();
-            for (int j = 0; j < dimensions[i]; j++)
-            {
-              parameters.startPoint[j + startParameterNumber] = solution->BestTrial->y[j];
-            }
-
-            parameters.startPointValues.SetSize(tasks[i]->GetNumOfFunc());
-            for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
-            {
-              parameters.startPointValues[j] = solution->BestTrial->FuncValues[j];
-            }
-          }
-        }
-      }
-
-
-
-      startParameterNumber = startParameterNumber + parameters.Dimension;
-
-      parameters.Dimension = originalDimension;
-
-
-
-      Calculation::leafCalculation = 0;  
-
-      print << "bestVolue =\t" << bestVolue << "\t Dimension " << i << "\n";
-      print << "best coordinate = \t" << parameters.startPoint.ToString() << "\n";
     }
-
-    parameters.localVerificationType = doLV;
-    if (finalSolver == nullptr)
-      finalSolver = new Solver(problem);
-    else
-    {
-
-      finalSolver = new Solver(problem);
-    }
-    parameters.MaxNumOfPoints[0] = 2;
-
-    finalSolver->SetPoint(points);
-
-    finalSolver->Solve();
-
-    if (solutionResult != nullptr)
-      delete solutionResult;
-    solutionResult = finalSolver->GetSolutionResult();
+    parameters.MaxNumOfPoints[0] = mnp;
 
   }
   catch (const Exception& e)

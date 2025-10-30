@@ -1329,8 +1329,8 @@ void TETypeSolver<Owner>::operator = (std::string data)
 {
   if ((data == "SingleSearch") || (data == "0"))
     *this = SingleSearch;
-  if ((data == "SeparableSearch") || (data == "2"))
-    *this = SeparableSearch;
+  if ((data == "HDSearch") || (data == "2"))
+    *this = HDSearch;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1339,8 +1339,8 @@ template <class Owner>
 TETypeSolver<Owner>::operator std::string()
 {
   std::string s;
-  if (this->mValue == SeparableSearch)
-    s = "SeparableSearch";
+  if (this->mValue == HDSearch)
+    s = "HDSearch";
   if (this->mValue == SingleSearch)
     s = "SingleSearch";
   return s;
