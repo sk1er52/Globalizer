@@ -428,3 +428,15 @@ std::vector<Trial*>& Solver::GetAllPoint()
 {
   return pData->GetTrials();
 }
+
+Task* Solver::GetTask()
+{
+  return pTask;
+}
+
+
+/// Возвращает поисковую информацию
+SearchData* Solver::GetData()
+{
+  return pData;
+}

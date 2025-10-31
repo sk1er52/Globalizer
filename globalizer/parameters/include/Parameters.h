@@ -133,14 +133,17 @@ public:
 
   TInt<Parameters> ProcRank;
   ///cпособ использования локального метода(только для синхронного типа процесса)
-  TELocalMethodScheme<Parameters> localVerificationType; 
+  TELocalMethodScheme<Parameters> localRefineSolution; 
 
   /// Количество итераций локального метода
-  TInt<Parameters> localVerificationIteration;
+  TInt<Parameters> localIteration;
   /// Точность локального метода
   TDouble<Parameters> localVerificationEpsilon; 
   /// Количество точек точек параллельно вычисляемых локальным методом
   TInt<Parameters> localVerificationNumPoint;
+
+  /// Количество итераций решателя задач большой размерности
+  TInt<Parameters> HDSolverIterationCount;
 
   ///параметр смешивания в локально-глобальном алгоритме
   TInt<Parameters> localMix; 
@@ -160,6 +163,8 @@ public:
   TEStopCondition<Parameters> stopCondition; 
   /// Критерий применим только к верхнему уровню или к любому (для адаптивной схемы)
   TBool<Parameters> isStopByAnyLevel;
+  /// Печатать ли результаты работы алгоритма в консоль
+  TBool<Parameters> isPrintResultToConsole;
   ///путь, по которому будут сохранены многомерные точки, поставленные методом корневого процесса
   TString<Parameters> iterPointsSavePath; 
   ///флаг, включающий печать дополнительной статистики: оценки констант Гёльдера и значения функций в точке оптимума

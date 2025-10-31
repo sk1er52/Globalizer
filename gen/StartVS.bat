@@ -16,7 +16,7 @@ git submodule update
 call conda init
 
 echo [1/5] Creating a Conda Environment...
-call conda create -p "%ROOT_DIR%\build_64\Globalizer_env" python=3.11 -y
+call conda create -p "%ROOT_DIR%\build_64\Globalizer_env" python=3.13 -y
 
 echo [2/5] activate a Conda Environment...
 call conda activate "%ROOT_DIR%\build_64\Globalizer_env"

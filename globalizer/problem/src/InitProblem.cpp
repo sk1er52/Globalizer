@@ -79,12 +79,34 @@ int InitProblemGlobalizerBenchmarks(GlobalOptimizationProblemManager& problemMan
 
   IGlobalOptimizationProblem* baseProblem = problemManager.GetProblem();
 
+  baseProblem->Initialize();
+
   if (parameters.Dimension.GetIsChange())
-    baseProblem->SetDimension(parameters.Dimension);
+  {
+    auto res = baseProblem->SetDimension(parameters.Dimension);
+    if (res != IGlobalOptimizationProblem::PROBLEM_OK)
+    {
+      print << " WARNING!!! Dimentions not change! \n";
+      parameters.Dimension = baseProblem->GetDimension();
+    }
+  }
   else
     parameters.Dimension = baseProblem->GetDimension();
 
-  baseProblem->Initialize();
+
+  std::vector<double> y(baseProblem->GetDimension());
+  std::vector<std::string> u;
+  std::vector<double> values(baseProblem->GetNumberOfFunctions());
+
+  int err = baseProblem->GetStartTrial(y, u, values);
+  if (err == IGlobalOptimizationProblem::PROBLEM_OK)
+  {
+    parameters.startPoint.SetSize(baseProblem->GetDimension());
+    for (int i = 0; i < baseProblem->GetDimension(); i++)
+    {
+      parameters.startPoint[i] = y[i];
+    }
+  }
 
   problem = baseProblem;
   return 0;

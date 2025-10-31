@@ -83,11 +83,13 @@ void Parameters::SetDefaultParameters()
   InitOption(IsSetDevice, false, "-sd", "Assign each process their device", 1);
   InitOption(deviceIndex, -1, "-di", "Device Index, def: -1 auto", 1);
 
-  InitOption(localVerificationType, None, "-doLV", "Enables or disables starting local method after the global one finished", 1);
+  InitOption(localRefineSolution, None, "-doLV", "Enables or disables starting local method after the global one finished", 1);
   InitOption(TypeLocalMethod, HookeJeeves, "-tlm", "Type Local Method, 0-Huck-Jivs, 1 - Qvadric, 2 - Gold", 1);
-  InitOption(localVerificationIteration, 10000, "-lvi", "Number of local method iterations", 1);
+  InitOption(localIteration, 10000, "-lvi", "Number of local method iterations", 1);
   InitOption(localVerificationEpsilon, 0.0001, "-lve", "Local Method Accuracy", 1);
-  InitOption(localVerificationNumPoint, -1, "-lvnp", "local Verification NumPoint", 1);
+  InitOption(localVerificationNumPoint, 1, "-lvnp", "The number of iterations of a large-dimensional problem solver", 1);
+
+  InitOption(HDSolverIterationCount, 1, "-hdsic", "local Verification NumPoint", 1);
   
   InitOption(localMix, 0, "-lm", "local mix parameter", 1);
   InitOption(localAlpha, 15, "-la", "parameter alpha in mixed algorithm", 1);
@@ -99,6 +101,7 @@ void Parameters::SetDefaultParameters()
   
   InitOption(stopCondition, Accuracy, "-stopCond", "stop condition type", 1);
   InitOption(isStopByAnyLevel, true, "-isbal", "Is Stop By Any Level", 1);
+  InitOption(isPrintResultToConsole, true, "-isPRC", "Should print the results of the algorithm to the console", 1);
   InitOption(iterPointsSavePath, \0, "-sip", "path to save iterations points", 1);
   InitOption(printAdvancedInfo, 0, "-advInf", "print advanced statistics", 1);
   InitOption(disablePrintParameters, 0, "-dpp", "disable print parameters", 1);
@@ -146,8 +149,8 @@ void Parameters::SetDefaultParameters()
 
   libConfigPath.mIsEdit = true;
   libPath.mIsEdit = true;
-  localVerificationType.mIsEdit = true;
-  localVerificationIteration.mIsEdit = true;
+  localRefineSolution.mIsEdit = true;
+  localIteration.mIsEdit = true;
   localVerificationEpsilon.mIsEdit = true;
   MaxNumOfPoints.mIsEdit = true;
   Epsilon.mIsEdit = true;
