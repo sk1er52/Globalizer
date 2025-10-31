@@ -133,10 +133,10 @@ public:
 
   TInt<Parameters> ProcRank;
   ///cпособ использования локального метода(только для синхронного типа процесса)
-  TELocalMethodScheme<Parameters> localVerificationType; 
+  TELocalMethodScheme<Parameters> localRefineSolution; 
 
   /// Количество итераций локального метода
-  TInt<Parameters> localVerificationIteration;
+  TInt<Parameters> localIteration;
   /// Точность локального метода
   TDouble<Parameters> localVerificationEpsilon; 
   /// Количество точек точек параллельно вычисляемых локальным методом

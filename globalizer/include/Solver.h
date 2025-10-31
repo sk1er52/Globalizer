@@ -100,6 +100,9 @@ public:
 
   /// Возвращает задачу решателя
   Task* GetTask();
+
+  /// Возвращает поисковую информацию
+  SearchData* GetData();
 };
 
 #endif //solver.h

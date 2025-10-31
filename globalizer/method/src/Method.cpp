@@ -1808,7 +1808,7 @@ void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
   // начальный шаг равен среднему размеру стороны гиперкуба, умноженному на коэффициент
   localMethod->SetEps(parameters.localVerificationEpsilon);
   localMethod->SetInitialStep(0.07 * initialStep);
-  localMethod->SetMaxTrials(parameters.localVerificationIteration);
+  localMethod->SetMaxTrials(parameters.localIteration);
   Trial newpoint2 = localMethod->StartOptimization();
   Trial* newpoint = TrialFactory::CreateTrial(&newpoint2);
 
@@ -1846,8 +1846,8 @@ void Method::HookeJeevesMethod(Trial& point, std::vector<Trial*>& localPoints)
 // ------------------------------------------------------------------------------------------------
 void Method::LocalSearch()
 {
-  if (((parameters.localVerificationType == FinalStart && isStop) ||
-    (parameters.localVerificationType == UpdatedMinimum))
+  if (((parameters.localRefineSolution == FinalStart && isStop) ||
+    (parameters.localRefineSolution == UpdatedMinimum))
     && GetOptimEstimation()->index == pTask.GetNumOfFunc() - 1)
   {
 
@@ -1899,7 +1899,7 @@ void Method::LocalSearch()
 
     localMethod->SetInitialStep(0.07 * initialStep);
 
-    localMethod->SetMaxTrials(parameters.localVerificationIteration);
+    localMethod->SetMaxTrials(parameters.localIteration);
     Trial point2 = localMethod->StartOptimization();
     Trial* newpoint = TrialFactory::CreateTrial(&point2);
 
@@ -1933,7 +1933,7 @@ void Method::LocalSearch()
 
     localPointCount += localMethod->GetTrialsCounter();
 
-    if (parameters.localVerificationType == UpdatedMinimum)
+    if (parameters.localRefineSolution == UpdatedMinimum)
       pData->SetRecalc(true);
 
   }

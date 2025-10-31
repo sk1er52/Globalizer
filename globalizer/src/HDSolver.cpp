@@ -157,9 +157,14 @@ int HDSolver::Solve()
 {
   try
   {
-    auto doLV = parameters.localVerificationType;
+    auto doLV = parameters.localRefineSolution;
     auto isPrint = parameters.isPrintResultToConsole;
 
+    parameters.M_constant.SetSize(problem->GetNumberOfFunctions());
+    for (int j = 0; j < problem->GetNumberOfFunctions(); j++)
+    {
+      parameters.M_constant[j] = 1;
+    }
 
     auto mnp = parameters.MaxNumOfPoints[0];
     int iterationCount = parameters.HDSolverIterationCount;
@@ -170,7 +175,7 @@ int HDSolver::Solve()
     double bestValue = MaxDouble;
     for (int iteration = 0; iteration < iterationCount; iteration++)
     {
-      parameters.localVerificationType = None;
+      parameters.localRefineSolution = None;
       parameters.isPrintResultToConsole = false;
       int startParameterNumber = 0;
 
@@ -198,10 +203,18 @@ int HDSolver::Solve()
         parameters.Dimension = originalDimension;
 
         Calculation::leafCalculation = 0;
+
+        for (int j = 0; j < tasks[i]->GetNumOfFunc(); j++)
+        {
+          if (solver->GetData()->M[j] > parameters.M_constant[j])
+          {
+            parameters.M_constant[j] = solver->GetData()->M[j];
+          }
+        }
       }
       if (iteration == iterationCount - 1)
       {
-        parameters.localVerificationType = doLV;
+        parameters.localRefineSolution = doLV;
         parameters.isPrintResultToConsole = isPrint;
       }
 
