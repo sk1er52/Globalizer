@@ -258,23 +258,6 @@ endif()
 
 add_library(${GLOBALIZER_LIB_NAME} STATIC ${ALL_SRC_FILES})
 
-target_include_directories(${GLOBALIZER_LIB_NAME} PUBLIC
-    ${GLOBALIZER_MPI_INCLUDES}
-    ${GLOBALIZER_MPIR_INCLUDES}
-    ${GLOBALIZER_MPFR_INCLUDES}
-    ${GLOBALIZER_MPREAL_INCLUDES}
-  
-    ${GLOBALIZER_COMMON_SRC_DIR}
-    ${GLOBALIZER_PARAMETERS_DIR}
-    ${GLOBALIZER_evolvent_DIR}
-    ${GLOBALIZER_extended_DIR}
-    ${GLOBALIZER_output_system_DIR}
-    ${GLOBALIZER_problem_DIR}
-    ${GLOBALIZER_method_DIR}
-    ${GLOBALIZER_calculation_DIR}
-    ${GLOBALIZER_local_method_DIR}
-)
-
 file(GLOB main_list "${GLOBALIZER_EXAMPLES_SRC_DIR}/*.cpp")
 
 
