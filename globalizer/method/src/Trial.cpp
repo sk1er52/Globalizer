@@ -40,7 +40,10 @@ Trial::Trial()
 
   for (int i = 0; i < MaxNumOfFunc; i++)
     FuncValues[i] = MaxDouble;
-  memset(y, 0, MaxDim * sizeof(*y));
+  
+  for (int i = 0; i < MaxDim; ++i) {
+      y[i] = 0.0;
+  }
 
   leftInterval = 0;
   rightInterval = 0;

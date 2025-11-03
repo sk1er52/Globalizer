@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      cuda_calculation.h                                          //
+//  File:      CudaCalculation.h                                           //
 //                                                                         //
 //  Purpose:   Header file for CUDA calculation class                      //
 //                                                                         //
@@ -13,56 +13,79 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
+/**
+ * \file CudaCalculation.h
+ *
+ * \authors Лебедев И.
+ * \date 2015
+ * \copyright ННГУ им. Н.И. Лобачевского
+ *
+ * \brief Объявление класса #CUDACalculation для вычислений с помощью CUDA
+ */
+
 #ifndef __CUDA_CALCULATION_H__
 #define __CUDA_CALCULATION_H__
 
 #include "Calculation.h"
 
+ /**
+  * \brief Реализация вычислителя с использованием технологии CUDA.
+  *
+  * Позволяет выполнять массовые параллельные вычисления на GPU от NVIDIA.
+  */
 class CUDACalculation : public Calculation
 {
 protected:
-  ///Кол-во устройств
-  int deviceCount;
-  ///Кол-во данных на каждом устройстве
-  int* dataSize;
-  ///Начало данных для устройств
-  int* dataStart;
-  //индексы используемых устройств
-  int* devicesIndex;
+	// распределения вычислений по нескольким GPU
 
-  double* coordinates;
-  int coordinatesSize;
-  double* FuncValues;
-  int FuncValuesSize;
+	/// Количество доступных GPU
+	int deviceCount;
+	/// Размер данных для каждого GPU
+	int* dataSize;
+	/// Начальный индекс данных для каждого GPU
+	int* dataStart;
+	/// Индексы используемых GPU
+	int* devicesIndex;
 
-  bool mIsInitialized;
+	/// Буфер для координат точек, передаваемых в CUDA-ядро
+	double* coordinates;
+	/// Размер буфера coordinates
+	int coordinatesSize;
+	/// Буфер для значений функций, получаемых из CUDA-ядра
+	double* FuncValues;
+	/// Размер буфера FuncValues
+	int FuncValuesSize;
 
-  
-  void StartCalculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
+	/// Флаг, показывающий, была ли проведена инициализация
+	bool mIsInitialized;
+
+	/**
+	 * \brief Внутренний метод, запускающий процесс вычислений.
+	 * \param[in] inputSet Входные данные.
+	 * \param[out] outputSet Выходные данные.
+	 */
+	void StartCalculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
 
 public:
-  CUDACalculation(Task& _pTask) : Calculation(_pTask)
-  {
-    mIsInitialized = false;
-	coordinates = 0;
-    FuncValues = 0;
-	coordinatesSize = 0;
-	FuncValuesSize = 0;
-  }
+	/**
+	 * \brief Конструктор.
+	 * \param _pTask Ссылка на объект задачи.
+	 */
+	CUDACalculation(Task& _pTask) : Calculation(_pTask)
+	{
+		mIsInitialized = false;
+		coordinates = 0;
+		FuncValues = 0;
+		coordinatesSize = 0;
+		FuncValuesSize = 0;
+	}
 
-  //~CUDACalculation();
-
-  /// 0 - Инициализирует массивы
-  //virtual void Init(int _numPoint, int _N, int _numFunc);
-
-  /// 1 - Задает координаты точки испытания
-  //virtual void SetCoordinate(int _indexPoint, double* _coordinates, bool isCalculate = true);
-
-  /// 2 - Вычисляет функции (ограничения и критерий) и индекс невыполненного ограничения по координатам
-  virtual void Calculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
-
-  /// 3 - Возвращает вычисленные значения функций
-  //virtual void GetFuncValue(int _indexPoint, double* _funcVal, int& index);
+	/**
+	 * \brief Выполняет вычисления для набора испытаний с использованием CUDA.
+	 * \param[in] inputSet Входные данные.
+	 * \param[out] outputSet Выходные данные.
+	 */
+	virtual void Calculate(InformationForCalculation& inputSet, TResultForCalculation& outputSet);
 };
 
 #endif
