@@ -79,3 +79,4 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
+/.vs/
