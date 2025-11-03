@@ -3,6 +3,8 @@ project (${PROJECT_NAME_STR})
 
 set(TESTS_OUTPUT_DIRECTORY ${GLOBALIZER_OUTPUT_DIRECTORY})
 
+include_directories(${PROJECT_SOURCE_DIR}/globalizer)
+
 include_directories(${GLOBALIZER_COMMON_SRC_DIR})
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
 
