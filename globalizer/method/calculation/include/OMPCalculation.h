@@ -5,7 +5,7 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      OmpCalculation.h                                            //
+//  File:      OMPCalculation.h                                            //
 //                                                                         //
 //  Purpose:   Header file for OpenMP calculation class                    //
 //                                                                         //
@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 /**
- * \file OmpCalculation.h
+ * \file OMPCalculation.h
  *
  * \authors Лебедев И.
  * \date 2015
