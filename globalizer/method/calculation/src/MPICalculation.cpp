@@ -21,7 +21,7 @@
 
 #include "TaskFactory.h"
 #include "TrialFactory.h"
-#include "OmpCalculation.h"
+#include "OMPCalculation.h"
 
 // ------------------------------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@
 
 #include "CalculationFactory.h"
 
-#include "OmpCalculation.h"
+#include "OMPCalculation.h"
 #include "CudaCalculation.h"
 
 #ifdef USE_PYTHON

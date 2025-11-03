@@ -5,7 +5,8 @@
 //                       Copyright (c) 2015 by UNN.                        //
 //                          All Rights Reserved.                           //
 //                                                                         //
-//  File:      OmpCalculation.cpp                                          //
+//  File:      
+// .cpp                                          //
 //                                                                         //
 //  Purpose:   Source file for OpenMP calculation class                    //
 //                                                                         //
@@ -13,7 +14,7 @@
 //                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "OmpCalculation.h"
+#include "OMPCalculation.h"
 
 #include <stdlib.h>
 #include <string.h>

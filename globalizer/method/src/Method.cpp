@@ -24,7 +24,7 @@
 #include "CalculationFactory.h"
 #include "ParallelHookeJeevesMethod.h"
 
-#include "OmpCalculation.h"
+#include "OMPCalculation.h"
 
 
 #include <cmath>

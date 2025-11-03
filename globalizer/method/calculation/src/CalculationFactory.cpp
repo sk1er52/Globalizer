@@ -15,7 +15,7 @@
 
 #include "CalculationFactory.h"
 
-#include "OmpCalculation.h"
+#include "OMPCalculation.h"
 #include "MPICalculationAsync.h"
 #include "MPICalculation.h"
 #include "CudaCalculation.h"
