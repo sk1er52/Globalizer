@@ -15,6 +15,10 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/gtest/googletest/include)
 
 
 add_executable(${PROJECT_NAME_STR} ${SRC_FILES})
+if(TARGET gklsC_mco)
+  add_dependencies(${PROJECT_NAME_STR} gklsC_mco)
+  target_compile_definitions(${PROJECT_NAME_STR} PRIVATE GKLS_MCO_LIBRARY="$<TARGET_FILE:gklsC_mco>")
+endif()
 set_target_properties(${PROJECT_NAME_STR} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY})
 
 # --- Диагностика памяти для тестов ---
